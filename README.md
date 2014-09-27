@@ -24,9 +24,7 @@ A biblioteca para aquisição da câmera fornecida pelo [Profº Marcelo Hashimot
 ---------------------
 ##### Alunos:
 
-[![Carlos Roberto das Chagas](https://0.gravatar.com/avatar/3b4da2efb9fda1566a2907dd551fc907?d=https%3A%2F%2Fidenticons.github.com%2F3a716d3607e5bf63ee1c167fa81c8f5d.png&r=x&s=50)](https://github.com/carlosrcjunior) | [![Gabriel Fontenelle](https://avatars2.githubusercontent.com/u/3775677?s=50)](https://github.com/OdnaropX)
---- | --- | --- | --- | --- | --- | ---
-[Ezequiel França](github.com/ezefranca) | [Gabriel Fontenelle](https://github.com/OdnaropX)
+[Gabriel Fontenelle](https://github.com/OdnaropX)
 
 ##### Professor Orientador:
 
