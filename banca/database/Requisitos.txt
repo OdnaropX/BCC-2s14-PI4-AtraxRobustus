@@ -31,6 +31,32 @@ Informações das editoras a serem salvas: Nome, Nomes Alternativos, Descrição
 Figuras possuem: Nome, coleção a que pertence, nome do personagem, escala, fabricante, categoria, artista (ilustrador da figura), escultor, versão (versão limitada, versão anime, versão diferenciada, etc), data de lançamento, material, altura, valor de lançamento, sites de vendas (multiplos ou nenhum), local de venda (revista ou site, ou evento), observações (exemplo: vendido apenas no japão).
 
 
+Usuários podem se cadastrar no sistema, para poder colocar comentários em alguns releases e criar listas de itens favoritos. Os usuários do sistema poderão registrar diversas listas de itens que eles possuem, as listas que podem ser criadas são de Edições, Releases e de Figuras. Cada lista possuem um nome e cada item associado a lista do usuário possuem alguns atributos para ajudar na classificação do item.
+
+Na lista de figuras os atributos que são utilizados para os itens são:
+
+Condição do produto (Classificação de E até S, E < D < C < B < A < S para condição do produto - S é novo, lacrado e sem danos)
+Condição da caixa (Mesma classificação do produto se aplica a caixa do produto)
+Observações especificas sobre o produto, ou seja, algum comentário que o autor da lista pode inserir.
+Status de posse (Indica se o autor possui, quer comprar, comprou e está aguardando chegar, vendeu, entre outros).
+
+
+Na lista de edições os atributos que são utilizados para os itens são:
+
+Condição (Classificação de E até S, E < D < C < B < A < S para condição do produto - S é novo, lacrado e sem danos)
+Status de posse (Indica se o autor possui, quer comprar, comprou e está aguardando chegar, vendeu, entre outros).
+Status de leitura ou uso.
+
+Na lista de release os atributos que são utilizados para os itens são:
+
+Status de posse (Se baixou ou irá baixar, se leu mas não armazenou, entre outros)
+Local salvo, se o usuário salvou no PC.
+Status de visualização (Se leu ou lerá, se jogou ou jogará).
+
+As listas de edições e releases servem para criar listas diversas separadas em tipos (anime, mangá, LN, Visual Novel), não poderá ser criada uma lista que tenha mais de um tipo de item (os itens devem ser do mesmo tipo).
+
+Ao se cadastrarem no sistema usuários fornecem: Nome de usuário, gênero, local de moradia atual (Pode ser digitado o Estado, Cidade ou até um nome ficticio como num fórum), data de nascimento, emails (poderá ter mais de um email cadastrado) e senha.
+
 Requisitos para o sistema do crawler:
 
 Para uso do crawler será armazenado os links visitados, junto com a data & hora que a url foi visitada.
