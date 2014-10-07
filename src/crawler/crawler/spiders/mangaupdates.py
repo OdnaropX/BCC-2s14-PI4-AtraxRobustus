@@ -2,6 +2,8 @@
 import scrapy
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
+from scrapy.utils.project import get_project_settings as Settings
+from .. import database
 import re
 
 class MangaUpdatesSpider(CrawlSpider):
@@ -13,6 +15,7 @@ class MangaUpdatesSpider(CrawlSpider):
 		"http://www.mangaupdates.com/genres.html",
 		"http://www.mangaupdates.com/series.html?page=1&",
 		"http://www.mangaupdates.com/categories.html?page=1&"]
+		dbase = None
 		
 		rules = (
 		Rule(LinkExtractor(allow=('series\.html\?page=[0-9]{1,}'), deny=('letter', 'orderby', 'filter', 'categories', 'act'))),
@@ -30,7 +33,26 @@ class MangaUpdatesSpider(CrawlSpider):
 		pattern_authors = re.compile(ur'authors\.html\?id=[0-9]{1,}')
 		pattern_genres = re.compile(ur'genres\.html')
 	
+		def instancialize_database(self):
+			if(self.dbase == None):
+				dbname = Settings().get('DBNAME')
+				dbuser = Settings().get('DBUSERNAME')
+				dbpass = Settings().get('DBPASSWORD')
+				dbhost = Settings().get('DBHOST')
+				dbport = Settings().get('DBPORT')
+				
+				self.dbase = database.Database(dbname, dbuser,dbpass, dbhost,dbport)
+				if(self.dbase.connect() == False):
+					print vars(self.dbase)
+					self.dbase = None
+				
+			
+			
 		def parse(self, response):
+			self.instancialize_database()
+			self.dbase.insert('function_type', ['teste'], ['name'])
+			print vars(self.dbase.get_var('function_type'))
+			
 			if(re.search(self.pattern_series, response.url) != None):
 				#Parse Series.
 				self.parse_series(self, response)
@@ -82,16 +104,19 @@ class MangaUpdatesSpider(CrawlSpider):
 				#f.write(response.body)
 				f.write("2")
 
-		def parse_groups(self, response):
+		#def parse_groups(self, response):
 			
-
-		def parse_authors(self, response):
 			
 		
-		def parse_publishers(self, response):
+		#def parse_authors(self, response):
 			
 		
-		def parse_categories(self, response):
+		#def parse_publishers(self, response):
+			
+		
+		#def parse_categories(self, response):
+			#Visita cada link.
+			#Para cada link visitado, pega o id da série e associa com a categoria no banco de dados.
 		
 		def parse_genres(self, response):
 			with open("teste.txt", 'a') as f:
