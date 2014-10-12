@@ -1739,7 +1739,7 @@ CREATE TABLE soundtrack_for_entity_edition (
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
-
+ 
 /* Maybe create in the future for entity_release */
 CREATE TABLE entity_edition_launch_country (
   entity_edition_id INTEGER UNSIGNED NOT NULL,

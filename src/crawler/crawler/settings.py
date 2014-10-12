@@ -14,5 +14,13 @@ SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 LOG_FILE = 'logs.txt'
 
+DBNAME = 'crawler'
+DBUSERNAME = 'postgres'
+DBPASSWORD = ''
+DBHOST = 'localhost'
+DBPORT = '5432'
+MUUSERNAME = ''
+MUPASSWORD = ''
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler (+http://www.yourdomain.com)'
