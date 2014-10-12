@@ -220,18 +220,67 @@ class Database:
 	def get_results(self, table, where = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None):
 		return self.select(table, ['*'], where, joins, join_columns, join_type, limit)
 		
+	#def add_release():
+		#check if there is a series where this release is from, check table entity and alias to find the series name. If not exists create the series.
 		
-	#def add_author():
+		#get the id from series, from series table or alias table.
+		
+		#normalize release number to be insert on database, release number can be e.g. 'c.53', 'v2.9', 'v1 c.1-4','v1-2', 'v.1 c.14', 'Oneshot', 'v.1 c.Interlude 2-3', 'c.Parts 1-2'
+		
+		#insert release
+		
+		#insert release number
+		
+		
+	#def add_people(self, work = []):
+		#check if there is already a people, check know alias from alias table. If there inst create.
+		
+		#register social network url from author.
+		
+		#if there is work associated register the author work.
+		
+		#return author id.	
 	
-	#def add_genre():
 	
-	#def add_collaborator():
+	#def add_collaborator(self, website = None, works = []):
+		#check if there is already a collaborator with the same name. Check if country is the same, if not create a new collaborator with same name but different country. 
+		#put the country name on collaborator name to maintain unique?
+
+		#check if there is website. If not exists get from social network (if possible). Use status on website.
+		#if(website != None):
+		
+		#register social network.
+		
+		#if there is work obtained register the collaborator work.
+		#if(len(work) > 0):
 	
-	#def add_category():
+		
+	#on Mangaupdates category = tag and genre = category.
+	#def add_category(self, type = 'Manga', works = []):
+		#check if there is already a category for type. If there inst create.
+
+		#if there is work associated with category register.
+		#if(len(work) > 0):
+		
+		#return category id.
+		
+		
+	#def add_tag(self, type = 'Manga'):
+		#check if there is already a tag for type. If there inst create.
+
+		#if there is work associated with tag register.
+		#if(len(work) > 0):
+		
+		#return tag id.
 	
-	#def add_tag():
+	#def add_genre(self, work = []):
+		#check if there is already genre.	
+		#if there is work associated with genre register.
+		#if(len(work) > 0):
+		#return genre id.
+		
+	#def add_publisher():
 	
-	#def add_category():
 	#def add_category():
 	#def add_category():
 	#def add_category():
