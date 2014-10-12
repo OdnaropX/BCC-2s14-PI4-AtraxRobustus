@@ -630,7 +630,7 @@ class Database:
 		
 		
 	
-	
+	 
 	def add_game_release()
 	
 	#insert lyrics

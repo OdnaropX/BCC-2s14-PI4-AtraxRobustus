@@ -194,7 +194,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			#if have tag adult or (+18) on content.
 		
 		def parse_categories_series(self, response):
-			content = response.css('')
+			content = response.css('') 
 		
 		def parse_categories(self, response):
 			#Visita cada link de page=1&. Loop já é feito nas regras.
