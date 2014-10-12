@@ -1,5 +1,10 @@
 import psycopg2
 
+"""
+	Class for connection and manipulation of database.
+	Have methods for delete, update and insert on any table. 
+	Have also methods for insert on specified table following it own logic.
+"""
 class Database:
 	conn = None
 	cursor = None
@@ -26,7 +31,10 @@ class Database:
 		self.dbhost = dbhost
 		self.dbport = dbport	
 	
-	#Destroy cached items.
+	"""
+		Method to set the default data on internal variables.
+		Basically destroy the date on the items. 
+	"""
 	def flush(self):
 		self.last_error = None
 		self.error = False
@@ -35,15 +43,23 @@ class Database:
 		self.last_query = None
 		self.result = None
 		self.last_query = None
+		self.programing_message = None
 		self.status_message = None
 	
+	"""
+		Set current message error and status
+	"""
 	def set_error(self,msg):
 		self.last_error = msg
 		self.error = True 
 		self.rows_affected = 0
 		self.insert_id = 0
 		self.status_message = "Programing error. No DB error."
-		
+
+	"""
+		Method responsible for connect with the database.
+		The connection will remain open. To close the connection use the method disconnect()
+	"""
 	def connect(self):
 		try:
 			self.conn = psycopg2.connect(database=self.dbname, user=self.dbuser, password=self.dbpass, host = self.dbhost, port = self.dbport);
@@ -56,13 +72,24 @@ class Database:
 			return False
 		return True
 		
+	"""
+		Method to verify if the current connection is open
+	"""
 	def is_connected(self):
 		return self.connected
 		
+	"""
+		Method to disconnect the current connection.
+		The method close the current cursor and connection
+	"""
 	def disconnect(self):
 		self.cursor.close()
 		self.conn.close()
 		
+	"""
+		Method used to execute all queries on database.
+		Please don't use this method, use the others available method instead.
+	"""
 	def query(self,sql, parameters = None):
 		#reset programing message when a new query is run
 		self.programing_message = None
@@ -87,6 +114,9 @@ class Database:
 		self.status_message = self.cursor.statusmessage
 		return True
 
+	"""
+		This method verify if an error occurred when the query was run.
+	"""
 	def has_error(self):
 		if(self.cursor.rowcount > 0):
 			self.error = False
@@ -95,7 +125,12 @@ class Database:
 			self.error = True
 			self.last_error = "No rows affected."
 			return True
-			
+
+	"""
+		Method used internally to run a query.
+		This method check if the query was run with success and commit the transaction.
+		If was found a error the message make a roll back.
+	"""
 	def change(self, sql, parameters = None):
 		if(self.query(sql, parameters) == False or self.has_error()):
 			self.conn.rollback()
@@ -103,12 +138,19 @@ class Database:
 		self.conn.commit()
 		return True
 	
+	"""
+		Method used internally to fetch the last inserted id from sequence. 
+		This method only work with table that have a sequence on schema.
+	"""
 	def _fetch_last_inserted_id(self, table, column):
 		sql = "SELECT currval('{table}_{column}_seq')".format(table=table, column=column)
 		if(self.query(sql) != False):
 			return self.cursor.fetchone()[0]
 		return 0
 	
+	"""
+		Method used to insert data on any table on the database.
+	"""
 	def insert(self, table, values, columns = []):
 		length_columns = len(columns)
 		
@@ -139,6 +181,9 @@ class Database:
 			self.insert_id = 0;
 			return False
 		
+	"""
+		Method used to update the columns data on table.
+	"""
 	def update(self, table, values, columns, where = None):
 		if(table == ""):
 			self.set_error("Table cannot be empty")
@@ -260,6 +305,8 @@ class Database:
 				return False
 		return id	
 	
+	############# Social Methods ##################
+	
 	#insert on social_type table
 	def add_social_type(self, name, website, website_secure = None):
 		#insert on table if there isnt the name on table . 
@@ -279,6 +326,38 @@ class Database:
 				return False
 		return id	
 	
+	#insert socials relationship.
+	#can be used for the follow tables: users_has_social, people_has_social, collaborator_has_social, company_has_social
+	def add_relation_social(self, relation_table, social_id, second_id, last_checked):
+		id = self.get_var(relation_table + "_has_social", ['social_id'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id, relation_table, second_id))
+		if(id == None):
+			columns = ['social_id', relation_table + '_id']
+			value = []
+			value.append(social_id)
+			value.append(second_id)
+			
+			self.insert(relation_table + "_has_social", value, columns)
+			id = self.insert_id
+		#else update last checked.
+		else:
+			
+			
+		return id
+	
+	#insert social
+	def add_social(self, social_type_id, url):
+		id = self.get_var('social', ['id'], "url = '{url}'".format(url))
+		if(id == None):
+			columns = ['social_type_id', 'url']
+			value = []
+			value.append(social_type_id)
+			value.append(url)
+			self.insert(relation_table + "_has_social", value, columns)
+			id = self.insert_id
+			if(id == 0):
+				return False
+		return id
+	
 	#insert new country or new language
 	def add_localization(self, name, code, type = 'country'):
 		if(type != 'country'):
@@ -295,6 +374,22 @@ class Database:
 			if(id == 0):
 				return False
 		return id
+		
+	#table used: country_has_currency
+	def add_relation_country_currency(self, country_id, currency_id, main_currency = 1):
+		id = self.get_var('country_has_currency', ['currency_id'], "currency_id = {currency_id} and country_id = {country_id}".format(currency_id, country_id))
+		
+		if(id == None):
+			columns = ['currency_id','country_id','main']
+			value = []
+			value.append(currency_id)
+			value.append(country_id)
+			value.append(main_currency)
+			
+			if(self.insert('country_has_currency', value, columns) == False):
+				return False
+		return True
+	
 	
 	#Insert image
 	def add_image(self, url, extension, name):
@@ -344,7 +439,24 @@ class Database:
 		return id
 	
 	
-	
+	#insert event
+	def add_event(self, name, edition,location, website, date, duration, free = 1):
+		id = get_var('event', ['id'], "name = {name} and edition = {edition}".format(name, edition))
+		if(id == None):
+			columns = ['name', 'edition', 'location', 'website', 'date', 'duration', 'free']
+			value = []
+			value.append(name)
+			value.append(edition)
+			value.append(location)
+			value.append(website)
+			value.append(date)
+			value.append(duration)
+			value.append(free)
+			self.insert('event', value, columns)
+			id = self.insert_id
+			if(id == 0)
+				return False
+		return id
 	
 	####### Entity methods #############
 	
@@ -518,9 +630,21 @@ class Database:
 		return True
 		
 	def add_collaborator_website(self, collaborator_id, website):
-	
-	
-	
+		id = self.get_var('collaborator_website', ['collaborator_id'], "collaborator_id = {collaborator_id} and website = '{website}'".format(collaborator_id, website))
+		if(id == None):
+			columns = ['collaborator_id', 'website']
+			value = []
+			value.append(collaborator_id)
+			value.append(website)
+			self.insert('collaborator_has_collaborator_member', value, columns)
+			
+			#how to know without id
+			if():
+				return False
+		return True
+		
+		
+		
 	############# People Methods ################
 	
 	def add_people(name, country, blood_type, website, decription, alias = []):
@@ -534,26 +658,29 @@ class Database:
 		
 		#return author id.	
 	
-	#insert socials.
-	#can be used for the follow tables: users_has_social, people_has_social, collaborator_has_social, company_has_social
-	def add_relation_social(self, relation_table, social_id, second_id, last_checked):
-		id = self.get_var(relation_table + "_has_social", ['social_id'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id, relation_table, second_id))
-		if(id == None):
-			columns = ['social_id', relation_table + '_id']
-			value = []
-			value.append(social_id)
-			value.append(second_id)
-			
-			self.insert(relation_table + "_has_social", value, columns)
-			id = self.insert_id
-		#else update last checked.
-		else:
-			
-			
-		return id
+	
+		
+		
 	############# Figure Methods ###############
 	
-	
+	#used on table: figure_has_shops
+	def add_figure_relation_shops(self, figure_id, shops_id, product_url):
+		#if already is registered on database update the checked_last
+		id = self.get_var("figure_has_shops", ['social_id'], "figure_id = {figure_id} and shops_id = {shops_id}".format(figure_id, shops_id, second_id))
+		if(id == None):
+			columns = ['figure_id', 'shops_id', 'product_url']
+			value = []
+			value.append(figure_id)
+			value.append(shops_id)
+			value.append(product_url)
+			
+			self.insert("figure_has_shops", value, columns)
+			id = self.insert_id
+			#how to know if was suceffull?
+			
+		#else update last checked.
+		else:
+			checked_last DATETIME NOT NULL DEFAULT now(),
 	
 	
 	
@@ -579,11 +706,7 @@ class Database:
 			value = []
 			value.append(first_id)
 			value.append(second_id)
-			self.insert(first_table + relation_type + second_table, value, columns)
-			
-			#need to check if will return only a value
-			
-			
+			if(self.insert(first_table + relation_type + second_table, value, columns) == False):
 				return False
 		return True
 		
@@ -599,9 +722,7 @@ class Database:
 			value.append(second_id)
 			value.append(type_id)
 			
-			self.insert(relation_table + "_has_image", value, columns)
-			id = self.insert_id
-			if(id == 0):
+			if(self.insert(relation_table + "_has_image", value, columns) == False):
 				return False
 		return id
 		
@@ -616,23 +737,68 @@ class Database:
 			value.append(second_id)
 			value.append(relation_type_id)
 			
-			self.insert(first_table + "_" + relation_type + "_" + second_table, value, columns)
-			#how to know if was inserted without id.
+			if(self.insert(first_table + "_" + relation_type + "_" + second_table, value, columns) == False):
+				return False
+		return True
+		
+	
+	#insert on entity_edition_launch_country
+	def add_entity_edition_launch_country(self, entity_id, country_id, launch_date, launch_price):
+		id = self.get_var('entity_edition_launch_country', ['entity_edition_id'], "entity_edition_id = {entity_id} and country_id = {country_id}".format(entity_id, country_id))
+		if(id == None):
+			columns = ['entity_edition_id', 'country_id' , 'launch_date', 'launch_price']
+			value = []
+			value.append(entity_id)
+			value.append(country_id)
+			value.append(launch_date)
+			value.append(launch_price)
 			
+			if(self.insert('entity_edition_launch_country', value, columns) == False):
+				return False
+		return True
+		
+		
+	###################### Audio Methods ##########################
+	
+	#insert audio 
+	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate, soundtracks = [], audio_exclusive = []):
+		id = get_var('audio', ['id'], "name = {name} and country_id = {country_id}".format(name, country_id))
+		if(id == None):
+			columns = ['country_id', 'audio_codec_id', 'name','duration','bitrate']
+			value = []
+			value.append(country_id)
+			value.append(audio_codec_id)
+			value.append(name)
+			value.append(duration)
+			value.append(bitrate)
+			self.insert('audio', value, columns)
 			id = self.insert_id
 			if(id == 0):
 				return False
+		
+		length_soundtrack = len(soundtracks)
+		if(length_soundtrack == len(audio_exclusive)):
+			not_fail = True		
+			for index in range(length_soundtrack):
+				not_fail = not_fail and add_relation_soundtrack_audio(id, soundtrack_id[index], audio_exclusive[index])
+			
+			if(not_fail == False)
+				self.programing_message = "Error on associating some audio to soundtrack"
 		return id
-		
 	
-	
-	def add_entity_edition_launch_country(self, entity_id, country_id, launch_date, launch_price):
-		
-		
-	
-	 
-	def add_game_release()
-	
+	#insert relationship between soundtrack and audio
+	def add_relation_soundtrack_audio(self, audio_id, soundtrack_id, exclusive):
+		id = get_var('soundtrack_has_audio', ['audio_id'], "audio_id = {audio_id} and soundtrack_id = {soundtrack_id}".format(audio_id, soundtrack_id))
+		if(id == None):
+			columns = ['soundtrack_id','audio_id','exclusive']
+			value = []
+			value.append(soundtrack_id)
+			value.append(audio_id)
+			value.append(exclusive)
+			if(self.insert('audio', value, columns) == False):
+				return False
+		return True
+			
 	#insert lyrics
 	def add_lyric(self, type_id, audio_id, language_id, title, content, user_id = None):
 		if(user_id != None):
@@ -658,6 +824,34 @@ class Database:
 			if(id == 0):
 				return False
 		return id
+	
+	#insert soundtrack
+	def add_soundtrack(self, name, type_id, launch_year, audios_id = [], audios_exclusive[]):
+		id = get_var('soundtrack', ['id'], "soundtrack_type_id = {type_id} and name = {name} and launch_year = {launch_year}".format(type_id,name,launch_year))
+		if(id == None):
+			columns = ['soundtrack_type_id', 'name' ,'launch_year']
+			value = []
+			value.append(type_id)
+			value.append(name)
+			value.append(launch_year)
+
+			self.insert('soundtrack', value, columns)
+			if(id == 0):
+				return False
+				
+		#register audios
+		lenght_audios = len(audios_id)
+		if(lenght_audios == len(audios_exclusive)):
+			not_fail = True		
+			for index in range(lenght_audios):
+				not_fail = not_fail and add_relation_soundtrack_audio(id, audios_id[index], audios_exclusive[index])
+			
+			if(not_fail == False):
+				self.programing_message = "Error on audio insertion on add_soundtrack."
+		return id
+	
+	
+	
 	
 	
 	#insert on user table
@@ -745,7 +939,23 @@ class Database:
 		return id
 	
 	
+	############# Archive Methods ###############
 	
+	def add_requirements(self, version_id, video_board, processor, memory, hd_storage):
+		id = self.get_var('requirements', ['id'], "version_id = '{version_id}'".format(version_id))
+		if(id == None):
+			columns = ['version_id', 'video_board', 'processor', 'memory', 'hd_storage']
+			value = []
+			value.append(version_id)
+			value.append(video_board)
+			value.append(processor)
+			value.append(memory)
+			value.append(hd_storage)
+			self.insert('requirements', value, columns)
+			id = insert_id
+			if(id == 0):
+				return False
+		return id
 	
 	#requirements have driver.
 	def add_driver(self, requirements_id, name, url_download):
@@ -758,7 +968,7 @@ class Database:
 			value.append(url_download)
 			self.insert('driver', value, columns)
 			id = insert_id
-			if(id == 0)
+			if(id == 0):
 				return False
 		return id
 	
@@ -774,7 +984,7 @@ class Database:
 			value.append(extension)
 			self.insert('archive', value, columns)
 			id = insert_id
-			if(id == 0)
+			if(id == 0):
 				return False
 		return id
 	
@@ -788,9 +998,49 @@ class Database:
 			value.append(code)
 			self.insert('hash', value, columns)
 			id = insert_id
-			if(id == 0)
+			if(id == 0):
 				return False
 		return id
+	
+	def add_entity_release_version(self, entity_id, stage_developer_type_id, number, changelog):
+		id = self.add_version(self, stage_developer_type_id, number, changelog = None)
+		if(id != False):
+			if(self.add_multi_relation(self, entity_id, id, 'entity_release', 'version') == False):
+				self.delete('version', "id = {id}".format(id))
+				return False
+			return True
+		return False
+			
+	def add_software_edition_version(self, entity_id, stage_developer_type_id, number, changelog):
+		id = self.add_version(self, stage_developer_type_id, number, changelog = None)
+		if(id != False):
+			if(self.add_multi_relation(self, entity_id, id, 'software_edition', 'version') == False):
+				self.delete('version', "id = {id}".format(id))
+				return False
+			return True
+		return False
+	
+	def add_version(self, stage_developer_type_id, number, changelog = None):
+		#check the table of relationship version_entity
+		columns = ['stage_developer_type_id', 'number']
+		value = []
+		value.append(stage_developer_type_id)
+		value.append(number)
+			
+		if(changelog != None):
+			columns.append('changelog')
+			value.append(changelog)
+			
+		self.insert('version', value, columns)
+		id = insert_id
+		if(id == 0):
+			return False		
+		return id
+	
+	
+	
+	
+	####################### Lists Methods ########################
 	
 	#insert user lists
 	#used on tables: lists_edition, lists_release, lists_figure
@@ -817,7 +1067,32 @@ class Database:
 				return False
 		return id
 	
+	#lists_release_list_entity_release
+	def add_release_to_list()
+	lists_release_id INTEGER UNSIGNED NOT NULL,
+  entity_release_id BIGINT UNSIGNED NOT NULL,
+  release_edition_read_status_type_id INTEGER UNSIGNED NOT NULL,
+  release_ownership_type_id INTEGER UNSIGNED NOT NULL,
+  local_storage VARCHAR NULL,
+  
+	#lists_figure_list_figure
+	def add_figure_to_list()
+		lists_figure_id INTEGER UNSIGNED NOT NULL,
+  figure_id BIGINT UNSIGNED NOT NULL,
+  ownership_status_id INTEGER UNSIGNED NOT NULL,
+  box_condition_type_id INTEGER UNSIGNED NOT NULL,
+  product_condition_type_id INTEGER UNSIGNED NOT NULL,
+  observation TEXT NULL,
+  
+	#lists_edition_list_entity_edition
+	def add_edition_to_list()
+		lists_edition_id INTEGER UNSIGNED NOT NULL,
+	  entity_edition_id INTEGER UNSIGNED NOT NULL,
+	  ownership_status_id INTEGER UNSIGNED NOT NULL,
+	  condition_type_id INTEGER UNSIGNED NOT NULL,
+	  edition_read_status_type_id INTEGER UNSIGNED NOT NULL
 	
+	observation TEXT NULL,
 	################ People Methods #########################
 	
 	#insert relation of people.

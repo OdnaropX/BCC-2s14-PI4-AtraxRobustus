@@ -344,7 +344,6 @@ CREATE TABLE currency (
 )
 TYPE=InnoDB;
 
-
 CREATE TABLE collaborator (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -502,18 +501,14 @@ TYPE=InnoDB;
 
 CREATE TABLE event (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  currency_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
+  edition VARCHAR NOT NULL,
   location VARCHAR NULL,
   website VARCHAR NULL,
   date DATE NOT NULL,
   duration INTEGER UNSIGNED NULL,
+  free BOOLEAN NOT NULL DEFAULT 1
   PRIMARY KEY(id),
-  INDEX event_FKIndex1(currency_id),
-  FOREIGN KEY(currency_id)
-    REFERENCES currency(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
@@ -1189,7 +1184,7 @@ TYPE=InnoDB;
 CREATE TABLE soundtrack_has_audio (
   soundtrack_id INTEGER UNSIGNED NOT NULL,
   audio_id INTEGER UNSIGNED NOT NULL,
-  exclusive BOOLEAN NULL,
+  exclusive BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY(soundtrack_id, audio_id),
   INDEX soundtrack_has_audio_FKIndex1(soundtrack_id),
   INDEX soundtrack_has_audio_FKIndex2(audio_id),
@@ -1528,6 +1523,7 @@ CREATE TABLE lists_edition_list_entity_edition (
   ownership_status_id INTEGER UNSIGNED NOT NULL,
   condition_type_id INTEGER UNSIGNED NOT NULL,
   edition_read_status_type_id INTEGER UNSIGNED NOT NULL,
+  observation TEXT NULL,
   PRIMARY KEY(lists_edition_id, entity_edition_id),
   INDEX lists_edition_has_entity_edition_FKIndex1(lists_edition_id),
   INDEX lists_edition_has_entity_edition_FKIndex2(entity_edition_id),
@@ -1981,7 +1977,7 @@ CREATE TABLE figure_has_shops (
   figure_id BIGINT UNSIGNED NOT NULL,
   shops_id INTEGER UNSIGNED NOT NULL,
   product_url VARCHAR NOT NULL,
-  checked_last DATETIME NULL,
+  checked_last DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(figure_id, shops_id),
   INDEX figure_has_shops_FKIndex1(figure_id),
   INDEX figure_has_shops_FKIndex2(shops_id),
