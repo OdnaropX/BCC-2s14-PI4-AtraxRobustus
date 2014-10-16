@@ -39,6 +39,8 @@ class Database:
 	alias_type_main = 1 #Alias Main
 	alias_type_romanized = 5 #Alias Romanized Title
 	alias_type_subromanized = 6 #Alias Romanized Subtitle
+	alias_type_title = 3
+	alias_type_subtitle = 4
 	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
@@ -200,6 +202,19 @@ class Database:
 		return 0
 	
 	"""
+		Method used to set insert_id variable and return last_insert_id
+	"""
+	def get_last_insert_id(self, table):
+		try:
+			self.insert_id = self._fetch_last_inserted_id(table, 'id')
+			print self.insert_id
+		except ValueError as e:
+			self.insert_id = 0
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)	
+		finally:
+			return self.insert_id
+	
+	"""
 		Method used to insert data on any table on the database.
 	"""
 	def insert(self, table, values, columns = []):
@@ -226,16 +241,7 @@ class Database:
 		
 		self.insert_id = 0;
 		
-		if(self.change(sql, values)):
-			try:
-				self.insert_id = self._fetch_last_inserted_id(table, 'id')
-				print self.insert_id
-			except ValueError as e:
-				print "ValueError({0}): {1}".format(e.errno, e.strerror)	
-			finally:
-				return True
-		else:
-			return False
+		return self.change(sql, values)
 		
 	"""
 		Method used to update the columns data on table.
@@ -284,8 +290,7 @@ class Database:
 	"""
 	def select(self, table, columns = ['*'], where = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None, from_table = True):
 		if(table == "" and from_table == True):
-			self.set_error("Table cannot be empty")
-			return False
+			raise ValueError("Table name cannot be empty on select method.")
 		
 		limited = False
 		
@@ -370,29 +375,31 @@ class Database:
 	"""
 	def add_type(self, name, type_name):
 		if(name == ""):
-			self.set_error("Name cannot be empty")
-			return False
-			
+			raise ValueError("Name cannot be empty on add_type method.")
+		
+		table = type_name + '_type'
 		#create name on table if there isn't none. 
-		id = self.get_var(type_name + '_type', ['id'], "name = '{name}'".format(name))
+		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
 		if(id == None):
 			value = []
 			value.append(name)
-			self.insert(type_name + '_type', value, ['name'])
-			id = self.insert_id
+			self.insert(table, value, ['name'])
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_type(%s, %s)" % (name, type_name))
 		return id
 	
 	"""
 		Method use to insert a item name on a table that only have id and name as columns.
 		This method can be use to insert name on the follow tables:
-		shop_location, scale, material, audio_codec, ownership_status, tag, category, genre
+		shop_location, scale, material, ownership_status, tag, category, genre
 	"""
 	def add_name_to_table(self, name, table):
 		if(name == ""):
-			self.set_error("Name cannot be empty")
-			return False
+			raise ValueError("Name cannot be empty on add_name_to_table method.")
+			
+		if(table == ""):
+			raise ValueError("Table cannot be empty on add_name_to_table method.")
 			
 		#create name on table if there isnt none. 
 		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
@@ -400,10 +407,39 @@ class Database:
 			value = []
 			value.append(name)
 			self.insert(table, value, ['name'])
-			id = self.insert_id
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
-		return id	
+				raise ValueError("There is no last insert id to return on add_name_to_table(%s, %s)" % (name, table))
+		return id
+		
+	"""
+		Method use to insert a codec on the codecs table.
+		This method can be use to insert name on the follow tables:
+		audio_codec, video_codec
+	"""
+	def add_codec(self, name, type ='audio', lossless = False):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_name_to_table method.")
+		
+		table = type + '_codec'
+		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		if(id == None):
+			columns = ['name', 'lossless']
+			
+			value = []
+			value.append(name)
+			
+			if(lossless):
+				value.append(1)
+			else:
+				value.append(0)
+		
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_name_to_table(%s, %s)" % (name, table))
+		return id
+			
 	
 	"""
 		Method used to insert a image to the image table.
@@ -411,14 +447,13 @@ class Database:
 	"""
 	def add_image(self, url, extension, name):
 		if(name == ""):
-			self.set_error("Name cannot be empty")
-			return False
+			raise ValueError("Name cannot be empty on add_image method.")
 		
 		if(url == ""):
-			self.set_error("Url cannot be empty")
-			return False
+			raise ValueError("Url cannot be empty on add_image method.")
 			
-		id = self.get_var('image', ['id'], "url = '{url}'".format(url))
+		table = 'image'
+		id = self.get_var(table, ['id'], "url = '{url}'".format(url))
 		if(id == None):
 			columns = ['url', 'extension', 'name']
 			value = []
@@ -426,10 +461,10 @@ class Database:
 			value.append(extension)
 			value.append(name)
 			
-			self.insert('image', value, columns)
-			id = self.insert_id
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_image(%s, %s, %s)." % (url, extension,name))
 		return id
 	
 	"""
@@ -441,17 +476,23 @@ class Database:
 		The methods add_image_to_ already uses the appropriate relation method 
 	"""
 	def add_relation_image(self, relation_table, image_id, second_id, type_id):
-		id = self.get_var(relation_table + "_has_image", ['image_id'], "image_id = {image_id} and {relation_table}_id = {second_id}".format(image_id, relation_table, second_id))
+		if(relation_table == ""):
+			raise ValueError("relation_table cannot be empty on add_relation_image method.")
+		if(image_id == "" or second_id == ""):
+			raise ValueError("image_id and second_id cannot be empty on add_relation_image method.")
+		
+		table = relation_table + "_has_image"
+		
+		id = self.get_var(table, ['image_id'], "image_id = {image_id} and {relation_table}_id = {second_id}".format(image_id, relation_table, second_id))
 		if(id == None):
 			columns = ['image_id', relation_table + '_id', 'image_' + relation_table + '_type_id']
 			value = []
 			value.append(image_id)
 			value.append(second_id)
 			value.append(type_id)
-			
-			if(self.insert(relation_table + "_has_image", value, columns) == False):
-				return False
-		return id
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_relation_image(%s, %s, %s, %s)." % (relation_table, image_id, second_id, type_id))
+		return True
 		
 	"""
 		Method used to insert on tables with cardinality N:M that have only the foreign keys.
@@ -459,24 +500,25 @@ class Database:
 		country_has_language, soundtrack_integrate_collection, category_has_filter_type, tag_has_filter_type,audio_has_language, company_sponsors_event,
 		company_owner_collection, company_has_country, people_has_image, genre_type_has_audio, entity_has_category, entity_has_tag, 
 		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, figure_from_persona, figure_has_category,
-		entity_release_has_version, entity_release_has_language, figure_has_material, figure_has_shop_location, figure_has_tag, mod_has_image,
+		entity_release_has_version, entity_release_has_language, figure_has_material, figure_has_shop_location, figure_has_tag, mod_release_has_image,
 		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
-		software_edition_has_subtitle, genre_has_filter_type
+		genre_has_filter_type
 		
 		The table name to be used will be assembly by first_table + relation_type + second_table. 
 		By default relation_type is equal to has, but can be overwrite.
 	"""
 	def add_multi_relation(self, first_id, second_id, first_table, second_table, relation_type = 'has'):
 		if(first_table == "" or sencod_table == ""):
-			self.set_error("Table names cannot be empty")
-			return False
+			raise ValueError("Table names cannot be empty on add_multi_relation method.")
 	
 		#check if there is already a compost key with the given ids.
 		if(first_table != second_table):
 			another = ''
 		else:
 			another = 'another_'
-		id = self.get_var(first_table + '_' + relation_type + '_' + second_table, [first_table + '_id'], "{first_table}_id = {first_id} and {another}{second_table}_id = {second_id}".format(first_table, first_id, another, second_table, second_id))
+		
+		table = first_table + '_' + relation_type + '_' + second_table
+		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and {another}{second_table}_id = {second_id}".format(first_table, first_id, another, second_table, second_id))
 		if(id == None):
 			if(first_table != second_table):
 				columns = [first_table + '_id', second_table + '_id']
@@ -485,8 +527,9 @@ class Database:
 			value = []
 			value.append(first_id)
 			value.append(second_id)
-			if(self.insert(first_table + relation_type + second_table, value, columns) == False):
-				return False
+
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_multi_relation(%s, %s, %s, %s, %s)." % (first_id, second_id, first_table, second_table, relation_type))
 		return True
 		
 	
@@ -502,14 +545,13 @@ class Database:
 	"""
 	def add_relation_with_type(self, first_table, second_table, first_id, second_id, relation_type, relation_type_id):
 		if(first_table == "" or sencod_table == ""):
-			self.set_error("Table names cannot be empty")
-			return False
+			raise ValueError("Table names cannot be empty on add_relation_with_type method")
 		
 		if(relation_type == ""):
-			self.set_error("Relation type cannot be empty")
-			return False
+			raise ValueError("Relation type cannot be empty on add_relation_with_type method")
 			
-		id = self.get_var(first_table + "_" + relation_type + "_" + second_table, [first_table + '_id'], "{first_table}_id = {first_id} and another_{second_table}_id = {second_id}".format(first_table, first_id, second_table, second_id))
+		table = first_table + "_" + relation_type + "_" + second_table
+		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and another_{second_table}_id = {second_id}".format(first_table, first_id, second_table, second_id))
 		if(id == None):
 			columns = [first_table + '_id', 'another_' + second_table + '_id', relation_table + '_type_id']
 			value = []
@@ -517,8 +559,8 @@ class Database:
 			value.append(second_id)
 			value.append(relation_type_id)
 			
-			if(self.insert(first_table + "_" + relation_type + "_" + second_table, value, columns) == False):
-				return False
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_relation_with_type(%s, %s, %s, %s, %s, %s)." % (first_table, second_table, first_id, second_id, relation_type, relation_type_id))
 		return True
 			
 			
@@ -533,32 +575,59 @@ class Database:
 		To insert a number associated with another on number_release use the method add_number_to_release instead.
 		add_number_to_release also make the relationship after the insertion of number data. 
 	"""
-	def add_number(self, type = 'release', entity_id, entity_type_id, number_type_id, number, number_release_id = 0):
-	
+	def add_number(self, type = 'release', entity_id, number_type_id, number, number_release_id = None):
+		if(number == ""):
+			raise ValueError("Number cannot be empty on add_edition_number method.")
+		
+		if(number_type_id == ""):
+			raise ValueError("Number type id cannot be empty on add_edition_number method.")
+			
+
 		#check if already there is this number registered on database
 		if(type = 'release'):
-			where = "number = {number} and number_release_id = {number_release_id} and entity_release_id = {entity_id} and number_type_id = {number_type_id} and entity_type_id = {entity_type_id}".format(number,number_release_id, entity_id, number_type_id, entity_type_id)
+			#check if entity_id really exists
+			self.check_id_exists('entity_release', entity_id)
+			if(number_release_id != None):
+				where = "number = '{number}' and number_release_id = {number_release_id} and entity_release_id = {entity_id} and number_type_id = {number_type_id}".format(number,number_release_id, entity_id, number_type_id)
+			else:
+				where = "number = '{number}' and number_release_id IS NULL and entity_release_id = {entity_id} and number_type_id = {number_type_id}".format(number, entity_id, number_type_id)
 		else:
-			where = "number = {number} and entity_edition_id = {entity_id} and number_type_id = {number_type_id} and entity_type_id = {entity_type_id}".format(number, entity_id, number_type_id, entity_type_id)
-		id = self.get_var('number_' + type, ['id'], where)
+			#check if entity_id really exists
+			self.check_id_exists('entity_edition', entity_id)
+			where = "number = '{number}' and entity_edition_id = {entity_id} and number_type_id = {number_type_id}".format(number, entity_id, number_type_id)
+		
+		table = 'number_' + type
+		id = self.get_var(table, ['id'], where)
 		if(id == None):
 			#register
-			columns = ['entity_'+ type +'_id', 'number_type_id', 'entity_type_id', 'number']
+			columns = ['entity_'+ type +'_id', 'number_type_id', 'number']
 			value = []
 			value.append(entity_id)
 			value.append(number_type_id)
-			value.append(entity_type_id)
 			value.append(number)
-			if(launch_date != None):
+			
+			if(number_release_id != None):
 				columns.append('number_release_id')
 				value.append(number_release_id)
-			self.insert('number_' + type, value, columns)
-			id = self.insert_id
+				
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_number(%s, %s, %s, %s, %s)." % (type, entity_id, number_type_id, number, number_release_id))
 		return id
 	
-
+	"""
+		Method used to check if id exists on determined table.
+		This method can be call on another method without try except, but method above must have a try except.  
+	"""
+	def check_id_exists(self, table, id):
+		#check if id really exists on table
+		id = self.get_var(table, ['id'], "id = {id}".format(id))
+		if(id == None):
+			raise ValueError("Error on insert mod, entity_release don't exists.")
+		return True
+		
 	############################## Entity Methods #################################
 	
 	"""
@@ -566,10 +635,10 @@ class Database:
 		This method can be use to insert on entity table.
 		
 	"""
-	def add_entity(self, entity_type_id, classification_type_id, collection_id, language_id, country_id, launch_year, collection_started = 0):
-		
+	def add_entity(self, entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started = 0):
+		table = 'entity'
 		#cannot warranty uniqueness
-		columns = ['entity_type_id', 'classification_type_id', 'collection_id','language_id','country_id', 'launch_year', 'collection_started']
+		columns = ['entity_type_id', 'classification_type_id', 'collection_id','language_id','country_id', 'launch_year', 'collection_started', 'gender_id']
 		value = []
 		value.append(entity_type_id)
 		value.append(classification_type_id)
@@ -578,10 +647,13 @@ class Database:
 		value.append(country_id)
 		value.append(launch_year)
 		value.append(collection_started)
-		self.insert('entity', value, columns)
-		id = self.insert_id
+		value.append(gender_id)
+		
+		self.insert(table, value, columns)
+		
+		id = self.get_last_insert_id(table)
 		if(id == 0):
-			return False
+			raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started))
 		return id
 	
 	
@@ -589,22 +661,24 @@ class Database:
 		Method used to insert a description to an entity.
 		This method can be use to insert on entity_description.
 		
+		TODO: Change method and table entity_description to register user who send the description. Allow multiples descriptions.
 	"""
 	def add_entity_description(self, entity_id, language_id, description):
 		if(description == ""):
-			self.set_error("Description cannot be empty")
-			return False
+			raise ValueError("Description cannot be empty on add_entity_description method.")
 			
-		#check if already exist a description for this entity and language
-		if(id == None):
-			columns = ['entity_id', 'language_id', 'description']
-			value = []
-			value.append(entity_id)
-			value.append(language_id)
-			value.append(description)
-			return self.insert('entity_description', value, columns)
-		return id
-	
+		table = 'entity_description'
+		
+		columns = ['entity_id', 'language_id', 'description']
+		value = []
+		value.append(entity_id)
+		value.append(language_id)
+		value.append(description)
+		
+		if(self.insert(table, value, columns) == False):
+			raise ValueError("An error occurred when trying to insert on add_entity_description(%s, %s, %s)." % (entity_id, language_id, description))
+		return True
+		
 	"""
 		Method used to insert a wiki to an entity.
 		This method can be use to insert on entity_wiki.
@@ -612,14 +686,13 @@ class Database:
 	"""
 	def add_entity_wiki(self, entity_id, name, url, language_id):
 		if(url == ""):
-			self.set_error("Description cannot be empty")
-			return False
-		
+			raise ValueError("Url cannot be empty on add_entity_wiki method.")
+
 		if(name == ""):
-			self.set_error("Name cannot be empty")
-			return False
-			
-		id = self.get_var('entity_wiki', ['id'], "url = '{url}'".format(url))
+			raise ValueError("Name cannot be empty on add_entity_wiki method.")
+		
+		table =	'entity_wiki'
+		id = self.get_var(table, ['id'], "url = '{url}'".format(url=url))
 		
 		if(id == None):
 			columns = ['entity_id', 'name', 'url', 'language_id']
@@ -628,9 +701,9 @@ class Database:
 			value.append(name)
 			value.append(url)
 			value.append(language_id)
-			self.insert('entity_wiki', value, columns)
+			self.insert(table, value, columns)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_entity_wiki(%s, %s, %s, %s)." % (entity_id, name, url, language_id))
 		return id
 	
 	"""
@@ -638,19 +711,23 @@ class Database:
 		This method can be use to insert on entity_synopse.
 		
 	"""
-	def add_entity_synopse(self, entity_id, language_id, description):
+	def add_entity_synopsis(self, entity_id, language_id, description):
 		if(description == ""):
-			self.set_error("Description cannot be empty")
-			return False
+			raise ValueError("Description cannot be empty on add_entity_synopse method.")
 		
-		id = self.get_var('entity_synopse', ['entity_id'], "entity_id = {entity_id} and language_id = {language_id}".format(entity_id, language_id))
+		#check if entity_id really exists
+		self.check_id_exists('entity', entity_id)
+		
+		table = 'entity_synopsis'
+		id = self.get_var(table, ['entity_id'], "entity_id = {entity_id} and language_id = {language_id}".format(entity_id, language_id))
 		if(id == None):
 			columns = ['entity_id', 'language_id', 'content']
 			value = []
 			value.append(entity_id)
 			value.append(language_id)
 			value.append(description)
-			return self.insert('entity_synopse', value, columns)
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_entity_synopsis(%s, %s, %s)." % (entity_id, language_id, description))
 		return True
 
 	"""
@@ -659,10 +736,13 @@ class Database:
 	"""
 	def add_entity_alias(self, name, entity_id, language_id, title, alias_type_id):
 		if(name == ""):
-			self.set_error("Name cannot be empty")
-			return False
-			
-		id = self.get_var('entity_alias', ['id'], "language_id = {language_id} and name = {name} and entity_id = {entity_id}".format(language_id, name, entity_id))
+			raise ValueError("Name cannot be empty on add_entity_alias method.")
+		
+		#check if entity_id really exists
+		self.check_id_exists('entity', entity_id)
+		
+		table = 'entity_alias'
+		id = self.get_var(table, ['id'], "language_id = {language_id} and name = {name} and entity_id = {entity_id}".format(language_id, name, entity_id))
 		if(id == None):
 			columns = ['people_alias_type_id', 'entity_id', 'language_id', 'name']
 			value = []
@@ -670,11 +750,11 @@ class Database:
 			value.append(entity_id)
 			value.append(language_id)
 			value.append(name)
-			self.insert('entity_alias', value, columns)
+			self.insert(table, value, columns)
 
-			id = self.insert_id
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_entity_alias(%s, %s, %s, %s, %s)." % (name, entity_id, language_id, title, alias_type_id))
 		return id
 	
 	"""
@@ -682,105 +762,89 @@ class Database:
 		This method must be used instead other specified methos related with entity.
 		
 		To use this method the types must be already registered on database.
+		The parameters titles must have elements that are dict. 
 	"""
-	def create_entity(self, romanize_title, romanize_subtitle, entity_type_id, classification_type_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-	titles	 = [], synopse = [], wiki = [], description = []):
+	def create_entity(self, romanize_title, romanize_subtitle = None, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
+	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = []):
 		if(romanize_title == ""):
-			self.set_error("Name cannot be empty")
-			return False
+			raise ValueError("Name cannot be empty on create_entity method.")
 		
 		#set commit to false.
+		self.set_auto_transaction(False)
 		
-		entity_id = add_entity(entity_type_id, classification_type_id, collection_id, language_id, country_id, launch_year, collection_started)
-		if(entity_id == False):
-			self.set_error("A error occurred when trying to create the entity")
+		try:
+			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started)
+		
+			#register main name (Romanize title and Romanized Subtitle)
+			self.add_entity_alias(entity_id, language_id, romanize_title,  self.alias_type_romanized)
+			
+			if(romanize_subtitle != None):
+				self.add_entity_alias(entity_id, language_id, romanize_subtitle,  self.alias_type_subromanized)
+			
+			for title in titles:
+				self.add_entity_alias(entity_id, title['language_id'], title['title'],  self.alias_type_title)
+			
+			for subtitle in subtitles:	
+				self.add_entity_alias(entity_id, subtitle['language_id'], subtitle['title'],  self.alias_type_subtitle)
+				
+			#register synopsis
+			for synops in synopsis:	
+				self.add_entity_synopsis(entity_id, synops['language_id'], synops['content'])
+			
+			for description in descriptions:
+				self.add_entity_description(entity_id, description['language_id'], description['content'])
+			
+			for category in categories:
+				self.add_multi_relation(entity_id, category['id'], 'entity', 'category')
+
+			for tag in tags:
+				self.add_multi_relation(entity_id, tag['id'], 'entity', 'tag')
+	
+			for wiki in wikis:
+				self.add_entity_wiki(entity_id, wiki['name'], wiki['url'], wiki['language_id']):
+			
+			for persona in personas:
+				#persona first_appear is 0 or 1.
+				self.add_persona_to_entity(entity_id, persona['id'], persona['alias_id'], persona['first_appear'])
+			
+			for company in companies:
+				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
 			return False
-			
-		add_entity_alias(entity_id, language_id, romanize_title,  self.alias_type_romanized)
-		add_entity_alias(self, entity_id, language_id, name, self.alias_type_main)
+		finally:
+			self.set_auto_transaction(True)
+	
+	
+	############################### Edition Methods ###############################
+	
+	"""
+		Method used to insert a entity edition. This method don't insert any related item to entity like subtitles or audio languages.
+		This method can be use to insert on entity_edition table.
 		
-		#register main name (Romanize title and Romanized Subtitle)
+		The parameter subtitle refers to subheading and not a caption.
+	"""
+	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None):
+		if(title == ""):
+			raise ValueError("Name cannot be empty on add_edition method.")
 		
+		if(entity_id == ""):
+			raise ValueError("Entity id cannot be empty on add_edition method.")
 		
+		#check if entity_id really exists
+		self.check_id_exists('entity', entity_id)
 		
-		#
+		where = "entity_id = {entity_id} and title = {title}".format(entity_id, title)
+		if(code != None):
+			where = where + " and code = {code}".format(code)
 		
-		description = [], alias = [], synopse = [], wiki = [], categories = [], tags = [], persona = []):
-		
-		#add_entity()
-		
-		table = 'entity'
-		#create entity if there is none with the given name on specified type.
-		where = "entity.name = '{name}' and entity_type.name = '{entity_type}'".format(name, entity_type)
-		id = self.get_var(table, ['name'], where, ['entity_type'], 'entity.entity_type_id = entity_type.id')
-		
-		if(id == None):
-			#register the entity
-			self.insert(table, [name], [name]))
-			
-			#register name
-			
-			#classification type
-			
-			#register the country
-			
-			#register the collection if the collection is mentioned, if not is registered.
-			#check with full text search a collection that have the a entity with similar name
-			
-			#register the language
-			
-			#register the description
-			
-			
-			#maybe not register the follow items with create_entity
-			#register alias
-			
-			#register synopse
-			
-			#wiki
-			
-			#categories
-			
-			#tags
-			
-			#register persona
-			
-			#company
-			
-			add_entity_description
-			
-		#commit changes
-		
-		return id
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	########################## Edition Methods #######################
-	
-	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None):
-		id = self.get_var('entity_edition', ['id'], "".format())
+		table = 'entity_edition'
+		id = self.get_var(table, ['id'], where)
 		if(id == None):
 			columns = ['edition_type_id', 'entity_id', 'title', 'free', 'censored']
 			value = []
@@ -804,7 +868,7 @@ class Database:
 				value.append(height)			
 			if(width != None):
 				columns.append('width')
-				value.append(width)			
+				value.append(width)	
 			if(depth != None):
 				columns.append('depth')
 				value.append(depth)			
@@ -814,38 +878,87 @@ class Database:
 			if(event_id != None):
 				columns.append('event_id')
 				value.append(event_id)
+			if(subtitle != None):
+				columns.append('subtitle')
+				value.append(subtitle)
 			
-			self.insert('entity_edition', value, columns)
-			id = self.insert_id
-			
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_edition(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (edition_type_id, entity_id, title, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, event_id))
 		return id
 		
-	def create_edition():
-		self.add_edition()
-		
-	def add_edition_number():
-		#call add_number()
-		
 	#insert on entity_edition_launch_country
-	def add_entity_edition_launch_country(self, entity_id, country_id, launch_date, launch_price):
-		id = self.get_var('entity_edition_launch_country', ['entity_edition_id'], "entity_edition_id = {entity_id} and country_id = {country_id}".format(entity_id, country_id))
+	
+	"""
+		Method used to register the launch country to an entity edition.
+		This method can be use to insert on entity_edition_launch_country tables.
+		
+	"""
+	def add_entity_edition_launch_country(self, entity_id, country_id, launch_date, launch_price, launch_currency_id):
+		if(entity_id == ""):
+			raise ValueError("Entity id cannot be empty on add_entity_edition_launch_country method.")
+		
+		if(country_id == ""):
+			raise ValueError("Country id cannot be empty on add_entity_edition_launch_country method.")
+		
+		#check if entity_edition_id really exists
+		self.check_id_exists('entity_edition', entity_id)
+		
+		table = 'entity_edition_launch_country'
+		id = self.get_var(table, ['entity_edition_id'], "entity_edition_id = {entity_id} and country_id = {country_id} and currency_id = {launch_currency_id}".format(entity_id, country_id, launch_currency_id))
 		if(id == None):
-			columns = ['entity_edition_id', 'country_id' , 'launch_date', 'launch_price']
+			columns = ['entity_edition_id', 'country_id' , 'launch_date', 'launch_price', 'currency_id']
 			value = []
 			value.append(entity_id)
 			value.append(country_id)
 			value.append(launch_date)
 			value.append(launch_price)
+			value.append(launch_currency_id)
 			
-			if(self.insert('entity_edition_launch_country', value, columns) == False):
-				return False
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_entity_edition_launch_country(%s, %s, %s, %s, %s)." % (entity_id, country_id, launch_date, launch_price, launch_currency_id))
 		return True
+	
+	"""
+		Method used to insert a number related with edition.
+		This method can be use to insert on number_edition table. 
+		The method only call the add_number method, not being at all special, you can use add_number is you like for insert number on edition,
+		but a strongly recommend against it.
 		
-	#insert software_edition
+	"""
+	#Method above that use this method need to call try except. add_number() raise exception that need to be catch.
+	def add_edition_number(self, edition_id, number, number_type_id):
+		if(edition_id == ""):
+			raise ValueError("Edition id cannot be empty on add_edition_number method.")
+			
+		return add_number('edition', edition_id, number_type_id, number)
+
+	
+	"""
+		Method used to insert a software edition to the specialization of entity_edition table.
+		This method can be used to insert on software_edition table. 
+		This method require a entity_edition_id to register, if you would like to add a entity_edition and a software edition with
+		the same method use create_software_edition method instead.
+	"""
 	def add_software_edition(self, entity_edition_id, plataform_type_id, software_type_id, media_type_id):
-		id = self.get_var('software_edition', ['entity_edition_id'], "entity_edition_id = {entity_edition_id} and plataform_type_id = {plataform_type_id} and software_type_id = {software_type_id} and media_type_id = {media_type_id}".format(language_id, name, entity_id))
+		if(entity_edition_id == ""):
+			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
+			
+		if(plataform_type_id == ""):
+			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")]
+			
+		if(software_type_id == ""):
+			raise ValueError("software_type_id cannot be empty on add_software_edition method.")
+		
+		if(media_type_id == ""):
+			raise ValueError("media_type_id cannot be empty on add_software_edition method.")
+	
+		#check if entity_edition_id really exists
+		self.check_id_exists('entity_edition', entity_edition_id)
+		
+		table = 'software_edition'
+		id = self.get_var(table, ['entity_edition_id'], "entity_edition_id = {entity_edition_id} and plataform_type_id = {plataform_type_id} and software_type_id = {software_type_id} and media_type_id = {media_type_id}".format(language_id, name, entity_id))
 		if(id == None):
 			columns = ['entity_edition_id', 'plataform_type_id', 'software_type_id', 'media_type_id']
 			value = []
@@ -853,55 +966,193 @@ class Database:
 			value.append(media_type_id)
 			value.append(software_type_id)
 			value.append(media_type_id)
-			self.insert('software_edition', value, columns)
-
-			id = self.insert_id
-			if(id == 0):
-				return False
+			
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_software_edition(%s, %s, %s, %s)." % (entity_edition_id, plataform_type_id, software_type_id, media_type_id))
 		return True
 		
-	def add_read_edition(self, entity_edition_id, print_type_id, pages_number, chapters_number):
-		id = self.get_var('read_edition', ['id'], "entity_edition_id = {entity_edition_id}".format(entity_edition_id))
+	"""
+		Method used to insert a read edition to the specialization of entity_edition table.
+		This method can be used to insert on read_edition table. 
+		This method require a entity_edition_id to register, if you would like to add a entity_edition and a read edition with
+		the same method use create_read_edition method instead.
+	"""
+	def add_read_edition(self, entity_edition_id, print_type_id, pages_number, chapters_number = None):
+		if(entity_edition_id == ""):
+			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
+			
+		if(pages_number == ""):
+			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")]
+		
+		table = 'read_edition'
+		
+		id = self.get_var(table, ['id'], "entity_edition_id = {entity_edition_id}".format(entity_edition_id))
 		if(id == None):
-			columns = ['entity_edition_id', 'print_type_id', 'pages_number', 'chapters_number']
+			columns = ['entity_edition_id', 'print_type_id', 'pages_number']
 			value = []
 			value.append(entity_edition_id)
 			value.append(print_type_id)
 			value.append(pages_number)
-			value.append(chapters_number)
+			
+			if(chapters_number != None):
+				columns.append('chapters_number')
+				value.append(chapters_number)
 
-			self.insert('read_edition', value, columns)
-			if(id == 0):
-				return False
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_read_edition(%s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number))
 		return id
-		
-	def add_image_to_edition(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			if(add_relation_image(#) != False):
-				return True
-		return False
-		
 	
-############## Release Methods ##################
-	
-	def add_game_release(self, entity_release_id, installation_instructions = None, emulate = 0):
-		id = get_var('game_release', ['entity_release_id'], "entity_release_id = {entity_release_id}".format(entity_release_id))
-		if(id == None):
-			columns = ['entity_release_id']
-			value = []
-			value.append(entity_release_id)
-			if(emulate != 0):
-				columns.append('emulate')
-				value.append(emulate)
-			if(installation_instructions != None):
-				columns.append('installation_instructions')
-				value.append(installation_instructions)
-			return self.insert('game_release', value,columns)
-		return id
+	"""
+		Method used to add a image and associated it with an entity edition.
+		This method implements try except and return boolean, so there is no need to implement try except on method above.
+	"""
+	def add_image_to_edition(self, url, extension, name, edition_id, image_type_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('entity_edition', image_id, edition_id, image_type_id)
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			return False
+			
+	"""
+		Method used to register all items related with entity.
+		This method must be used instead other specified methos related with entity.
 		
+		To use this method the types must be already registered on database.
+		The parameters titles must have elements that are dict. 
+	"""
+	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None,
+	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = [], return_method = False):
+
+		if(return_method == False):
+			#set commit to false.
+			self.set_auto_transaction(False)
+		
+		try:
+			table = 'entity_edition'
+			
+			edition_id = self.add_edition(edition_type_id, entity_id, title, free, censored, subtitle, code , complement_code, release_description,height,width, depth, weight, event_id )
+		
+			#Add number
+			self.add_edition_number(edition_id, number, number_type_id)
+		
+			for language in languages:
+				self.add_multi_relation(edition_id, language, table, 'language')
+			
+			for caption in subtitles:
+				self.add_multi_relation(edition_id, caption, table, 'subtitle')
+		
+			#Add launch countries
+			for launch in launch_countries:
+				self.add_entity_edition_launch_country(edition_id, launch['country_id'], launch['date'], launch['price'], launch['currency_id'])
+			
+			for company in companies:
+				self.add_relation_company(company['id'], edition_id, company['function_type_id'], table)
+			
+			for image in images:
+				self.add_image_to_edition(image['url'], image['extension'], image['name'], edition_id, image['type_id'])
+
+			if(return_method == False):
+				#commit changes
+				self.commit()
+			
+			if(return_method):
+				return edition_id
+				
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			
+			if(return_method == False):
+				self.rollback()
+			
+			if(return_method):
+				raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
+				
+			return False
+		finally:
+			self.set_auto_transaction(True)
+		
+	"""
+		Method used to create a entity edition that is a read_edition specialization.
+		The method differ from create_edition on that it not request subtitles because subtitles, or captions, are for videos; game is a video based content.
+		This method as well all other create method will only commit the transaction after all be run successful. 
+	"""
+	def create_read_edition(self, print_type_id, pages_number, chapters_number = None,
+	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id == None,
+	languages_id = [], launch_countries = [], companies = [], images = []):
+		
+		#set commit to false.
+		self.set_auto_transaction(False)
+			
+		try:
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images, True):
+			self.add_read_edition(self, edition_id, print_type_id, pages_number, chapters_number)
+			
+			#commit changes
+			self.commit()
+			
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+	
+	"""
+		Method used to create a entity edition that is a software_edition specialization.
+		This method as well all other create method will only commit the transaction after all be run successful. 
+	"""
+	def create_software_edition(self, plataform_type_id, software_type_id, media_type_id,	
+	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id == None,
+	languages_id = [], subtitles = [], launch_countries = [], companies = [], images = []):
+	
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images, True):
+			self.add_software_edition(edition_id, plataform_type_id, software_type_id, media_type_id)
+			#commit changes
+			self.commit()
+			
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+	
+	
+
+	################################ Release Methods ##############################
+	
+	"""
+		Method used to insert a entity release. This method don't insert any related item to entity like number or languages.
+		This method can be use to insert on entity_release table.
+	"""
 	def add_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None):
-		id = self.get_var('entity_release', ['id'], "entity_id = {entity_id} and release_type_id = {release_type_id} and entity_edition_id = {entity_edition_id} and country_id = {country_id}".format(entity_id, release_type_id, entity_edition_id, country_id))
+		if(entity_id == ""):
+			raise ValueError("entity_id cannot be empty on add_release method.")	
+		
+		if(release_type_id == ""):
+			raise ValueError("release_type_id cannot be empty on add_release method.")	
+		
+		if(country_id == ""):
+			raise ValueError("country_id cannot be empty on add_release method.")	
+			
+		if(entity_edition_id == ""):
+			raise ValueError("entity_edition_id cannot be empty on add_release method.")
+		
+		#check if entity really exists
+		self.check_id_exists('entity', entity_id)
+		
+		table = 'entity_release'
+		
+		id = self.get_var(table, ['id'], "entity_id = {entity_id} and release_type_id = {release_type_id} and entity_edition_id = {entity_edition_id} and country_id = {country_id}".format(entity_id, release_type_id, entity_edition_id, country_id))
+		
 		if(id == None):
 			columns = ['entity_id','release_type_id','country_id','entity_edition_id','description','release_date']
 			value = []
@@ -916,32 +1167,57 @@ class Database:
 				columns.append('release_date')
 				value.append(release_date) 
 				
-			self.insert('entity_release', value, columns)
-			id = self.insert_id
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_release(%s, %s, %s, %s, %s, %s)." % (entity_id, release_type_id, country_id, entity_edition_id, release_date, description))
 		return id
+		
+	"""
+		Method used to insert a game release to the specialization of entity_release table.
+		This method can be used to insert on game_release table. 
+		This method require a entity_release_id to register, if you would like to add a entity_release and a read edition with
+		the same method use create_game_release method instead.
+	"""
+	def add_game_release(self, entity_release_id, installation_instructions = None, emulate = 0):
+		if(entity_release_id == ""):
+			raise ValueError("entity_release_id cannot be empty on add_game_release method.")
+			
+		table = 'game_release'
+		id = get_var(table, ['entity_release_id'], "entity_release_id = {entity_release_id}".format(entity_release_id))
+		
+		if(id == None):
+			columns = ['entity_release_id']
+			value = []
+			value.append(entity_release_id)
+			if(emulate != 0):
+				columns.append('emulate')
+				value.append(emulate)
+			if(installation_instructions != None):
+				columns.append('installation_instructions')
+				value.append(installation_instructions)
+				
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_game_release(%s, %s, %s)." % (entity_release_id, installation_instructions, emulate ))
+		return True
 	
-	def create_release():
-		#check if there is a series where this release is from, check table entity and alias to find the series name. If not exists create the series.
-		
-		#get the id from series, from series table or alias table.
-		
-		#normalize release number to be insert on database, release number can be e.g. 'c.53', 'v2.9', 'v1 c.1-4','v1-2', 'v.1 c.14', 'Oneshot', 'v.1 c.Interlude 2-3', 'c.Parts 1-2'
-		
-		#insert release
-		
-		#insert release number
-		
-	#insert mods
-	def add_mod(self, name, type_id, entity_release_id, author_name, launch_date = None, description = None, installation_instruction = None):
-		#check if entity_release exists
-		id = self.get_var('entity_release', ['id'], "id = {entity_release_id}".format(entity_release_id))
-		if(id == None)
-			self.programing_message = "Error on insert mod, entity_release dont exists."
-			return False
+	"""
+		Method used to insert a game mod release to the specialization of entity_release table.
+		This method can be used to insert on mod_release table. 
+		This method require a entity_release_id to register, if you would like to add a entity_release and a mod release with
+		the same method use create_mod_release method instead.
+	"""
+	def add_mod_release(self, name, type_id, entity_release_id, author_name, launch_date = None, description = None, installation_instruction = None):
+		if(entity_release_id == ""):
+			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
+			
+		#check if entity_release really exists
+		self.check_id_exists('entity_release', entity_release_id)
+			
+		table = 'mod_release'
 		#check if already is a mod with the same name
-		id = self.get_var('mod', ['id'], "entity_release_id = {entity_release_id} and name= '{name}' ".format(entity_release_id, name)
+		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id} and name= '{name}' ".format(entity_release_id, name)
 		if(id == None):
 			columns = ['entity_release_id', 'mod_type_id', 'name', 'author']
 			value = []
@@ -949,6 +1225,7 @@ class Database:
 			value.append(type_id)
 			value.append(name)
 			value.append(author_name)
+			
 			if(launch_date != None):
 				columns.append('launch_date')
 				value.append(launch_date)
@@ -959,68 +1236,192 @@ class Database:
 				columns.append('installation_instruction')
 				value.append(installation_instruction)
 			
-			self.insert('mod', value, columns)
-			id = self.insert_id
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_mod_release(%s, %s, %s, %s, %s, %s, %s)." % (name, type_id, entity_release_id, author_name, launch_date, description, installation_instruction ))
 		return id
-		
-	def add_release_number():
-		#call add_number()
-		
-	def add_image_to_release(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
+	
+	"""
+		Method used to add a number to a release.
+		This method can be used to insert multiples numbers and hierarchies number, 
+		e.g. Volume 1 Chapter 1-4 or Season 4 Episode 89-102. 
+	"""
+	def add_release_number(self, release_id, numbers):
+		if(release_id == ""):
+			raise ValueError("Edition id cannot be empty on add_edition_number method.")
 			
-			#not add_relation_image
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			for number in numbers:
+				#register volume first.
+				volume_id = None
+				if(number['parent'] != ""):
+					volume_id = add_number('release', release_id, number['parent_type'], number['parent'])
+		
+				for chapter in number['child']:
+					add_number('release', release_id, number['child_type'], chapter, volume_id)
+					
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			raise ValueError("An error occurred when trying to run add_release_number(%s, %s)." % (release_id, numbers ))
+		finally:
+			self.set_auto_transaction(True)
+			
+		
+	"""
+		Method used to add a image and associated it with an entity release.
+		This method implements try except and return boolean, so there is no need to implement try except on method above.
+	"""
+	def add_image_to_release(self, url, extension, name, release_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('entity_release', image_id, release_id, image_type_id)
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			return False
 	
-############ Persona methods ##################
+	"""
+		Method used to add a image and associated it with an mod release.
+		This method implements try except and return boolean, so there is no need to implement try except on method above.
+	"""
+	def add_image_to_mod_release(self, url, extension, name, mod_release_id)
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('mod_release', image_id, mod_release_id, image_type_id)
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			return False
+		
+	"""
+		Method used to register all items related with entity release.
+		This method must be used instead other specified methods related with entity release.
+		
+		To use this method the types must be already registered on database.
+		The parameters numbers,collaborators and collaborator_members must have elements that are dict. 
+	"""
+	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], return_method = False):
+		
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			release_id = add_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description)
+			
+			#register numbers
+			add_release_number(release_id, numbers)
+			
+			#register languages
+			for language in languages_id:
+				self.add_multi_relation(release_id, language, 'entity_release', 'language')
+			
+			#register collaborator
+			for collaborator in collaborators:
+				add_relation_collaborator_release(collaborator['id'], release_id, collaborator['function_type_id'], 'collaborator')
+				
+			#register collaborator members
+			for member in collaborator_members:
+				add_relation_collaborator_release(member['id'], release_id, member['function_type_id'], 'collaborator_member', 'produces')
+			
+			if(return_method == False):
+				#commit changes
+				self.commit()
+			
+			if(return_method):
+				return release_id
+				
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			
+			if(return_method == False):
+				self.rollback()
+			
+			if(return_method):
+				raise ValueError("return id is equal to 0 on create_release method. Some error must have occurred.")
+				
+			return False
+		finally:
+			self.set_auto_transaction(True)
+			
+	"""
+		Method used to create a game release that is a specialization of entity_release.
+		This method as well all other create method will only commit the transaction after all be run successful. 
+	"""
+	def create_game_release(self, entity_id, release_type_id, country_id, entity_edition_id, 
+	installation_instructions = None, emulate = 0, release_date = None, description = None, 
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = []):
+		#set commit to false.
+		self.set_auto_transaction(False)
+			
+		try:
+			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
+			numbers, languages_id, collaborators, collaborator_members, True)
+			self.add_game_release(entity_release_id, installation_instructions, emulate)
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
 	
-	#insert persona table related data
-	#used on persona_occupation, persona_associated_name, persona_unusual_features, persona_affiliation, persona_race
-	def add_persona_items(self, name, persona_id, item_table):
-		id = get_var('persona_' + item_table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
-		if(id == None):
-			columns = ['persona_id', 'name']
-			value = []
-			value.append(persona_id)
-			value.append(name)
-
-			self.insert('persona_' + item_table, value, columns)
-			if(id == 0):
-				return False
-		return id
+	"""
+		Method used to create a mod release that is a specialization of entity_release.
+		This method as well all other create method will only commit the transaction after all be run successful. 
+	"""
+	def create_mod_release(self, name, mod_type_id, author_name, entity_id, release_type_id, country_id, entity_edition_id,
+	launch_date = None, description = None, installation_instruction = None, images = []):
+		
+		if(name == ""):
+			raise ValueError("Name cannot be empty on create_mod_release method.")
+			
+		#set commit to false.
+		self.set_auto_transaction(False)
+			
+		try:
+			entity_release_id = self.create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
+			numbers, languages_id, collaborators, collaborator_members, True)
+			mod_id = self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction)
+			
+			for image in images:
+				self.add_image_to_mod_release(image['url'], image['extension'], image['name'], mod_id)
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
 	
-	def create_persona(self, unusual_features = [], associated_name = [], occupation = [], affiliation = [], race = [], figure = [], voices_actor = []):
-		self.add_persona()
-		
-		#add voices
-		
-		#add entity
-		
-		#add relationship with another persona
-		
-		#add_relation_people_voice_persona
 	
-		#add affiliation
-		
-		#persona alias (associated names)
-		
-		
 	
-	def add_persona(self, name, entity_id, gender, first_appear_on = None, birthday = None, blood_type_id == None, height = None, weight = None, eyes_color = None, hair_color = None):
+	################################ Persona methods ##############################
+	
+	"""
+		Method used to insert a persona on database.
+		This method don't insert any related item to persona like voice actors or names.
+		This method can be use to insert on entity_release table.
+	"""
+	def add_persona(self, gender, birthday = None, blood_type_id == None, height = None, weight = None, eyes_color = None, hair_color = None):
 		id = self.get_var('persona', ['id'], "entity_id = {entity_id} and name = {name} and gender = {gender}".format(entity_id, name, gender))
 		if(id == None):
-			columns = ['name', 'gender', 'entity_id']
+			columns = ['gender', 'entity_id']
 			value = []
-			value.append(name)
 			value.append(gender)
 			value.append(entity_id)
 			
-			if(first_appear_on != None):
-				columns.append('first_appear_on')
-				value.appendfirst_appear_on
 			if(blood_type_id != None):
 				columns.append('blood_type_id')
 				value.append(blood_type_id)
@@ -1046,13 +1447,83 @@ class Database:
 				return False
 		return id
 		
-	def add_image_to_persona(self, url, extension, name, edition_id):
+	#insert persona table related data
+	#used on persona_occupation, persona_unusual_features, persona_affiliation, persona_race
+	def add_persona_items(self, name, persona_id, item_table):
+		id = get_var('persona_' + item_table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		if(id == None):
+			columns = ['persona_id', 'name']
+			value = []
+			value.append(persona_id)
+			value.append(name)
+
+			self.insert('persona_' + item_table, value, columns)
+			if(id == 0):
+				return False
+		return id
+	
+	def add_persona_alias(self, name, alias_type_id):
+		table = 'persona_alias'
+		
+		id = get_var(table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		if(id == None):
+			columns = ['persona_id', 'name', 'alias_type_id']
+			value = []
+			value.append(persona_id)
+			value.append(name)
+			value.append(alias_type_id)
+
+			self.insert(table, value, columns)
+			if(id == 0):
+				return False
+		return id
+	
+		def add_image_to_persona(self, url, extension, name, edition_id):
 		image_id = add_image(url, extension, name):
 		if(image_id != False):
 			#add relationship
 			
 			#not add_relation_image
 			
+	def add_persona_to_entity(self, entity_id, persona_id, alias_used_id, first_appear = 0):
+		
+		table = 'persona_appear_on_entity'
+		
+		id = self.get_var(table, ['persona_id'], "entity_id = {entity_id} and persona_id = {persona_id}".format(entity_id, persona_id))
+		
+		if(id == None):
+			columns = ['persona_id', 'entity_id', 'first_appear', 'alias_used_id']
+			value = []
+			value.append(persona_id)
+			value.append(entity_id)
+			value.append(first_appear)
+			value.append(alias_used_id)
+			
+			return self.insert(table, value, columns)
+		return True
+		
+	def create_persona(self, unusual_features = [], associated_name = [], occupation = [], affiliation = [], race = [], figure = [], voices_actor = []):
+		self.add_persona()
+		
+		#add voices
+		
+		#add entity
+		
+		#add relationship with another persona
+		
+		#add_relation_people_voice_persona
+	
+		#add affiliation
+		
+		#persona alias (associated names)
+		
+		
+	
+	
+		
+
+	
+	
 ################# Company Methods ########################
 	
 	def add_company(slef, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
@@ -1087,6 +1558,7 @@ class Database:
 	
 	#insert relation of company
 	#used for tables: entity_edition_has_company, entity_has_company
+	#relation_table is the first part of table name _has_company
 	def add_relation_company(self, company_id, second_id, company_function_type_id, relation_table):
 		id = self.get_var(relation_table + '_has_company', ['company_id'], "company_id = {company_id} and {relation_table}_id = {second_id} and company_function_type_id = {company_function_type_id}".format(people_id, relation_table, second_id, relation_type, company_function_type_id))
 		if(id == None):
@@ -1324,6 +1796,12 @@ class Database:
 ##################### Collection Methods #########################3
 	#Add to collection table
 	def add_collection(self, name, description = None, owner_id = 0, soundtracks_id = []):
+	
+		
+				#register the collection if the collection is mentioned, if not is registered.
+				#check with full text search a collection that have the a entity with similar name
+				
+				
 		id = self.get_var('collection', ['id'], "name = '{name}'".format(name))
 		if(id == None):
 			columns = ['name']
@@ -1775,16 +2253,19 @@ class Database:
 			return self.insert('collaborator_has_collaborator_member', value, columns)
 		return True
 	
-	#used on table: collaborator_provides_release, collaborator_member_produces_entity_release
-	def add_relation_collaborator_release(self, collaborator_id, release_id, function_type_id, first_table, second_table, relation = 'provices'):
-		id = self.get_var(first_table + '_' + relation + '_' + second_table, ['collaborator_id'], "collaborator_id = {collaborator_id} and entity_release_id = {release_id}".format(collaborator_id, release_id))
+	#used on table: collaborator_provides_entity_release, collaborator_member_produces_entity_release
+	def add_relation_collaborator_release(self, collaborator_id, release_id, function_type_id, first_table, relation = 'provides'):
+		table = first_table + '_' + relation + '_entity_release'
+		id = self.get_var(table, ['collaborator_id'], "collaborator_id = {collaborator_id} and entity_release_id = {release_id}".format(collaborator_id, release_id))
 		if(id != None):
 			columns = ['collaborator_id', 'entity_release_id', first_table + '_type_id']
 			value = []
 			value.append(collaborator_id)
 			value.append(release_id)
 			value.append(function_type_id)
-			return self.insert(first_table + '_' + relation + '_' + second_table, value, columns);
+			
+			if(self.insert(table, value, columns) == False):
+				
 		return True
 	
 	def add_collaborator_website(self, collaborator_id, website):
@@ -1994,33 +2475,8 @@ class Database:
 			return True
 		return False
 
-	
-	
-		
-	#on Mangaupdates category = tag and genre = category.
-	def add_category(self, type = 'Manga', works = []):
-		#check if there is already a category for type. If there inst create.
 
-		#if there is work associated with category register.
-		#if(len(work) > 0):
-		
-		#return category id.
-		
-		
-	def add_tag(self, type = 'Manga'):
-		#check if there is already a tag for type. If there inst create.
 
-		#if there is work associated with tag register.
-		#if(len(work) > 0):
-		
-		#return tag id.
-	
-	def add_genre(self, work = []):
-		#check if there is already genre.	
-		#if there is work associated with genre register.
-		#if(len(work) > 0):
-		#return genre id.
-		
 	def add_publisher():
 	
 	
