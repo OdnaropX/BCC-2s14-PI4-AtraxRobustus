@@ -140,11 +140,47 @@ INSERT INTO ownership_status (
   name 
 )
 VALUES()
-INSERT INTO hash_type (
-  id
-  name 
-)
-VALUES()
+
+INSERT INTO hash_type (id, name) values (1,'ADLER-32')
+INSERT INTO hash_type (id, name) values (2,'CRC-32')
+INSERT INTO hash_type (id, name) values (3,'CRC-32B')
+INSERT INTO hash_type (id, name) values (4,'CRC-16')
+INSERT INTO hash_type (id, name) values (5,'CRC-16-CCITT')
+INSERT INTO hash_type (id, name) values (6,'DES(Unix)')
+INSERT INTO hash_type (id, name) values (7,'FCS-16')
+INSERT INTO hash_type (id, name) values (8,'GHash-32-3')
+INSERT INTO hash_type (id, name) values (9,'GHash-32-5')
+INSERT INTO hash_type (id, name) values (10,'GOST R 34.11-94')
+INSERT INTO hash_type (id, name) values (11,'Haval-160')
+INSERT INTO hash_type (id, name) values (12,'Haval-192 110080') 
+INSERT INTO hash_type (id, name) values (13,'Haval-224 114080') 
+INSERT INTO hash_type (id, name) values (14,'Haval-256')
+INSERT INTO hash_type (id, name) values (15,'Lineage II C4')
+INSERT INTO hash_type (id, name) values (16,'Domain Cached Credentials')
+INSERT INTO hash_type (id, name) values (17,'XOR-32')
+INSERT INTO hash_type (id, name) values (18,'Haval-128')
+INSERT INTO hash_type (id, name) values (19,'MD2')
+INSERT INTO hash_type (id, name) values (20,'MD4')
+INSERT INTO hash_type (id, name) values (21,'MD5')
+INSERT INTO hash_type (id, name) values (22,'NTLM')
+INSERT INTO hash_type (id, name) values (23,'RAdmin v2.x')
+INSERT INTO hash_type (id, name) values (24,'RipeMD-128')
+INSERT INTO hash_type (id, name) values (25,'RipeMD-160')
+INSERT INTO hash_type (id, name) values (26,'RipeMD-256')
+INSERT INTO hash_type (id, name) values (27,'RipeMD-320')
+INSERT INTO hash_type (id, name) values (28,'SNEFRU-128')
+INSERT INTO hash_type (id, name) values (29,'SNEFRU-256')
+INSERT INTO hash_type (id, name) values (30,'SAM')
+INSERT INTO hash_type (id, name) values (31,'SHA-1')
+INSERT INTO hash_type (id, name) values (32,'SHA-224')
+INSERT INTO hash_type (id, name) values (33,'SHA-384')
+INSERT INTO hash_type (id, name) values (34,'SHA-256')
+INSERT INTO hash_type (id, name) values (35,'SHA-512')
+INSERT INTO hash_type (id, name) values (36,'Tiger-128')
+INSERT INTO hash_type (id, name) values (37,'Tiger-160')
+INSERT INTO hash_type (id, name) values (38,'Tiger-192')
+INSERT INTO hash_type (id, name) values (39,'Whirlpool')
+
 INSERT INTO release_edition_read_status_type (
   id
   name 
@@ -173,6 +209,16 @@ INSERT INTO image_entity_edition_type (
   name 
 )
 VALUES()
+
+INSERT INTO image_company_type (id, name) VALUES(1, 'Logo')
+INSERT INTO image_company_type (id, name) VALUES(2, 'Front')
+INSERT INTO image_company_type (id, name) VALUES(3, 'Back')
+INSERT INTO image_company_type (id, name) VALUES(4, 'Above')
+INSERT INTO image_company_type (id, name) VALUES(5, 'Within')
+INSERT INTO image_company_type (id, name) VALUES(6, 'Google Map')
+
+
+
 INSERT INTO image_figure_type (
   id
   name 
@@ -248,20 +294,36 @@ INSERT INTO condition_type (
   name 
 )
 VALUES()
-INSERT INTO classification_type (
-  id
-  name 
-)
-VALUES()
+INSERT INTO classification_type ( id, name ) VALUES(1, 'Free')
+INSERT INTO classification_type ( id, name ) VALUES(2, '3+')
+INSERT INTO classification_type ( id, name ) VALUES(3, '4+')
+INSERT INTO classification_type ( id, name ) VALUES(4, '5+')
+INSERT INTO classification_type ( id, name ) VALUES(5, '6+')
+INSERT INTO classification_type ( id, name ) VALUES(6, '7+')
+INSERT INTO classification_type ( id, name ) VALUES(7, '8+')
+INSERT INTO classification_type ( id, name ) VALUES(8, '9+')
+INSERT INTO classification_type ( id, name ) VALUES(9, '10+')
+INSERT INTO classification_type ( id, name ) VALUES(10, '11+')
+INSERT INTO classification_type ( id, name ) VALUES(11, '12+')
+INSERT INTO classification_type ( id, name ) VALUES(12, '13+')
+INSERT INTO classification_type ( id, name ) VALUES(13, '14+')
+INSERT INTO classification_type ( id, name ) VALUES(14, '15+')
+INSERT INTO classification_type ( id, name ) VALUES(15, '16+')
+INSERT INTO classification_type ( id, name ) VALUES(16, '17+')
+INSERT INTO classification_type ( id, name ) VALUES(17, '18+')
+
 INSERT INTO collaborator_type (
   id
   name 
 );
-INSERT INTO media_type (
-  id
-  name 
-)
-VALUES()
+
+INSERT INTO media_type ( id, name ) VALUES(1,'Disk Floppy')
+INSERT INTO media_type ( id, name ) VALUES(2,'CD')
+INSERT INTO media_type ( id, name ) VALUES(3,'DVD')
+INSERT INTO media_type ( id, name ) VALUES(4,'DAT TAPE')
+INSERT INTO media_type ( id, name ) VALUES(5,'HD-DVD')
+INSERT INTO media_type ( id, name ) VALUES(6,'BluRay')
+
 /* Volume oneshot must have Oneshot on number field */
 INSERT INTO number_type ( id, name) VALUES(1,'Volume')
 INSERT INTO number_type ( id, name) VALUES(2,'Chapter')
@@ -271,10 +333,11 @@ INSERT INTO number_type ( id, name) VALUES(2,'Episode')
 
 INSERT INTO alias_type ( id, name ) VALUES(1, 'Main')
 INSERT INTO alias_type ( id, name ) VALUES(2, 'Alias')
-INSERT INTO alias_type ( id, name ) VALUES(3, 'Title')
-INSERT INTO alias_type ( id, name ) VALUES(4, 'Subtitle')
-INSERT INTO alias_type ( id, name ) VALUES(5, 'Romanized Title')
-INSERT INTO alias_type ( id, name ) VALUES(6, 'Romanized Subtitle')
+INSERT INTO alias_type ( id, name ) VALUES(3, 'Nickname')
+INSERT INTO alias_type ( id, name ) VALUES(4, 'Title')
+INSERT INTO alias_type ( id, name ) VALUES(5, 'Subtitle')
+INSERT INTO alias_type ( id, name ) VALUES(6, 'Romanized Title')
+INSERT INTO alias_type ( id, name ) VALUES(7, 'Romanized Subtitle')
 
 
 INSERT INTO mod_type (

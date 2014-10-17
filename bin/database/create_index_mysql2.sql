@@ -288,6 +288,13 @@ CREATE TABLE image_soundtrack_type (
 )
 TYPE=InnoDB;
 
+CREATE TABLE image_company_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
 CREATE TABLE lyric_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
@@ -1008,7 +1015,7 @@ CREATE TABLE soundtrack_has_image (
 )
 TYPE=InnoDB;
 
-CREATE TABLE lyrics (
+CREATE TABLE lyric (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   lyric_type_id INTEGER UNSIGNED NOT NULL,
   user_id INTEGER UNSIGNED NULL,
@@ -1017,11 +1024,11 @@ CREATE TABLE lyrics (
   title VARCHAR NOT NULL,
   lyric TEXT NOT NULL,
   PRIMARY KEY(id),
-  INDEX lyrics_FKIndex1(language_id),
-  INDEX lyrics_FKIndex2(audio_id),
-  INDEX lyrics_FKIndex3(user_id),
-  INDEX lyrics_FKIndex4(lyric_type_id),
-  INDEX lyrics_FKIndex5(title),
+  INDEX lyric_FKIndex1(language_id),
+  INDEX lyric_FKIndex2(audio_id),
+  INDEX lyric_FKIndex3(user_id),
+  INDEX lyric_FKIndex4(lyric_type_id),
+  INDEX lyric_FKIndex5(title),
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
@@ -1087,15 +1094,9 @@ TYPE=InnoDB;
 
 CREATE TABLE driver (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  requirements_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR UNIQUE NOT NULL,
   url_download VARCHAR NULL,
   PRIMARY KEY(id),
-  INDEX driver_FKIndex1(requirements_id),
-  FOREIGN KEY(requirements_id)
-    REFERENCES requirements(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
@@ -1197,7 +1198,7 @@ TYPE=InnoDB;
 CREATE TABLE persona (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   blood_type_id INTEGER UNSIGNED NULL,
-  gender SET NULL,
+  gender SET NOT NULL,
   birthday DATETIME NULL,
   height INTEGER UNSIGNED NULL,
   weight DECIMAL NULL,
@@ -2135,6 +2136,7 @@ CREATE TABLE figure_has_image (
 )
 TYPE=InnoDB;
 
+
 CREATE TABLE entity_edition_has_image (
   image_id BIGINT UNSIGNED NOT NULL,
   entity_edition_id INTEGER UNSIGNED NOT NULL,
@@ -2449,6 +2451,15 @@ CREATE TABLE people_voice_persona (
       ON UPDATE NO ACTION
 );
 
+/* adicionar entidade */
+
+CREATE TABLE people_voice_persona_on_number_edition (
+	persona_id INTEGER UNSIGNED NOT NULL,
+	people_id BIGINT UNSIGNED NOT NULL,
+	language_id INTEGER UNSIGNED NOT NULL,
+	number_edition_id
+	primary key(persona_id, people_id)
+	
 CREATE TABLE tag_user_filter (
   user_filter_id INTEGER UNSIGNED NOT NULL,
   tag_id INTEGER UNSIGNED NOT NULL,
@@ -2519,6 +2530,84 @@ CREATE TABLE persona_appear_on_entity (
       ON UPDATE NO ACTION
 	 FOREIGN KEY(persona_alias_id)
     REFERENCES persona_alias(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+
+CREATE TABLE persona_has_image (
+  image_id BIGINT UNSIGNED NOT NULL,
+  persona_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(image_id, people_id),
+  INDEX persona_has_image_FKIndex1(image_id),
+  INDEX persona_has_image_FKIndex2(people_id),
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+
+CREATE TABLE company_has_image (
+  image_id BIGINT UNSIGNED NOT NULL,
+  company_id INTEGER UNSIGNED NOT NULL,
+  image_company_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(image_id, entity_edition_id),
+  INDEX entity_edition_has_image_FKIndex1(image_id),
+  INDEX entity_edition_has_image_FKIndex2(company_id),
+  INDEX entity_edition_has_image_FKIndex3(image_company_type_id),
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(company_id)
+    REFERENCES company(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_company_type_id)
+    REFERENCES image_company_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE people_voice_persona_on_number_edition (
+  people_voice_persona_language_id INTEGER UNSIGNED NOT NULL,
+  people_voice_persona_people_id BIGINT UNSIGNED NOT NULL,
+  people_voice_persona_persona_id INTEGER UNSIGNED NOT NULL,
+  number_edition_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(people_voice_persona_language_id, people_voice_persona_people_id, people_voice_persona_persona_id, number_edition_id),
+  INDEX people_voice_persona_has_number_edition_FKIndex1(people_voice_persona_persona_id, people_voice_persona_people_id, people_voice_persona_language_id),
+  INDEX people_voice_persona_has_number_edition_FKIndex2(number_edition_id),
+  FOREIGN KEY(people_voice_persona_persona_id, people_voice_persona_people_id, people_voice_persona_language_id)
+    REFERENCES people_voice_persona(persona_id, people_id, language_id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(number_edition_id)
+    REFERENCES number_edition(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE requirements_has_driver (
+  requirements_id INTEGER UNSIGNED NOT NULL,
+  driver_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(requirements_id, driver_id),
+  INDEX requirements_has_driver_FKIndex1(requirements_id),
+  INDEX requirements_has_driver_FKIndex2(driver_id),
+  FOREIGN KEY(requirements_id)
+    REFERENCES requirements(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(driver_id)
+    REFERENCES driver(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
