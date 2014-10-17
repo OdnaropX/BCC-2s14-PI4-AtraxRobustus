@@ -37,10 +37,12 @@ class Database:
 	type_alias = None
 	#Default types registered
 	alias_type_main = 1 #Alias Main
-	alias_type_romanized = 5 #Alias Romanized Title
-	alias_type_subromanized = 6 #Alias Romanized Subtitle
-	alias_type_title = 3
-	alias_type_subtitle = 4
+	alias_type_alias = 2 #Alias Alias
+	alias_type_nickname = 3 #Alias Nickname
+	alias_type_title = 4
+	alias_type_subtitle = 5
+	alias_type_romanized = 6 #Alias Romanized Title
+	alias_type_subromanized = 7 #Alias Romanized Subtitle
 	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
@@ -470,7 +472,7 @@ class Database:
 	"""
 		Method used to insert a relationship for images that have a certain type.
 		This method can be use to insert name on the follow tables:
-		entity_edition_has_image, figure_has_image, soundtrack_has_image
+		entity_edition_has_image, figure_has_image, soundtrack_has_image, audio_has_image
 		
 		For people_has_image table use the add_multi_relation method.
 		The methods add_image_to_ already uses the appropriate relation method 
@@ -502,7 +504,7 @@ class Database:
 		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, figure_from_persona, figure_has_category,
 		entity_release_has_version, entity_release_has_language, figure_has_material, figure_has_shop_location, figure_has_tag, mod_release_has_image,
 		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
-		genre_has_filter_type
+		genre_has_filter_type, persona_has_image, requirements_has_driver
 		
 		The table name to be used will be assembly by first_table + relation_type + second_table. 
 		By default relation_type is equal to has, but can be overwrite.
@@ -734,7 +736,7 @@ class Database:
 		Method used to insert a title to an entity.
 		This method can be use to insert on entity_alias.
 	"""
-	def add_entity_alias(self, name, entity_id, language_id, title, alias_type_id):
+	def add_entity_alias(self, name, entity_id, language_id, alias_type_id):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on add_entity_alias method.")
 		
@@ -754,7 +756,7 @@ class Database:
 
 			id = self.get_last_insert_id(table)
 			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_entity_alias(%s, %s, %s, %s, %s)." % (name, entity_id, language_id, title, alias_type_id))
+				raise ValueError("There is no last insert id to return on add_entity_alias(%s, %s, %s, %s)." % (name, entity_id, language_id, alias_type_id))
 		return id
 	
 	"""
@@ -776,16 +778,16 @@ class Database:
 			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started)
 		
 			#register main name (Romanize title and Romanized Subtitle)
-			self.add_entity_alias(entity_id, language_id, romanize_title,  self.alias_type_romanized)
+			self.add_entity_alias(romanize_title, entity_id, language_id, self.alias_type_romanized)
 			
 			if(romanize_subtitle != None):
-				self.add_entity_alias(entity_id, language_id, romanize_subtitle,  self.alias_type_subromanized)
+				self.add_entity_alias(romanize_subtitle, entity_id, language_id, self.alias_type_subromanized)
 			
 			for title in titles:
-				self.add_entity_alias(entity_id, title['language_id'], title['title'],  self.alias_type_title)
+				self.add_entity_alias(title['title'], entity_id, title['language_id'],  self.alias_type_title)
 			
 			for subtitle in subtitles:	
-				self.add_entity_alias(entity_id, subtitle['language_id'], subtitle['title'],  self.alias_type_subtitle)
+				self.add_entity_alias(subtitle['title'], entity_id, subtitle['language_id'],  self.alias_type_subtitle)
 				
 			#register synopsis
 			for synops in synopsis:	
@@ -1004,7 +1006,8 @@ class Database:
 	
 	"""
 		Method used to add a image and associated it with an entity edition.
-		This method implements try except and return boolean, so there is no need to implement try except on method above.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
 	"""
 	def add_image_to_edition(self, url, extension, name, edition_id, image_type_id):
 		try:
@@ -1012,7 +1015,7 @@ class Database:
 			return add_relation_image('entity_edition', image_id, edition_id, image_type_id)
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			return False
+			raise ValueError(e.strerror)
 			
 	"""
 		Method used to register all items related with entity.
@@ -1275,7 +1278,8 @@ class Database:
 		
 	"""
 		Method used to add a image and associated it with an entity release.
-		This method implements try except and return boolean, so there is no need to implement try except on method above.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
 	"""
 	def add_image_to_release(self, url, extension, name, release_id):
 		try:
@@ -1283,11 +1287,12 @@ class Database:
 			return add_relation_image('entity_release', image_id, release_id, image_type_id)
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			return False
+			raise ValueError(e.strerror)
 	
 	"""
 		Method used to add a image and associated it with an mod release.
-		This method implements try except and return boolean, so there is no need to implement try except on method above.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
 	"""
 	def add_image_to_mod_release(self, url, extension, name, mod_release_id)
 		try:
@@ -1295,14 +1300,15 @@ class Database:
 			return add_relation_image('mod_release', image_id, mod_release_id, image_type_id)
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			return False
+			raise ValueError(e.strerror)
 		
 	"""
 		Method used to register all items related with entity release.
 		This method must be used instead other specified methods related with entity release.
 		
 		To use this method the types must be already registered on database.
-		The parameters numbers,collaborators and collaborator_members must have elements that are dict. 
+		The parameters numbers,collaborators and collaborator_members must have elements that are dict.
+		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method. 
 	"""
 	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
 	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], return_method = False):
@@ -1414,58 +1420,91 @@ class Database:
 		This method don't insert any related item to persona like voice actors or names.
 		This method can be use to insert on entity_release table.
 	"""
-	def add_persona(self, gender, birthday = None, blood_type_id == None, height = None, weight = None, eyes_color = None, hair_color = None):
-		id = self.get_var('persona', ['id'], "entity_id = {entity_id} and name = {name} and gender = {gender}".format(entity_id, name, gender))
-		if(id == None):
-			columns = ['gender', 'entity_id']
-			value = []
-			value.append(gender)
-			value.append(entity_id)
-			
-			if(blood_type_id != None):
-				columns.append('blood_type_id')
-				value.append(blood_type_id)
-			if(birthday != None):
-				columns.append('birthday')
-				value.append(birthday)
-			if(height != None):
-				columns.append('height')
-				value.append(height)
-			if(weight != None):
-				columns.append('weight')
-				value.append(weight)
-			if(eyes_color != None):
-				columns.append('eyes_color')
-				value.append(eyes_color)
-			if(hair_color != None):
-				columns.append('hair_color')
-				value.append(hair_color)
-			
-			self.insert('persona', value,columns)
-			id = self.insert_id
-			if(id == 0):
-				return False
-		return id
+	def add_persona(self, gender, birthday = None, blood_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None):
+		if(gender == ""):
+			raise ValueError("Gender cannot be empty on add_persona method.")	
 		
-	#insert persona table related data
-	#used on persona_occupation, persona_unusual_features, persona_affiliation, persona_race
+		table = 'persona'
+		
+		#Cannot verify uniqueness.
+		
+		columns = ['gender']
+		value = []
+		value.append(gender)
+			
+		if(blood_type_id != None):
+			columns.append('blood_type_id')
+			value.append(blood_type_id)
+		if(birthday != None):
+			columns.append('birthday')
+			value.append(birthday)
+		if(height != None):
+			columns.append('height')
+			value.append(height)
+		if(weight != None):
+			columns.append('weight')
+			value.append(weight)
+		if(eyes_color != None):
+			columns.append('eyes_color')
+			value.append(eyes_color)
+		if(hair_color != None):
+			columns.append('hair_color')
+			value.append(hair_color)
+		
+		self.insert(table, value,columns)
+		id = self.get_last_insert_id(table)
+		if(id == 0):
+			raise ValueError("There is no last insert id to return on add_persona(%s, %s, %s, %s, %s, %s, %s)." % (gender, birthday, blood_type_id, height, weight, eyes_color, hair_color))
+		return id
+	
+	"""
+		Method used to insert data related with persona.
+		This method can be use to insert on the follow tables:
+		persona_occupation, persona_unusual_features, persona_affiliation, persona_race
+	"""
 	def add_persona_items(self, name, persona_id, item_table):
-		id = get_var('persona_' + item_table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_persona_items method.")
+		
+		if(item_table == ""):
+			raise ValueError("Item table cannot be empty on add_persona_items method.")
+			
+		if(persona_id == ""):
+			raise ValueError("Persona id cannot be empty on add_persona_items method.")
+			
+		self.check_id_exists('persona', persona_id)
+		
+		table = 'persona_' + item_table
+		id = get_var(table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
 		if(id == None):
 			columns = ['persona_id', 'name']
 			value = []
 			value.append(persona_id)
 			value.append(name)
 
-			self.insert('persona_' + item_table, value, columns)
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_persona_items(%s, %s, %s)." % (name, persona_id, item_table))
 		return id
 	
-	def add_persona_alias(self, name, alias_type_id):
+	"""
+		Method used to insert a alias for a persona.
+		This method can be use to insert data on persona_alias table.
+	"""
+	def add_persona_alias(self, name, persona_id, alias_type_id):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_persona_items method.")
+		
+		if(alias_type_id == ""):
+			raise ValueError("Alias type cannot be empty on add_persona_items method.")
+			
+		self.check_id_exists('persona', persona_id)
+		
 		table = 'persona_alias'
 		
 		id = get_var(table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		
 		if(id == None):
 			columns = ['persona_id', 'name', 'alias_type_id']
 			value = []
@@ -1474,18 +1513,38 @@ class Database:
 			value.append(alias_type_id)
 
 			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_persona_alias(%s, %s, %s)." % (name, persona_id, alias_type_id))
 		return id
 	
-		def add_image_to_persona(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
-			
-			#not add_relation_image
-			
+	
+	"""
+		Method used to add a image and associated it with a persona.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""
+	def add_image_to_persona(self, url, extension, name, persona_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_multi_relation(persona_id, image_id, 'persona', 'image')
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			raise ValueError(e.strerror)
+
+	"""
+		Method used to associate a persona with a entity.
+		This method is used to insert on persona_appear_on_entity table.
+		
+	"""
 	def add_persona_to_entity(self, entity_id, persona_id, alias_used_id, first_appear = 0):
+		if(persona_id == ""):
+			raise ValueError("Persona id cannot be empty on add_persona_items method.")
+			
+		if(entity_id == ""):
+			raise ValueError("Entity id cannot be empty on add_persona_items method.")
+			
+		self.check_id_exists('entity', entity_id)
 		
 		table = 'persona_appear_on_entity'
 		
@@ -1499,35 +1558,98 @@ class Database:
 			value.append(first_appear)
 			value.append(alias_used_id)
 			
-			return self.insert(table, value, columns)
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_persona_to_entity(%s, %s, %s, %s)." % (entity_id, persona_id, alias_used_id, first_appear))
 		return True
 		
-	def create_persona(self, unusual_features = [], associated_name = [], occupation = [], affiliation = [], race = [], figure = [], voices_actor = []):
-		self.add_persona()
+	"""
+		Method used to register all items related with persona.
+		This method must be used instead other specified methods related with persona.
 		
-		#add voices
+		To use this method the types must be already registered on database.
+		Alias is to alternative names where nickname is for nickname. 
+		Think like Tatsuya alias is Ooguro where his nickname is Mahesvara on Mahou Kokkou no Retousei.
+		The parameters entities_appear_on,     must have elements that are dict.
 		
-		#add entity
-		
-		#add relationship with another persona
-		
-		#add_relation_people_voice_persona
+		To add a relationship the other persona id on relationship must be already registered on database.
+	"""
+	def create_persona(self, name, gender, birthday = None, blood_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
+	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], figures = [], voices_actor = [], entities_appear_on = [],
+	relationship = [], images = []):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on create_persona method.")
 	
-		#add affiliation
+		#set commit to false.
+		self.set_auto_transaction(False)
 		
-		#persona alias (associated names)
+		try:
+			persona_id = self.add_persona(self, gender, birthday, blood_type_id, height, weight, eyes_color, hair_color)
+			
+			#register main name
+			self.add_persona_alias(name, persona_id, self.alias_type_main)
+			#register alias
+			for alias in aliases:
+				self.add_persona_alias(alias, persona_id, self.alias_type_alias)
+			
+			#register nicknames
+			for nick in nicknames:
+				self.add_persona_alias(nick, persona_id, self.alias_type_nickname)
+			
+			#add voices
+			for people in voices_actor:
+				self.add_relation_people_voice_persona(people['id'], persona_id, people['language_id'], people['entity_id'], people['entity_edition_id'], people['observation'], people['numbers_edition_id'])
+			
+			#add entity
+			for entity in entities_appear_on:
+				self.add_persona_to_entity(self, entity['id'], persona_id, entity['alias_used_id'], entity['first_appear'])
+				
+			#add relationship with another persona
+			for unusual_feature in unusual_features:
+				self.add_persona_items(unsual_feature, persona_id, 'unusual_features')
+				
+			for occupation in occupations:
+				self.add_persona_items(occupation, persona_id, 'occupation')
+					
+			for race in races:
+				self.add_persona_items(race, persona_id, 'race')
+					
+			for affiliation in affiliations:
+				self.add_persona_items(affiliation, persona_id, 'affiliation')
+				
+			for figure in figures:
+				self.add_multi_relation(figure['id'], persona_id, 'figure', 'persona', 'from')
+				
+			for image in images:
+				self.add_image_to_persona(image['url'], image['extension'], image['name'], persona_id)
+				
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+	
 		
+	############################### Company Methods ###############################
+	
+	"""
+		Method used to insert a company. This method don't insert any related item to company like websites or filial countries.
+		This method can be use to insert on entity_edition table.
 		
-	
+		Countries must be already save on database prior to the usage of this method.
+		TODO: Use similarity instead equal on name.
+	"""
+	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_company method.")
 	
 		
-
-	
-	
-################# Company Methods ########################
-	
-	def add_company(slef, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
-		id = self.get_var('company', ['id'], "name = {name} and country_id = {country_origin_id}".format(name, country_origin_id))
+		self.check_id_exists('country', country_origin_id)
+		
+		table = 'company'
+		id = self.get_var(table, ['id'], "name = '{name}' and country_id = {country_origin_id}".format(name, country_origin_id))
 		if(id == None):
 			columns = ['country_id','name']
 			value = []
@@ -1550,17 +1672,39 @@ class Database:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 				
-			return self.insert('company', value, columns)
-		return True
+			self.insert('company', value, columns)
+			
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_company(%s, %s, %s, %s, %s, %s, %s)." % (name, country_origin_id, description, social_name, start_year, website, foundation_date))
+		return id
 	
-	def create_company(self, events_sponsored = [], owned_collections = [], countries = [], social = [], editions = [], entities = [], comments = []):
 	
-	
-	#insert relation of company
-	#used for tables: entity_edition_has_company, entity_has_company
-	#relation_table is the first part of table name _has_company
+	"""
+		Method used to insert a relation with company on database.
+		This method can be use to insert a relation on the follow tables:
+		entity_edition_has_company, entity_has_company
+		
+		The parameter relation_table is used as the first part of table name that have _has_company
+	"""
 	def add_relation_company(self, company_id, second_id, company_function_type_id, relation_table):
-		id = self.get_var(relation_table + '_has_company', ['company_id'], "company_id = {company_id} and {relation_table}_id = {second_id} and company_function_type_id = {company_function_type_id}".format(people_id, relation_table, second_id, relation_type, company_function_type_id))
+		if(company_id == ""):
+			raise ValueError("company_id cannot be empty on add_relation_company method.")
+		
+		if(second_id == ""):
+			raise ValueError("second_id cannot be empty on add_relation_company method.")
+		
+		if(company_function_type_id == ""):
+			raise ValueError("company_function_type_id cannot be empty on add_relation_company method.")
+			
+		if(relation_table == ""):
+			raise ValueError("relation_table cannot be empty on add_relation_company method.")
+			
+		self.check_id_exists('company', company_id)
+		
+		table = relation_table + '_has_company'
+		
+		id = self.get_var(table, ['company_id'], "company_id = {company_id} and {relation_table}_id = {second_id} and company_function_type_id = {company_function_type_id}".format(people_id, relation_table, second_id, relation_type, company_function_type_id))
 		if(id == None):
 			columns = ['company_id', relation_table + '_id', 'company_function_type_id']
 			value = []
@@ -1568,48 +1712,85 @@ class Database:
 			value.append(second_id)
 			value.append(company_function_type_id)
 
-			self.insert(relation_table + '_has_company', value, columns)
-	
-			#there inst id, how to check if worked?
-			
-			id = self.insert_id
-			if():
-				return False
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_relation_company(%s, %s, %s, %s)." % (company_id, second_id, company_function_type_id, relation_table))
 		return True
 		
-	def add_image_to_company(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
+	"""
+		Method used to add a image and associated it with an company.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""		
+	def add_image_to_company(self, url, extension, name, company_id, image_type_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('entity_edition', image_id, company_id, image_type_id)
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			raise ValueError(e.strerror)
 			
-			#not add_relation_image
+	"""
+		Method used to register all items related with company.
+		This method must be used instead other specified methos related with company.
+		
+		To use this method the types must be already registered on database.
+		The parameters images, editions, entities must have elements that are dict. 
+	"""		
+	def create_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
+	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = []):	
+		
+		self.set_auto_transaction(False)
+		
+		try:
+			company_id = self.add_company(name, country_origin_id, description, social_name, start_year, website, foundation_date)
+		
+			#add events sponsored
+			for event_sponsored in events_sponsored:
+				self.add_multi_relation(company_id, event_sponsored, 'company', 'event', 'sponsors'):
 			
-################ People Methods #########################
+			for owned_collection in owned_collections:
+				self.add_multi_relation(company_id, owned_collection, 'company', 'collection', 'owner'):
+				
+			for country in countries:
+				self.add_multi_relation(company_id, country, 'company', 'country'):
+				
+			for edition in editions:
+				self.add_relation_company(company_id, edition['id'], edition['company_function_type_id'], 'entity_edition')
+				
+			for entity in entities:
+				self.add_relation_company(company_id, entity['id'], entity['company_function_type_id'], 'entity')
+				
+			for social in socials:
+				self.add_relation_social(self, 'company', social['id'], company_id, social['last_update'])
+				
+			for image in images:
+				self.add_image_to_company(image['url'], image['extension'], image['name'], company_id, image['type_id'])
+				
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+			
+
 	
-	#need to commit only after all was successful
-	def create_people(self, name, country, blood_type, website, decription, alias = []):
-		#add_people
-		
-		#add_people_alias
+	################################ People Methods ###############################
 	
-		#add_relation_people
+	"""
+		Method used to insert a person on database. This method don't insert any related item to a persona like socials or websites.
+		This method can be used to insert on people table.
 		
-		#add_relation_people_voice_persona
-		
-		
-		
-		
-		#need to made a unique field to identify person with same name.
-		
-		#check if there is already a people, check know alias from alias table. If there inst create.
-		
-		#register social network url from author.
-		
-		#if there is work associated register the author work.
-		
-		#return author id.	
-		
+		Countries must be already save on database prior to the usage of this method.
+	"""
 	def add_people(self, country_id, blood_type_id = None, website = None, description = None):
+		if(country == ""):
+			raise ValueError("Country id cannot be empty on add_people method.")
+		
+		self.check_id_exists('country', country_id)
+		
 		#cannot check uniqueness
 		columns = ['country_id']
 		value = []
@@ -1628,17 +1809,36 @@ class Database:
 			value.append(description)
 			
 		self.insert('people', value, columns)
-		id = self.insert_id
+		id = self.get_last_insert_id(table)
 		if(id == 0):
-			return False
+			raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s)." % (country_id, blood_type_id, website, description))
 		return id
 	
 	
-	#insert relation of people.
-	#used for tables: people_create_figure, people_produces_entity, people_compose_audio
+	"""
+		Method used to insert a relation with people on database.
+		This method can be use to insert a relation on the follow tables:
+		people_create_figure, people_produces_entity, people_compose_audio
+	
+	"""
 	def add_relation_people(self, people_id, people_alias_used_id, second_id, relation_table, relation_type_id, relation_type = 'produces'):
+		if(people_id == ""):
+			raise ValueError("People id cannot be empty on add_relation_people method.")
+		
+		if(relation_table == ""):
+			raise ValueError("relation_table cannot be empty on add_relation_people method.")
+			
+		if(second_id == ""):
+			raise ValueError("Second id cannot be empty on add_relation_people method.")	
+			
+		if(relation_type_id == ""):
+			raise ValueError("relation_type id cannot be empty on relation_type_id method.")	
+			
+		self.check_id_exists('people', people_id)
+		
+		table = 'people_' + relation_type + '_' + relation_table
 		#check if already is a relation with the people_id, second_id and relation_type_id.
-		id = self.get_var('people_' + relation_type + '_' + relation_table, ['people_id'], "people_id = {people_id} and {relation_table}_id = {second_id} and {relation_type}_type_id = {relation_type_id}".format(people_id, relation_table, second_id, relation_type, relation_type_id))
+		id = self.get_var(table, ['people_id'], "people_id = {people_id} and {relation_table}_id = {second_id} and {relation_type}_type_id = {relation_type_id}".format(people_id, relation_table, second_id, relation_type, relation_type_id))
 		if(id == None):
 			columns = ['people_id', relation_table + '_id', 'people_alias_id', relation_type + '_type_id']
 			value = []
@@ -1646,17 +1846,34 @@ class Database:
 			value.append(second_id)
 			value.append(people_alias_used_id)
 			value.append(relation_type_id)
-			self.insert('users', value, columns)
 			
-			#there inst id, how to check if worked?
-			
-			id = self.insert_id
-			if():
-				return False
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_relation_people(%s, %s, %s, %s, %s, %s)." % (people_id, people_alias_used_id, second_id, relation_table, relation_type_id, relation_type))
 		return True
 		
-	def add_people_alias(self, alias_type_id, people_id, name, lastname):
-		id = self.get_var('people_alias', ['id'], "name = '{name}' and lastname = '{lastname}' and people_id = {people_id}".format(name, lastname, people_id))
+	"""
+		Method used to insert a name to an people.
+		This method can be use to insert on people_alias.
+	"""
+	def add_people_alias(self, name, lastname, people_id, alias_type_id):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_people_alias method.")
+		
+		if(lastname == ""):
+			raise ValueError("Last name id cannot be empty on add_people_alias method.")
+			
+		if(people_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(alias_type_id == ""):
+			raise ValueError("alias_type_id id cannot be empty on add_people_alias method.")
+			
+			
+		#check if people_id really exists
+		self.check_id_exists('people', people_id)
+		
+		table = 'people_alias'
+		id = self.get_var(table, ['id'], "name = '{name}' and lastname = '{lastname}' and people_id = {people_id}".format(name, lastname, people_id))
 		if(id == None):
 			columns = ['name', 'alias_type_id', 'people_id', 'lastname']
 			value = []
@@ -1664,14 +1881,45 @@ class Database:
 			value.append(alias_type_id)
 			value.append(people_id)
 			value.append(lastname)
-			self.insert('people_alias', value, columns)
+			self.insert(table, value, columns)
 			id = insert_id
-			if(id == 0)
-				return False
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_people_alias(%s, %s, %s, %s)." % (name, lastname, people_id, alias_type_id))
 		return id
+
 	
-	def add_relation_people_voice_persona(self, people_id, persona_id, language_id, entity_id, entity_edition_id, observation = None):
-		id = self.get_var('people_voice_persona', ['persona_id'], " persona_id = {persona_id} and people_id = {people_id} and language_id = {language_id}".format(persona_id, people_id, language_id)) 
+	"""
+		Method used to insert a N:M relationship between People and Persona
+		This method can be use to insert on the follow tables:
+		people_voice_persona
+		
+		Language must be already registered on database.
+
+	"""		
+	def add_relation_people_persona(self, people_id, persona_id, language_id, entity_id, entity_edition_id, observation = None):
+		if(people_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(persona_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(language_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(entity_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(entity_edition_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		self.check_id_exists('people', people_id)
+		self.check_id_exists('persona', persona_id)
+		self.check_id_exists('entity', entity_id)
+		self.check_id_exists('language', language_id)
+		self.check_id_exists('entity_edition', entity_edition_id)
+	
+		table = 'people_voice_persona'
+		id = self.get_var(table, ['persona_id'], " persona_id = {persona_id} and people_id = {people_id} and language_id = {language_id}".format(persona_id, people_id, language_id)) 
 		if(id == None):
 			columns = ['persona_id','people_id','language_id','entity_id','entity_edition_id']
 			value = []
@@ -1680,25 +1928,157 @@ class Database:
 			value.append(language_id)
 			value.append(entity_id)
 			value.append(entity_edition_id)
-			
+
 			if(observation != None):
 				columns.append('observation')
 				value.append(observation)
 				
-			return self.insert('people_voice_persona', value, columns)
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_software_edition(%s, %s, %s, %s, %s, %s)." % (people_id, persona_id, language_id, entity_id, entity_edition_id, observation))
 		return True
 		
-	def add_image_to_people(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
+	"""
+		Method used to insert on the associated table people_voice_persona_on_number_edition.
+		This method must be used only if there is information about the number of episode that a persona was voiced by a people.
+		
+	"""
+	def add_relation_people_persona_on_entity_edition_number(self, people_id, persona_id, language_id, number_id):
+		if(people_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-			#not add_relation_image
+		if(persona_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-	############# Archive Methods ###############
+		if(language_id == ""):
+			raise ValueError("People id cannot be empty on add_people_alias method.")
+			
+		if(number_id == ""):
+			raise ValueError("Number id cannot be empty on add_people_alias method.")
+		
+		self.check_id_exists('people', people_id)
+		self.check_id_exists('persona', persona_id)
+		self.check_id_exists('number_edition', number_id)
+		self.check_id_exists('language', language_id)
+		
+		table = 'people_voice_persona_on_number_edition'
+		id = self.get_var(table, ['persona_id'], " people_voice_persona_persona_id = {persona_id} and people_voice_persona_people_id = {people_id} and people_voice_persona_language_id = {language_id} and number_edition_id = {number_id}".format(persona_id, people_id, language_id, number_id)) 
+		if(id == None):
+			columns = ['people_voice_persona_persona_id', 'people_voice_persona_people_id', 'people_voice_persona_language_id', 'number_edition_id']
+			value = []
+			value.append(persona_id)
+			value.append(people_id)
+			value.append(language_id)
+			value.append(number_id)
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_software_edition(%s, %s, %s, %s)." % (people_id, persona_id, language_id, number_id))
+		return True
+		
+	"""
+		Method used to make a relationship between a person and a persona.
+		This method differ from add_relation_people_persona in it receive a number and make a association with  
+		the table people_voice_persona_on_number_edition
+	"""
+	def add_relation_people_voice_persona(self, people_id, persona_id, language_id, entity_id, entity_edition_id, observation = None,
+	numbers = []):
+		self.set_auto_transaction(False)
+		try:
+			self.add_relation_people_persona(people_id, persona_id, language_id, entity_id, entity_edition_id, observation)
+			for number_id in numbers:
+				self.add_relation_people_persona_on_entity_edition_number(people_id, persona_id, language_id, number_id)
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			raise ValueError(e.strerror)
+		finally:
+			self.set_auto_transaction(True)
+	"""
+		Method used to add a image and associated it with an people.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""			
+	def add_image_to_people(self, url, extension, name, people_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return self.add_multi_relation(people_id, image_id, 'people', 'image')
+			
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			raise ValueError(e.strerror)
+			
 	
+	"""
+		Method used to register all items related with people.
+		This method must be used instead other specified methods related with entity.
+		
+		To use this method the types must be already registered on database.
+		The parameters alias, nicknames, figures,entities_produced and audios_composed must have elements that are dictionary. 
+	"""
+	def create_people(self, name, lastname,
+	country_id, blood_type_id = None, website = None, description = None,
+	aliases = [], nicknames = [], figures = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = []):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on create_people method.")
+			
+		if(lastname == ""):
+			raise ValueError("Last name cannot be empty on create_people method.")
+		
+		self.set_auto_transaction(False)
+		try:
+			#add_people
+			people_id = self.add_people(self, country_id, blood_type_id, website, description)
+			
+			#add_people_alias
+			self.add_people_alias(name, lastname, people_id, self.alias_type_main)
+			
+			for alias in aliases:
+				self.add_people_alias(alias['name'], alias['lastname'], people_id, self.alias_type_alias)
+			
+			for nick in nicknames:
+				self.add_people_alias(nick['name'], nick['lastname'], people_id, self.alias_type_nickname)
+			
+			for figure in figures:
+				self.add_relation_people(people_id, figure['people_alias_used_id'], figure['id'], 'figure', figure['people_relation_type_id'], 'create')
+
+			for entity in entities_produced:
+				self.add_relation_people(people_id, entity['people_alias_used_id'], entity['id'], 'entity', entity['people_relation_type_id'])
+
+			for audio in audios_composed:
+				self.add_relation_people(people_id, audio['people_alias_used_id'], audio['id'], 'audio', audio['people_relation_type_id'], 'compose')
+
+			for persona in personas_voiced:
+				self.add_relation_people_voice_persona(people_id, persona['id'], persona['language_id'], persona['entity_id'], persona['entity_edition_id'], persona['observation'], persona['numbers'])
+
+			for image in images:
+				self.add_image_to_people(self, image['url'], image['extension'], image['name'], people_id)
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+		
+			
+	################################ Archive Methods ##############################
+	
+	"""
+		Method used to insert a requirement related with a version.
+		This method check if version_id really exists prior to insert on table.
+	"""
 	def add_requirements(self, version_id, video_board, processor, memory, hd_storage):
-		id = self.get_var('requirements', ['id'], "version_id = '{version_id}'".format(version_id))
+		if(version_id == ""):
+			raise ValueError("version_id cannot be empty on add_requirements method.")
+		
+		self.check_id_exists('version', version_id)
+		
+		table = 'requirements'
+		id = self.get_var(table, ['id'], "version_id = '{version_id}'".format(version_id))
 		if(id == None):
 			columns = ['version_id', 'video_board', 'processor', 'memory', 'hd_storage']
 			value = []
@@ -1707,29 +2087,61 @@ class Database:
 			value.append(processor)
 			value.append(memory)
 			value.append(hd_storage)
-			self.insert('requirements', value, columns)
-			id = insert_id
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_requirements(%s, %s, %s, %s, %s)." % (version_id, video_board, processor, memory, hd_storage))
 		return id
 	
-	#requirements have driver.
-	def add_driver(self, requirements_id, name, url_download):
-		id = self.get_var('driver', ['id'], "name = '{name}'".format(name))
+	"""
+		Method used to insert a driver to a requirement.
+		This method check if requirements_id really exists prior to insert on table.
+	"""
+	def add_driver(self, name, url_download):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_requirements method.")
+		
+		self.check_id_exists('requirements', requirements_id)
+		
+		id = self.get_var('driver', ['id'], "name = '{name}' and url_download = '{url_download}'".format(name, url_download))
 		if(id == None):
-			columns = ['name', 'requirements_id', 'url_download']
+			columns = ['name', 'url_download']
 			value = []
 			value.append(name)
-			value.append(requirements_id)
 			value.append(url_download)
 			self.insert('driver', value, columns)
-			id = insert_id
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_driver(%s, %s)." % (name, url_download))
 		return id
 	
+	"""
+		Method used to insert a archive associated with a version
+		This method check if version_id really exists prior to insert on table.
+	"""
 	def add_archive(self, name, version_id, url, size, extension):
-		id = self.get_var('archive', ['id'], "name = '{name}' and url = '{url}'".format(name, url))
+		if(version_id == ""):
+			raise ValueError("version_id cannot be empty on add_archive method.")
+			
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_archive method.")
+			
+		if(url == ""):
+			raise ValueError("url cannot be empty on add_archive method.")
+			
+		if(size == ""):
+			raise ValueError("size cannot be empty on add_archive method.")
+			
+		if(extension == ""):
+			raise ValueError("extension cannot be empty on add_archive method.")
+			
+		self.check_id_exists('version', version_id)
+		
+		table = 'archive'
+		
+		id = self.get_var(table, ['id'], "name = '{name}' and url = '{url}' and version_id= {version_id}".format(name, url,version_id))
 		if(id == None):
 			columns = ['name', 'version_id', 'url', 'size', 'extension']
 			value = []
@@ -1738,46 +2150,61 @@ class Database:
 			value.append(url)
 			value.append(size)
 			value.append(extension)
-			self.insert('archive', value, columns)
-			id = insert_id
+			
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_archive(%s, %s, %s, %s, %s)." % (name, version_id, url, size, extension))
 		return id
 	
+	"""
+		Method used to insert a hash associated with a archive
+		This method check if archive_id really exists prior to insert on table.
+	"""
 	def add_hash(self, hash_type_id, archive_id, code):
-		id = self.get_var('hash', ['id'], "archive_id = '{archive_id}' and hash_type_id = {hash_type_id}".format(archive_id, hash_type_id))
+		if(hash_type_id == ""):
+			raise ValueError("hash_type_id cannot be empty on add_hash method.")
+			
+		if(archive_id == ""):
+			raise ValueError("archive_id cannot be empty on add_hash method.")
+			
+		if(code == ""):
+			raise ValueError("code cannot be empty on add_hash method.")
+
+		self.check_id_exists('archive', archive_id)
+		
+		table = 'hash'
+		
+		id = self.get_var(table, ['id'], "archive_id = '{archive_id}' and hash_type_id = {hash_type_id}".format(archive_id, hash_type_id))
 		if(id == None):
 			columns = ['hash_type_id', 'archive_id', 'code']
 			value = []
 			value.append(hash_type_id)
 			value.append(archive_id)
 			value.append(code)
-			self.insert('hash', value, columns)
-			id = insert_id
+			
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_hash(%s, %s, %s)." % (hash_type_id, archive_id, code))
 		return id
 	
-	def add_entity_release_version(self, entity_id, stage_developer_type_id, number, changelog):
-		id = self.add_version(self, stage_developer_type_id, number, changelog = None)
-		if(id != False):
-			if(self.add_multi_relation(self, entity_id, id, 'entity_release', 'version') == False):
-				self.delete('version', "id = {id}".format(id))
-				return False
-			return True
-		return False
-			
-	def add_software_edition_version(self, entity_id, stage_developer_type_id, number, changelog):
-		id = self.add_version(self, stage_developer_type_id, number, changelog = None)
-		if(id != False):
-			if(self.add_multi_relation(self, entity_id, id, 'software_edition', 'version') == False):
-				self.delete('version', "id = {id}".format(id))
-				return False
-			return True
-		return False
-	
+
+	"""
+		Method used to add a version to the version table on database.
+		This method don't insert any relationship to version like release version or software edition version.
+	"""
 	def add_version(self, stage_developer_type_id, number, changelog = None):
-		#check the table of relationship version_entity
+		if(stage_developer_type_id == ""):
+			raise ValueError("stage_developer_type_id cannot be empty on add_version method.")
+			
+		if(number == ""):
+			raise ValueError("Number cannot be empty on add_version method.")
+			
+		table = 'version'
+
 		columns = ['stage_developer_type_id', 'number']
 		value = []
 		value.append(stage_developer_type_id)
@@ -1787,22 +2214,110 @@ class Database:
 			columns.append('changelog')
 			value.append(changelog)
 			
-		self.insert('version', value, columns)
-		id = insert_id
+		self.insert(table, value, columns)
+		
+		id = self.get_last_insert_id(table)
 		if(id == 0):
-			return False		
+			raise ValueError("There is no last insert id to return on add_version(%s, %s, %s)." % (stage_developer_type_id, number, changelog))
 		return id
 		
-##################### Collection Methods #########################3
-	#Add to collection table
-	def add_collection(self, name, description = None, owner_id = 0, soundtracks_id = []):
-	
+	"""
+		Method used to insert a archive and the related hash.
+		The parameter hashes must have elements that are dictionary. 
+	"""		
+	def create_archive(self, name, version_id, url, size, extension, hashes = []):
+		#set commit to false.
+		self.set_auto_transaction(False)
 		
-				#register the collection if the collection is mentioned, if not is registered.
-				#check with full text search a collection that have the a entity with similar name
-				
-				
-		id = self.get_var('collection', ['id'], "name = '{name}'".format(name))
+		try:
+			archive_id = add_archive(name, version_id, url, size, extension)
+			
+			for hash in hashes:
+				add_hash(self, hash['type_id'], archive_id, hash['code'])
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+			
+	"""
+		Method used to insert a requirement and the related driver.
+		The parameter drivers must have elements that are dictionary. 
+	"""		
+	def create_requirements(self, version_id, video_board, processor, memory, hd_storage,
+	drivers = []):
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			requirement_id = self.add_requirements(self, version_id, video_board, processor, memory, hd_storage)
+			
+			for driver in drivers:
+				driver_id = self.add_driver(driver['name'], driver['url_download'])
+				self.add_multi_relation(requirement_id, driver_id, 'requirements', 'driver')
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+		 
+	"""
+		Method used to register all items related with version.
+		This method must be used instead other specified methods related with version.
+		
+		To use this method the types must be already registered on database.
+		The parameter version_for will be used to know in which relationship to make, if is version for entity_release or for software_edition. 
+		The parameter archive and requirements must be a dictionary
+	"""
+	def create_version(self, version_for_table, version_for_entity_id, stage_developer_type_id, number, changelog, archive = None, requirements = None):
+		#set commit to false.
+		self.set_auto_transaction(False)
+		try:
+			version_id = add_version(self, stage_developer_type_id, number, changelog)
+			if(archive != None):
+				self.create_archive(archive['name'], version_id, archive['url'], archive['size'], archive['extension'], archive['hashes'])
+			if(requirements != None):
+				self.create_requirements(version_id, requirements['video_board'], requirements['processor'], requirements['memory'], requirements['hd_storage'], requirements['drivers'])
+			
+			#associate version with entity specified on version_for_table
+			self.add_multi_relation(self, version_for_entity_id, version_id, version_for_table, 'version')
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
+			
+
+			
+	############################## Collection Methods #############################
+	
+	"""
+		Method used to insert a collection on database. This method don't insert any related item to a collection like soundtracks.
+		This method can be used to insert on collection table.
+		
+		TODO: check with full text search a collection that have the a entity with similar name
+	"""
+	def add_collection(self, name, description = None):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_collection method.")
+		
+		table = 'collection'
+		#register the collection if the collection is mentioned, if not is registered.				
+		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
 		if(id == None):
 			columns = ['name']
 			value = []
@@ -1811,142 +2326,61 @@ class Database:
 				columns.append('description')
 				value.append(description)
 				
-			self.insert('collection', value, columns)
-			id = self.insert_id
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
-				return False
-	
-		not_fail = True
-			
-		for soundtrack_id in soundtracks_id:
-			#check if already is a soundtrack associated with this collection
-			sound_id = self.get_var('soundtrack_integrate_collection', ['soundtrack_id'], "soundtrack_id = {soundtrack_id} and collection_id = {collection_id}".format(soundtrack_id, collection_id = id))
-			if(sound_id == None):
-				not_fail = not_fail and add_multi_relation(id, soundtrack_id, 'soundtrack', 'collection', 'integrate')
-			
-		if(not_fail == False):
-			failed_message = "Error on save some item to multi_relation."
-			
-		if(owner_id != 0):
-			#add company_owner_collection
-			if(add_multi_relation(owner_id, id, 'company', 'collection', 'owner') == False):
-				failed_message = failed_message + " Error on company_owner_collection insertion."
-					
-		self.programing_message = failed_message 
-			
-		return id
-	
-	
-	################### User Methods ####################3
-	#insert on user table
-	def add_user(self, username, password, gender, location, birthday, signup_date = None, activated = 1, emails = []):
-		id = self.get_var('users', ['id'], "username = '{username}'".format(username))
-		if(id == None):
-			columns = ['username', 'pass', 'gender','location', 'birthday']
-			value = []
-			value.append(username)
-			value.append(password)
-			value.append(gender)
-			value.append(location)
-			value.append(birthday)
-			
-			if(signup_date != None):
-				columns.append('signup_date')
-				value.append(signup_date)
-			if(activated != 1):
-				columns.append('activated')
-				value.append(0)
-			self.insert('users', value, columns)
-			id = self.insert_id
-			if(id == 0):
-				self.programing_message = "Error on user insertion"
-				return False
-		#Register emails
-		not_fail = True
-		for email in emails:
-			not_fail = not_fail and add_user_email(id, email)
-		
-		if(not_fail == False):
-			self.programing_message = "Error on emails insertion"
-			
-		return id
-	
-	def add_user_email(self, user_id, email):
-		id = self.get_var('user_email', ['email'], "email = '{email}'".format(email))
-		if(id == None):
-			columns = ['users_id', 'email']
-			value = []
-			value.append(user_id)
-			value.append(email)
-			self.insert('users', value, columns)
-			#there inst id, how to check if worked?
-			
-			return self.insert_id('user_email', value, columns)
-		return True
-
-	def add_user_filter(self, name, user_id, type_id):
-		id = get_var('user_filter', ['id'], "users_id = {user_id} and name = {name} and user_filter_type_id = {type_id}".format(user_id, name, type_id))
-		if(id == None):
-			columns = ['name','users_id','user_filter_type_id']
-			value = []
-			value.append(name)
-			value.append(user_id)
-			value.append(type_id)
-			
-			self.insert('user_filter', value, columns)
-			id = self.insert_id
-			if(id == 0):
-				return False
-		return id
-		
-	def add_element_to_user_filter(self, filter_id, attribute_id, attribute = 'tag'):
-		id = self.get_var(attribute + '_user_filter', ['user_filter_id'], "user_filter_id = {user_filter_id} and {attribute}_id = {attribute_id}")
-		if(id == None):
-			columns = ['user_filter_id',attribute +'_id']
-			value = []
-			value.append(filter_id)
-			value.append(attribute_id)
-			
-			return self.insert(attribute + '_user_filter', value, columns)
+				raise ValueError("An error occurred when trying to insert on add_collection(%s, %s)." % (name, description))
 		return True
 	
-	#only commit after all is run successful.
-	def create_user_filter(self, name, user_id, type_id, elements = [], attribute = 'tag'):
-		id = add_user_filter(name, user_id, type_id)
+	"""
+		Method used to register all items related with collection.
+		This method must be used instead other specified methods related with collection.
 		
-		not_fail = True
-		for element in elements:
-			not_fail = not_fail and add_element_to_user_filter(id, element, attribute)
-		if(not_fail == False)
-			self.programing_message = "Error associating some element to user filter"
-		return id
-	
-	def add_comment(self, title, content, user_id, entity_id, type = 'release'):
-		#dont need to check if already exists.
-		columns = [type + '_id', 'users_id', 'content', 'title']
-		value = []
-		value.append(entity_id)
-		value.append(user_id)
-		value.append(content)
-		value.append(title)
-		self.insert(type + '_comments', value, columns)
-		id = self.insert_id
-		if(id == 0):
+		There is no entities to register with collection because a collection is already registered with entity. 
+		Because that a collection must be create previous the insertion of entity.
+	"""
+	def create_collection(self, name, description = None, soundtracks = [], owners = []):
+		#set commit to false.
+		self.set_auto_transaction(False)
+		try:
+			collection_id = self.add_collection( name, description)
+			
+			for soundtrack_id in soundtracks:
+				self.add_multi_relation(id, soundtrack_id, 'soundtrack', 'collection', 'integrate')
+			
+			for owner in owners:
+				self.add_multi_relation(owner_id, id, 'company', 'collection', 'owner') == False):
+			
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
 			return False
-		return True
-		
-	def add_image_to_user(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
-			
-			#not add_relation_image
-		
-###################### Audio Methods ##########################
+		finally:
+			self.set_auto_transaction(True)
 	
-	#insert audio 
-	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate, soundtracks = [], audio_exclusive = []):
-		id = get_var('audio', ['id'], "name = {name} and country_id = {country_id}".format(name, country_id))
+
+		
+	################################# Audio Methods ###############################
+	
+	"""
+		Method used to insert a audio on database. This method don't insert any related item to a audio like soundtracks.
+		This method can be used to insert on audio table.
+		
+	"""
+	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_audio method.")
+		
+		if(country_id == ""):
+			raise ValueError("country_id cannot be empty on add_audio method.")
+		
+		self.check_id_exists('country', country_id)
+		
+		table = 'audio'
+		id = get_var(table, ['id'], "name = '{name}' and country_id = {country_id} and duration = '{duration}'".format(name, country_id, duration))
 		if(id == None):
 			columns = ['country_id', 'audio_codec_id', 'name','duration','bitrate']
 			value = []
@@ -1955,41 +2389,79 @@ class Database:
 			value.append(name)
 			value.append(duration)
 			value.append(bitrate)
-			self.insert('audio', value, columns)
-			id = self.insert_id
-			if(id == 0):
-				return False
-		
-		length_soundtrack = len(soundtracks)
-		if(length_soundtrack == len(audio_exclusive)):
-			not_fail = True		
-			for index in range(length_soundtrack):
-				not_fail = not_fail and add_relation_soundtrack_audio(id, soundtrack_id[index], audio_exclusive[index])
 			
-			if(not_fail == False)
-				self.programing_message = "Error on associating some audio to soundtrack"
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_audio(%s, %s, %s, %s, %s)." % (country_id, audio_codec_id, name, duration, bitrate))
 		return id
 	
-	#insert relationship between soundtrack and audio
+	"""
+		Method used to insert a relationship between audio and soundtrack on database.
+		This method can be used to insert on the follow tables:
+		soundtrack_has_audio
+		
+	"""
 	def add_relation_soundtrack_audio(self, audio_id, soundtrack_id, exclusive):
-		id = get_var('soundtrack_has_audio', ['audio_id'], "audio_id = {audio_id} and soundtrack_id = {soundtrack_id}".format(audio_id, soundtrack_id))
+		if(soundtrack_id == ""):
+			raise ValueError("Name cannot be empty on add_relation_soundtrack_audio method.")
+		
+		if(audio_id == ""):
+			raise ValueError("country_id cannot be empty on add_relation_soundtrack_audio method.")
+
+		if(exclusive == ""):
+			raise ValueError("exclusive cannot be empty on add_relation_soundtrack_audio method.")
+	
+		self.check_id_exists('audio', audio_id)
+		self.check_id_exists('soundtrack', soundtrack_id)
+		
+		table = 'soundtrack_has_audio'
+		id = get_var(table, ['audio_id'], "audio_id = {audio_id} and soundtrack_id = {soundtrack_id}".format(audio_id, soundtrack_id))
 		if(id == None):
 			columns = ['soundtrack_id','audio_id','exclusive']
 			value = []
 			value.append(soundtrack_id)
 			value.append(audio_id)
 			value.append(exclusive)
-			if(self.insert('audio', value, columns) == False):
-				return False
-		return True
 			
-	#insert lyrics
-	def add_lyric(self, type_id, audio_id, language_id, title, content, user_id = None):
+			if(self.insert(table, value, columns) == False):
+				raise ValueError("An error occurred when trying to insert on add_relation_soundtrack_audio(%s, %s, %s)." % (audio_id, soundtrack_id, exclusive))
+		return True
+	
+	"""
+		Method used to insert a lyric on database. 
+		This method can be used to insert on lyric table.
+		
+		The lyric_type_id must be previously registered on database.
+		
+	"""
+	def add_lyric(self, lyric_type_id, audio_id, language_id, title, content, user_id = None):
+		if(soundtrack_id == ""):
+			raise ValueError("soundtrack_id cannot be empty on add_lyric method.")
+		
+		if(audio_id == ""):
+			raise ValueError("audio_id cannot be empty on add_lyric method.")
+
+		if(language_id == ""):
+			raise ValueError("Language id cannot be empty on add_lyric method.")
+			
+		if(title == ""):
+			raise ValueError("Title cannot be empty on add_lyric method.")
+			
+		if(content == ""):
+			raise ValueError("Content cannot be empty on add_lyric method.")
+	
+		self.check_id_exists('audio', audio_id)
+		self.check_id_exists('language', language_id)
+		
 		if(user_id != None):
 			where = "audio_id = {audio_id} and language_id = {language_id} and user_id = {user_id} and title = {title} and lyric_type_id = {lyric_type_id}".format(audio_id,language_id,user_id,title,lyric_type_id)
 		else
 			where = "audio_id = {audio_id} and language_id = {language_id} and title = {title} and lyric_type_id = {lyric_type_id}".format(audio_id,language_id,title,lyric_type_id)
-		id = get_var('lyrics', ['id'], where)
+		
+		table = 'lyric'
+		id = get_var(table, ['id'], where)
 		if(id == None):
 			columns = ['lyric_type_id', 'audio_id' ,'language_id', 'title', 'lyric']
 			value = []
@@ -2003,52 +2475,150 @@ class Database:
 				columns.append('user_id')
 				value.append(user_id)
 			
-			self.insert('lyrics', value, columns)
-			id = self.insert_id
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			
 			if(id == 0):
-				return False
+				raise ValueError("There is no last insert id to return on add_lyric(%s, %s, %s, %s, %s, %s)." % (lyric_type_id, audio_id, language_id, title, content, user_id))
 		return id
 	
-	#insert soundtrack
-	def add_soundtrack(self, name, type_id, launch_year, audios_id = [], audios_exclusive[]):
-		id = get_var('soundtrack', ['id'], "soundtrack_type_id = {type_id} and name = {name} and launch_year = {launch_year}".format(type_id,name,launch_year))
+	
+	"""
+		Method used to insert a soundtrack on database. This method don't regiter anything related with soundtrack, like tracks (also know as audio) 
+		This method can be used to insert on lyric table.
+		
+		The lyric_type_id must be previously registered on database.
+		
+	"""
+	def add_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None):
+		if(name == ""):
+			raise ValueError("Name cannot be empty on add_soundtrack method.")
+		if(type_id == ""):
+			raise ValueError("type_id cannot be empty on add_soundtrack method.")
+		if(launch_year == ""):
+			raise ValueError("launch_year cannot be empty on add_soundtrack method.")
+		
+		if(launch_country_id == ""):
+			raise ValueError("launch_country_id cannot be empty on add_soundtrack method.")
+		
+		self.check_id_exists('country', launch_country_id)
+		
+		table = 'soundtrack'
+		
+		if(code != None):
+			where = "soundtrack_type_id = {type_id} and name = '{name}' and launch_year = {launch_year} and country_id = {launch_country_id} and code = '{code}'".format(type_id,name,launch_year, launch_country_id, code)
+		else:
+			where = "soundtrack_type_id = {type_id} and name = '{name}' and launch_year = {launch_year} and country_id = {launch_country_id}".format(type_id,name,launch_year, launch_country_id)
+		
+		id = get_var(table, ['id'], where)
 		if(id == None):
-			columns = ['soundtrack_type_id', 'name' ,'launch_year']
+			columns = ['soundtrack_type_id', 'name' ,'launch_year', 'country_id', 'code']
 			value = []
 			value.append(type_id)
 			value.append(name)
 			value.append(launch_year)
+			value.append(launch_country_id)
+			value.append(code)
 
-			self.insert('soundtrack', value, columns)
-			if(id == 0):
-				return False
-				
-		#register audios
-		lenght_audios = len(audios_id)
-		if(lenght_audios == len(audios_exclusive)):
-			not_fail = True		
-			for index in range(lenght_audios):
-				not_fail = not_fail and add_relation_soundtrack_audio(id, audios_id[index], audios_exclusive[index])
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			
-			if(not_fail == False):
-				self.programing_message = "Error on audio insertion on add_soundtrack."
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_soundtrack(%s, %s, %s, %s, %s)." % (url, name, type_id, launch_year, launch_country_id, code))
 		return id
 	
-	def add_image_to_audio(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
+	"""
+		Method used to add a image and associated it with an audio.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""	
+	def add_image_to_audio(self, url, extension, name, audio_id, image_type_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('audio', image_id, audio_id, image_type_id)
 			
-			#not add_relation_image
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			raise ValueError(e.strerror)
+	"""
+		Method used to add a image and associated it with an soundtrack.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""	
+	def add_image_to_soundtrack(self, url, extension, name, soundtrack_id, image_type_id):
+		try:
+			image_id = add_image(url, extension, name)
+			return add_relation_image('soundtrack', image_id, soundtrack_id, image_type_id)
+			
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			raise ValueError(e.strerror)
+			
+	"""
+		Method used to register all items related with audio.
+		This method must be used instead other specified methods related with entity.
+		
+		To use this method the types must be already registered on database.
+		The parameters titles must have elements that are dict. 
+	"""		
+	def create_audio(self, country_id, audio_codec_id, name, duration, bitrate,	soundtracks = [], lyrics = [], images = [], user_id = None):
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			audio_id = self.add_audio(country_id, audio_codec_id, name, duration, bitrate)
+			
+			for soundtrack in soundtracks:
+				self.add_relation_soundtrack_audio(audio_id, soundtrack['id'], soundtrack['exclusive'])
+			
+			for lyric in lyrics:
+				self.add_lyric(lyric['type_id'], audio_id, lyric['language_id'], lyric['title'], lyric['content'], lyric['user_id'])
+			
+			for image in images:
+				self.add_image_to_audio(image['url'], image['extension'], image['name'], audio_id, image['type_id'])
+				
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
 	
-	def add_image_to_soundtrack(self, url, extension, name, edition_id):
-		image_id = add_image(url, extension, name):
-		if(image_id != False):
-			#add relationship
+	"""
+		Method used to register all items related with soundtrack.
+		This method must be used instead other specified methods related with entity.
+		
+		To use this method the types must be already registered on database.
+		The parameters titles must have elements that are dict. 
+	"""	
+	def create_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None,	collections = [], audios = [], images = []):
+		#set commit to false.
+		self.set_auto_transaction(False)
+		
+		try:
+			soundtrack_id = self.add_soundtrack(name, type_id, launch_year, launch_country_id, code)
 			
-			#not add_relation_image
-			
-	############# Figure Methods ###############
+			for collection in collections:
+				self.add_multi_relation(soundtrack_id, collection, 'soundtrack', 'collection', 'integrate')
+				
+			for image in images:
+				self.add_image_to_soundtrack(image['url'], image['extension'], image['name'], audio_id, image['type_id'])
+				
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)	
+				
+	
+	################################# Figure Methods ##############################
 	
 	def create_figure(self, alias = [], ):
 		#same items as create_entity
@@ -2172,7 +2742,9 @@ class Database:
 			
 			#not add_relation_image
 			
-	####### Collaborator methods ##############
+
+			
+	############################## Collaborator methods ###########################
 	
 	def add_collaborator(self, website = None, works = []):
 		
@@ -2278,6 +2850,11 @@ class Database:
 			return self.insert('collaborator_has_collaborator_member', value, columns)
 		return True
 		
+	"""
+		Method used to add a image and associated it with a persona.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""
 	def add_image_to_collaborator(self, url, extension, name, edition_id):
 		image_id = add_image(url, extension, name):
 		if(image_id != False):
@@ -2285,7 +2862,8 @@ class Database:
 			
 			#not add_relation_image
 			
-############# Social Methods ##################
+
+	################################# Social Methods ##############################
 	
 	#insert on social_type table
 	def add_social_type(self, name, website, website_secure = None):
@@ -2338,8 +2916,8 @@ class Database:
 				return False
 		return id
 		
-		
-############################### Localization Methods ###############################
+
+	############################## Localization Methods ###########################
 
 #insert new country or new language
 	def add_localization(self, name, code, type = 'country'):
@@ -2389,7 +2967,8 @@ class Database:
 				return False
 		return id
 		
-	####################### Lists Methods ########################
+		
+	################################## Lists Methods ##############################
 	
 	#insert user lists
 	#used on tables: lists_edition, lists_release, lists_figure
@@ -2474,16 +3053,118 @@ class Database:
 				return self.insert('lists_edition_list_entity_edition', value, columns)
 			return True
 		return False
-
-
-
-	def add_publisher():
-	
-	
-	
-	def add_derivate_work(self, work_id, another_id, type):
-		#insert the derivate work on database.
 		
-	#def add_category():
-	#def add_category():
-	#def add_category():
+		
+		################################ User Methods #################################
+
+	#insert on user table
+	def add_user(self, username, password, gender, location, birthday, signup_date = None, activated = 1, emails = []):
+		id = self.get_var('users', ['id'], "username = '{username}'".format(username))
+		if(id == None):
+			columns = ['username', 'pass', 'gender','location', 'birthday']
+			value = []
+			value.append(username)
+			value.append(password)
+			value.append(gender)
+			value.append(location)
+			value.append(birthday)
+			
+			if(signup_date != None):
+				columns.append('signup_date')
+				value.append(signup_date)
+			if(activated != 1):
+				columns.append('activated')
+				value.append(0)
+			self.insert('users', value, columns)
+			id = self.insert_id
+			if(id == 0):
+				self.programing_message = "Error on user insertion"
+				return False
+		#Register emails
+		not_fail = True
+		for email in emails:
+			not_fail = not_fail and add_user_email(id, email)
+		
+		if(not_fail == False):
+			self.programing_message = "Error on emails insertion"
+			
+		return id
+	
+	def add_user_email(self, user_id, email):
+		id = self.get_var('user_email', ['email'], "email = '{email}'".format(email))
+		if(id == None):
+			columns = ['users_id', 'email']
+			value = []
+			value.append(user_id)
+			value.append(email)
+			self.insert('users', value, columns)
+			#there inst id, how to check if worked?
+			
+			return self.insert_id('user_email', value, columns)
+		return True
+
+	def add_user_filter(self, name, user_id, type_id):
+		id = get_var('user_filter', ['id'], "users_id = {user_id} and name = {name} and user_filter_type_id = {type_id}".format(user_id, name, type_id))
+		if(id == None):
+			columns = ['name','users_id','user_filter_type_id']
+			value = []
+			value.append(name)
+			value.append(user_id)
+			value.append(type_id)
+			
+			self.insert('user_filter', value, columns)
+			id = self.insert_id
+			if(id == 0):
+				return False
+		return id
+		
+	def add_element_to_user_filter(self, filter_id, attribute_id, attribute = 'tag'):
+		id = self.get_var(attribute + '_user_filter', ['user_filter_id'], "user_filter_id = {user_filter_id} and {attribute}_id = {attribute_id}")
+		if(id == None):
+			columns = ['user_filter_id',attribute +'_id']
+			value = []
+			value.append(filter_id)
+			value.append(attribute_id)
+			
+			return self.insert(attribute + '_user_filter', value, columns)
+		return True
+	
+	#only commit after all is run successful.
+	def create_user_filter(self, name, user_id, type_id, elements = [], attribute = 'tag'):
+		id = add_user_filter(name, user_id, type_id)
+		
+		not_fail = True
+		for element in elements:
+			not_fail = not_fail and add_element_to_user_filter(id, element, attribute)
+		if(not_fail == False)
+			self.programing_message = "Error associating some element to user filter"
+		return id
+	
+	def add_comment(self, title, content, user_id, entity_id, type = 'release'):
+		#dont need to check if already exists.
+		columns = [type + '_id', 'users_id', 'content', 'title']
+		value = []
+		value.append(entity_id)
+		value.append(user_id)
+		value.append(content)
+		value.append(title)
+		self.insert(type + '_comments', value, columns)
+		id = self.insert_id
+		if(id == 0):
+			return False
+		return True
+		
+	"""
+		Method used to add a image and associated it with a persona.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+	"""
+	def add_image_to_user(self, url, extension, name, edition_id):
+		image_id = add_image(url, extension, name):
+		if(image_id != False):
+			#add relationship
+			
+			#not add_relation_image
+	
+	
+	################################# Comments Methods ############################
