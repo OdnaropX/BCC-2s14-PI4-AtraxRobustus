@@ -1,16 +1,10 @@
-INSERT INTO shop_location (
-  id
-  name 
-)
-VALUES()
+INSERT INTO shop_location ( id, name) VALUES()
 
+CREATE TABLE audio_channels ( id, name ) VALUES (1, '2')
+CREATE TABLE audio_channels ( id, name ) VALUES (2, '4')
+CREATE TABLE audio_channels ( id, name ) VALUES (2, '6')
+CREATE TABLE audio_channels ( id, name ) VALUES (2, '8')
 
-CREATE TABLE audio_channels (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
 CREATE TABLE image_audio_type ( id, name ) VALUES ()
 
 INSERT INTO scale ( id, name ) VALUES (1, '1/1')
@@ -39,6 +33,9 @@ INSERT INTO material ( id, name ) VALUES(8, 'Silicon')
 INSERT INTO material ( id, name ) VALUES(9, 'Aluminium')
 INSERT INTO material ( id, name ) VALUES(10, 'Lead')
 INSERT INTO material ( id, name ) VALUES(11, 'Magnet')
+INSERT INTO material ( id, name ) VALUES(12, 'Acrylic')
+INSERT INTO material ( id, name ) VALUES(12, 'Stainless Steel')
+INSERT INTO material ( id, name ) VALUES(12, 'Steel')
 
 INSERT INTO audio_codec ( id, name ) VALUES(1, 'AAC', 0)
 INSERT INTO audio_codec ( id, name ) VALUES(2, 'AC3', 0)
@@ -332,6 +329,10 @@ INSERT INTO media_type ( id, name ) VALUES(3,'DVD')
 INSERT INTO media_type ( id, name ) VALUES(4,'DAT TAPE')
 INSERT INTO media_type ( id, name ) VALUES(5,'HD-DVD')
 INSERT INTO media_type ( id, name ) VALUES(6,'BluRay')
+
+INSERT INTO media_type ( id, name ) VALUES(7,'HDTV')
+INSERT INTO media_type ( id, name ) VALUES(8,'SDTV')
+INSERT INTO media_type ( id, name ) VALUES(9,'PDTV')
 
 /* Volume oneshot must have Oneshot on number field */
 INSERT INTO number_type ( id, name) VALUES(1,'Volume')
@@ -1062,6 +1063,20 @@ INSERT INTO collaborator_member_produces_entity_release (
   collaborator_member_type_id
 )
 VALUES()
+
+CREATE TABLE archive_container (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+);
+
+
+CREATE TABLE url_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+);
+
 INSERT INTO entity_edition_has_company (
   company_id
   entity_edition_id
@@ -1205,7 +1220,6 @@ INSERT INTO classification_user_filter (
   classification_id
 )
 VALUES()
-INSERT INTO category_user_filter (
-  user_filter_id
+INSERT INTO category_user_filter (  user_filter_id
   category_id
-) VLAUES
+) VALUES

@@ -227,6 +227,12 @@ CREATE TABLE number_type (
 )
 TYPE=InnoDB;
 
+CREATE TABLE archive_container (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+);
+
 CREATE TABLE alias_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
@@ -334,6 +340,12 @@ CREATE TABLE social_type (
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
+
+CREATE TABLE url_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+);
 
 CREATE TABLE audio_channels (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1199,7 +1211,6 @@ CREATE TABLE archive (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   version_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
-  url VARCHAR NOT NULL,
   size INTEGER UNSIGNED NOT NULL,
   extension VARCHAR NOT NULL,
   PRIMARY KEY(id),
@@ -2756,6 +2767,75 @@ CREATE TABLE user_has_image (
       ON UPDATE NO ACTION,
   FOREIGN KEY(image_user_type_id)
     REFERENCES image_user_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE archive_url (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  url_type_id INTEGER UNSIGNED NOT NULL,
+  archive_id BIGINT UNSIGNED NOT NULL,
+  url VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id),
+  INDEX archive_url_FKIndex1(archive_id),
+  INDEX archive_url_FKIndex2(url_type_id),
+  FOREIGN KEY(archive_id)
+    REFERENCES archive(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(url_type_id)
+    REFERENCES url_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+
+CREATE TABLE video_release (
+  entity_release_id BIGINT UNSIGNED NOT NULL,
+  video_codec_id INTEGER UNSIGNED NOT NULL,
+  archive_container_id INTEGER UNSIGNED NOT NULL,
+  duration VARCHAR NOT NULL,
+  resolution VARCHAR NOT NULL,
+  softsub BOOL NOT NULL,
+  PRIMARY KEY(entity_release_id),
+  INDEX video_release_FKIndex1(entity_release_id),
+  INDEX video_release_FKIndex2(archive_container_id),
+  INDEX video_release_FKIndex3(video_codec_id),
+  FOREIGN KEY(entity_release_id)
+    REFERENCES entity_release(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(archive_container_id)
+    REFERENCES archive_container(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(video_codec_id)
+    REFERENCES video_codec(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE video_release_has_audio_codec (
+  audio_codec_id INTEGER UNSIGNED NOT NULL,
+  video_release_entity_release_id BIGINT UNSIGNED NOT NULL,
+  language_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(audio_codec_id, video_release_entity_release_id, language_id),
+  INDEX audio_codec_has_video_release_FKIndex1(audio_codec_id),
+  INDEX audio_codec_has_video_release_FKIndex2(video_release_entity_release_id),
+  INDEX video_release_has_audio_codec_FKIndex3(language_id),
+  FOREIGN KEY(audio_codec_id)
+    REFERENCES audio_codec(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(video_release_entity_release_id)
+    REFERENCES video_release(entity_release_id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )

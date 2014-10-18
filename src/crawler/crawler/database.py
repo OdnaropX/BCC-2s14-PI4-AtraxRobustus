@@ -411,7 +411,7 @@ class Database:
 	"""
 		Method use to insert a item name on a table that only have id and name as columns.
 		This method can be use to insert name on the follow tables:
-		shop_location, scale, material, ownership_status, tag, category, genre
+		shop_location, scale, material, ownership_status, tag, category, genre, archive_container
 	"""
 	def add_name_to_table(self, name, table):
 		if(name == ""):
@@ -555,34 +555,48 @@ class Database:
 	"""
 		Method used to insert a N:M relationship with attribute type.
 		This method can be use to insert on the follow tables:
-		entity_based_entity, persona_related_persona
+		entity_based_entity, persona_related_persona, video_release_has_audio_codec
 		
-		The only table avaliable on database N:M with type are auto-relationship, but this methods can be used with
+		The only table available on database N:M with type are auto-relationship, but this methods can be used with
 		another table with the same structure, I just didn't create any besides the already mentioned. 
+		The database N:M auto-related table must have another_ as prefix on the second id. 
 		
-		relation_type parameter is the middle name for the table, currenty can be 'related' or 'based'
+		If used for the video_release_has_audio_codec table set use_type_id to false because there isn't a language_type_id only language_id.
+		
+		relation_type parameter is the middle name for the table, current can be 'has', 'related' or 'based'
 	"""
-	def add_relation_with_type(self, first_table, second_table, first_id, second_id, relation_type, relation_type_id):
+	def add_relation_with_type(self, first_table, second_table, first_id, second_id, relation_type, relation_type_id, use_type_id = True):
 		if(first_table == "" or sencod_table == ""):
 			raise ValueError("Table names cannot be empty on add_relation_with_type method")
 		
 		if(relation_type == ""):
 			raise ValueError("Relation type cannot be empty on add_relation_with_type method")
+		
+		#check if there is already a compost key with the given ids.
+		if(first_table != second_table):
+			another = ''
+		else:
+			another = 'another_'
+			
+		if(use_type_id):
+			type = '_type'
+		else:
+			type = ''
 			
 		table = first_table + "_" + relation_type + "_" + second_table
-		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and another_{second_table}_id = {second_id}".format(first_table, first_id, second_table, second_id))
+		
+		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and {another}{second_table}_id = {second_id} and {relation_type}{type}_id = {relation_type_id}".format(first_table, first_id, another, second_table, second_id, relation_type, type, relation_type_id))
 		if(id == None):
-			columns = [first_table + '_id', 'another_' + second_table + '_id', relation_table + '_type_id']
+			columns = [first_table + '_id', another + second_table + '_id', relation_table + type + '_id']
 			value = []
 			value.append(first_id)
 			value.append(second_id)
 			value.append(relation_type_id)
 			
 			if(self.insert(table, value, columns) == False):
-				raise ValueError("An error occurred when trying to insert on add_relation_with_type(%s, %s, %s, %s, %s, %s)." % (first_table, second_table, first_id, second_id, relation_type, relation_type_id))
+				raise ValueError("An error occurred when trying to insert on add_relation_with_type(%s, %s, %s, %s, %s, %s, %s)." % (first_table, second_table, first_id, second_id, relation_type, relation_type_id, use_type_id))
 		return True
-			
-			
+	
 	"""
 		Method used to insert a number with type on the database.
 		This method can be use to insert a number on the follow tables:
@@ -1208,6 +1222,7 @@ class Database:
 			raise ValueError("entity_release_id cannot be empty on add_game_release method.")
 			
 		table = 'game_release'
+		
 		id = get_var(table, ['entity_release_id'], "entity_release_id = {entity_release_id}".format(entity_release_id))
 		
 		if(id == None):
@@ -1239,8 +1254,8 @@ class Database:
 		self.check_id_exists('entity_release', entity_release_id)
 			
 		table = 'mod_release'
-		#check if already is a mod with the same name
-		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id} and name= '{name}' ".format(entity_release_id, name)
+		#check if already is a mod fro this entity
+		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id}".format(entity_release_id)
 		if(id == None):
 			columns = ['entity_release_id', 'mod_type_id', 'name', 'author']
 			value = []
@@ -1265,6 +1280,41 @@ class Database:
 				raise ValueError("There is no last insert id to return on add_mod_release(%s, %s, %s, %s, %s, %s, %s)." % (name, type_id, entity_release_id, author_name, launch_date, description, installation_instruction ))
 		return id
 	
+	"""
+		Method used to insert a video release to the specialization of entity_release table.
+		This method can be used to insert on video_release table. 
+		This method require a entity_release_id to register, if you would like to add a entity_release and a video edition with
+		the same method use create_video_release method instead.
+	"""
+	def add_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution):
+		if(entity_release_id == ""):
+			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
+			
+		#check if entity_release really exists
+		self.check_id_exists('entity_release', entity_release_id)
+		
+		table = 'video_release'
+		#check if already is a video release for this entity
+		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id}".format(entity_release_id)
+		if(id == None):
+			columns = ['entity_release_id', 'video_codec_id', 'archive_container_id', 'duration', 'resolution','softsub']
+			value = []
+			value.append(entity_release_id)
+			value.append(video_codec_id)
+			value.append(container_id)
+			value.append(duration)
+			value.append(resolution)
+			if(resolution):
+				value.append(1)
+			else:
+				value.append(0)
+				
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_video_release(%s, %s, %s, %s, %s, %s)." % ( entity_release_id, duration, video_codec_id, container_id, softsub, resolution ))
+		return id
+		
 	"""
 		Method used to add a number to a release.
 		This method can be used to insert multiples numbers and hierarchies number, 
@@ -1309,19 +1359,7 @@ class Database:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			raise ValueError(e.strerror)
 	
-	"""
-		Method used to add a image and associated it with an mod release.
-		This method implements try except and return boolean, there is need to implement try except on method above because
-		on error a raise will be flagged.
-	"""
-	def add_image_to_mod_release(self, url, extension, name, mod_release_id)
-		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('mod_release', image_id, mod_release_id, image_type_id)
-		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			raise ValueError(e.strerror)
-		
+
 	"""
 		Method used to register all items related with entity release.
 		This method must be used instead other specified methods related with entity release.
@@ -1331,7 +1369,7 @@ class Database:
 		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method. 
 	"""
 	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
-	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], return_method = False):
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = [], return_method = False):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1354,9 +1392,12 @@ class Database:
 			for member in collaborator_members:
 				add_relation_collaborator_release(member['id'], release_id, member['function_type_id'], 'collaborator_member', 'produces')
 			
-			if(return_method == False):
-				#commit changes
-				self.commit()
+			for image in images:
+				self.add_image_to_release(image['url'], image['extension'], image['name'], release_id)
+			
+			
+			#commit changes
+			self.commit()
 			
 			if(return_method):
 				return release_id
@@ -1379,13 +1420,13 @@ class Database:
 	"""
 	def create_game_release(self, entity_id, release_type_id, country_id, entity_edition_id, 
 	installation_instructions = None, emulate = 0, release_date = None, description = None, 
-	numbers = [], languages_id = [], collaborators = [], collaborator_members = []):
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
 		#set commit to false.
 		self.set_auto_transaction(False)
 			
 		try:
 			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
-			numbers, languages_id, collaborators, collaborator_members, True)
+			numbers, languages_id, collaborators, collaborator_members, images, True)
 			self.add_game_release(entity_release_id, installation_instructions, emulate)
 			
 			#commit changes
@@ -1413,11 +1454,10 @@ class Database:
 			
 		try:
 			entity_release_id = self.create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
-			numbers, languages_id, collaborators, collaborator_members, True)
-			mod_id = self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction)
+			numbers, languages_id, collaborators, collaborator_members, images, True)
 			
-			for image in images:
-				self.add_image_to_mod_release(image['url'], image['extension'], image['name'], mod_id)
+			self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction)
+			
 			
 			#commit changes
 			self.commit()
@@ -1429,7 +1469,34 @@ class Database:
 		finally:
 			self.set_auto_transaction(True)
 	
-	
+	"""
+		Method used to create a video release that is a specialization of entity_release.
+		This method as well all other create method will only commit the transaction after all be run successful. 
+	"""
+	def create_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution, audio_codecs = [],
+	entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
+		
+		#set commit to false.
+		self.set_auto_transaction(False)
+			
+		try:
+			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
+			numbers, languages_id, collaborators, collaborator_members, images, True)
+			video_release_id = self.add_video_release(entity_release_id, duration, video_codec_id, container_id, softsub, resolution)
+			
+			for audio_codec in audio_codecs:
+				self.add_relation_with_type('video_release', 'audio_codec', video_release_id, audio_codec['id'], 'has', audio_codec['language_id'], False)
+
+			#commit changes
+			self.commit()
+			return True
+		except ValueError as e:
+			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			self.rollback()
+			return False
+		finally:
+			self.set_auto_transaction(True)
 	
 	################################ Persona methods ##############################
 	
@@ -2142,15 +2209,12 @@ class Database:
 		Method used to insert a archive associated with a version
 		This method check if version_id really exists prior to insert on table.
 	"""
-	def add_archive(self, name, version_id, url, size, extension):
+	def add_archive(self, name, version_id, size, extension):
 		if(version_id == ""):
 			raise ValueError("version_id cannot be empty on add_archive method.")
 			
 		if(name == ""):
 			raise ValueError("Name cannot be empty on add_archive method.")
-			
-		if(url == ""):
-			raise ValueError("url cannot be empty on add_archive method.")
 			
 		if(size == ""):
 			raise ValueError("size cannot be empty on add_archive method.")
@@ -2162,13 +2226,12 @@ class Database:
 		
 		table = 'archive'
 		
-		id = self.get_var(table, ['id'], "name = '{name}' and url = '{url}' and version_id= {version_id}".format(name, url,version_id))
+		id = self.get_var(table, ['id'], "name = '{name}' and extension = '{extension}' and version_id= {version_id}".format(name, extension,version_id))
 		if(id == None):
-			columns = ['name', 'version_id', 'url', 'size', 'extension']
+			columns = ['name', 'version_id', 'size', 'extension']
 			value = []
 			value.append(name)
 			value.append(version_id)
-			value.append(url)
 			value.append(size)
 			value.append(extension)
 			
@@ -2179,6 +2242,39 @@ class Database:
 				raise ValueError("There is no last insert id to return on add_archive(%s, %s, %s, %s, %s)." % (name, version_id, url, size, extension))
 		return id
 	
+	"""
+		Method used to insert a url associated with a archive
+		This method check if archive_id really exists prior to insert on table.
+	"""
+	def add_url_archive(self, archive_id, url, url_type_id):
+		if(archive_id == ""):
+			raise ValueError("archive_id cannot be empty on add_archive method.")
+			
+		if(url == ""):
+			raise ValueError("URL cannot be empty on add_archive method.")
+			
+		if(url_type_id == ""):
+			raise ValueError("url_type_id cannot be empty on add_archive method.")
+			
+		self.check_id_exists('archive', archive_id)
+		
+		table = 'archive_url'
+		id = self.get_var(table, ['id'], "url = '{url}'".format(url))
+		if(id == None):
+			columns = ['url_type_id', 'archive_id', 'url']
+			value = []
+			value.append(url_type_id)
+			value.append(archive_id)
+			value.append(url)
+			
+			self.insert(table, value, columns)
+			
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_url_archive(%s, %s, %s)." % (archive_id, url, url_type_id))
+		return id
+		
+		
 	"""
 		Method used to insert a hash associated with a archive
 		This method check if archive_id really exists prior to insert on table.
@@ -2244,18 +2340,21 @@ class Database:
 		
 	"""
 		Method used to insert a archive and the related hash.
-		The parameter hashes must have elements that are dictionary. 
+		The parameter hashes and urls must have elements that are dictionary. 
 	"""		
-	def create_archive(self, name, version_id, url, size, extension, hashes = []):
+	def create_archive(self, name, version_id, size, extension, hashes = [], urls = []):
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			archive_id = add_archive(name, version_id, url, size, extension)
+			archive_id = self.add_archive(name, version_id, url, size, extension)
 			
 			for hash in hashes:
-				add_hash(self, hash['type_id'], archive_id, hash['code'])
+				self.add_hash(self, hash['type_id'], archive_id, hash['code'])
 	
+			for url in urls:
+				self.add_url_archive(archive_id, url['url'], url['type_id'])
+				
 			#commit changes
 			self.commit()
 			return True
