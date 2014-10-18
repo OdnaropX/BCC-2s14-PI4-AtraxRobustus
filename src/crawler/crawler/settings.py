@@ -15,12 +15,12 @@ NEWSPIDER_MODULE = 'crawler.spiders'
 LOG_FILE = 'logs.txt'
 
 DBNAME = 'crawler'
-DBUSERNAME = 'postgres'
-DBPASSWORD = ''
+DBUSERNAME = 'teste'
+DBPASSWORD = '123456'
 DBHOST = 'localhost'
 DBPORT = '5432'
-MUUSERNAME = ''
-MUPASSWORD = ''
+MUUSERNAME = 'Teste2352'
+MUPASSWORD = '=QWZ;=w)WZ;=w)@!)G'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler (+http://www.yourdomain.com)'
