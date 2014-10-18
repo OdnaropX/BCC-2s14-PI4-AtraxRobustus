@@ -1,4 +1,5 @@
 import psycopg2
+import warnings
 
 """
 	Class for connection and manipulation of database.
@@ -31,6 +32,11 @@ class Database:
 		Set the transaction option. Set False to not commit and roll-back automatic when query is call.   
 	"""
 	auto_transaction = True
+	"""
+		Set the amount of times that the auto_transaction was called.
+	"""
+	auto_transaction_call = 0
+	
 	
 	#variable to table loaded from database
 	type_alias = None
@@ -60,12 +66,21 @@ class Database:
 	"""
 		Method to set the auto transaction option status]
 	"""
-	def set_auto_transaction(self, auto = False):
-		if(auto != False and auto != True):
-			raise ValueError("Variable auto must have a boolean value. The value give was: %s" % (auto))
+	def set_auto_transaction(self, auto):
+		if(self.auto_transaction_call == 0):
+			if(auto == True):
+				self.auto_transaction = True
+			else:
+				self.auto_transaction = False
 			
-		self.auto_transaction = auto
-		
+		if(auto == False):
+			self.auto_transaction_call += 1 
+		else:
+			self.auto_transaction_call -= 1
+
+		if(self.auto_transaction_call < 0 ):
+			warnings.warn("Warning: auto_transaction_call is less than 0. You must have called set_auto_transaction(True) more than set_auto_transaction(False) and on your code. You must call the same amount to both.")
+			
 	"""
 		Method to set the default data on internal variables.
 		Basically destroy the date on the items. 
@@ -91,16 +106,20 @@ class Database:
 		self.status_message = "Programing error. No DB error."
 
 	"""
-		Method used to commit a transaction
+		Method used to commit a transaction.
+		The transaction will only be committed when was called on first runtime stack.
 	"""
 	def commit(self):
-		self.conn.commit()
+		if(self.auto_transaction_call < 2):
+			self.conn.commit()
 		
 	"""
 		Method used to roll-back a transaction
+		The transaction will only be roll-back when was called on first runtime stack.
 	"""
 	def rollback(self):
-		self.conn.rollback()
+		if(self.auto_transaction_call < 2):
+			self.conn.rollback()
 	
 	"""
 		Method responsible for connect with the database.
@@ -770,9 +789,7 @@ class Database:
 			raise ValueError("Name cannot be empty on create_entity method.")
 		
 		#set commit to false.
-		if(return_method == False):
-			#set commit to false.
-			self.set_auto_transaction(False)
+		self.set_auto_transaction(False)
 		
 		try:
 			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started)
@@ -812,9 +829,8 @@ class Database:
 			for company in companies:
 				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
 			
-			if(return_method == False):
-				#commit changes
-				self.commit()
+			#commit changes
+			self.commit()
 			
 			if(return_method):
 				return entity_id
@@ -822,8 +838,7 @@ class Database:
 			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			if(return_method == False):
-				self.rollback()
+			self.rollback()
 			
 			if(return_method):
 				raise ValueError("return id is equal to 0 on create_entity method. Some error must have occurred.")
@@ -831,7 +846,6 @@ class Database:
 			return False
 		finally:
 			self.set_auto_transaction(True)
-	
 	
 	############################### Edition Methods ###############################
 	
@@ -1037,9 +1051,8 @@ class Database:
 	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None,
 	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = [], return_method = False):
 
-		if(return_method == False):
-			#set commit to false.
-			self.set_auto_transaction(False)
+		#set commit to false.
+		self.set_auto_transaction(False)
 		
 		try:
 			table = 'entity_edition'
@@ -1065,9 +1078,8 @@ class Database:
 			for image in images:
 				self.add_image_to_edition(image['url'], image['extension'], image['name'], edition_id, image['type_id'])
 
-			if(return_method == False):
-				#commit changes
-				self.commit()
+			#commit changes
+			self.commit()
 			
 			if(return_method):
 				return edition_id
@@ -1075,9 +1087,7 @@ class Database:
 			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			
-			if(return_method == False):
-				self.rollback()
+			self.rollback()
 			
 			if(return_method):
 				raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
@@ -1354,9 +1364,7 @@ class Database:
 			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			
-			if(return_method == False):
-				self.rollback()
+			self.rollback()
 			
 			if(return_method):
 				raise ValueError("return id is equal to 0 on create_release method. Some error must have occurred.")
@@ -2247,6 +2255,7 @@ class Database:
 			
 			for hash in hashes:
 				add_hash(self, hash['type_id'], archive_id, hash['code'])
+	
 			#commit changes
 			self.commit()
 			return True
@@ -2447,7 +2456,6 @@ class Database:
 		This method can be used to insert on lyric table.
 		
 		The lyric_type_id must be previously registered on database.
-		
 	"""
 	def add_lyric(self, lyric_type_id, audio_id, language_id, title, content, user_id = None):
 		if(soundtrack_id == ""):
@@ -3255,19 +3263,17 @@ class Database:
 		
 		To use this method the types must be already registered on database. 
 	"""
-	def create_social(self, social_type_id, url, relation_table, second_id, last_checked = None, return_method = False):
+	def create_social(self, social_type_id, url, relation_table, second_id, last_checked = None, return_method = False):	
 		
-		if(return_method == False):
-			#set commit to false.
-			self.set_auto_transaction(False)
+		#set commit to false.
+		self.set_auto_transaction(False)
 			
 		try:
 			social_id = self.add_social(self, social_type_id, url)
 			self.add_relation_social(relation_table, social_id, second_id, last_checked)
 			
-			if(return_method == False):
-				#commit changes
-				self.commit()
+			#commit changes
+			self.commit()
 			
 			if(return_method):
 				return social_id
@@ -3275,9 +3281,7 @@ class Database:
 			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			
-			if(return_method == False):
-				self.rollback()
+			self.rollback()
 			
 			if(return_method):
 				raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
@@ -3688,10 +3692,9 @@ class Database:
 		The parameters elements must have elements that are dictionary. 
 	"""
 	def create_user_filter(self, name, user_id, type_id, elements = [], return_method = False):
-		
-		if(return_method == False):
-			#set commit to false.
-			self.set_auto_transaction(False)
+
+		#set commit to false.
+		self.set_auto_transaction(False)
 		
 		try:
 			user_filter_id = self.add_user_filter(name, user_id, type_id)
@@ -3699,9 +3702,8 @@ class Database:
 			for element in elements:
 				self.add_element_to_user_filter(user_filter_id, element['id'], element['attribute'])
 			
-			if(return_method == False):
-				#commit changes
-				self.commit()
+			#commit changes
+			self.commit()
 			
 			if(return_method):
 				return user_filter_id
@@ -3709,9 +3711,7 @@ class Database:
 			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
-			
-			if(return_method == False):
-				self.rollback()
+			self.rollback()
 			
 			if(return_method):
 				raise ValueError("return id is equal to 0 on create_user_filter method. Some error must have occurred.")
