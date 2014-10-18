@@ -95,7 +95,7 @@ CREATE TABLE image_entity_edition_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE image_figure_type (
+CREATE TABLE image_goods_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
   PRIMARY KEY(id)
@@ -485,13 +485,13 @@ CREATE TABLE collection (
 )
 TYPE=InnoDB;
 
-CREATE TABLE lists_figure (
+CREATE TABLE lists_goods (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NULL,
   create_date DATETIME NULL DEFAULT now(),
   PRIMARY KEY(id),
-  INDEX lists_figure_FKIndex1(user_id),
+  INDEX lists_goods_FKIndex1(user_id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
@@ -1581,7 +1581,7 @@ CREATE TABLE people_produces_entity (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure (
+CREATE TABLE goods (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   entity_id BIGINT UNSIGNED NOT NULL,
   figure_version_id INTEGER UNSIGNED NOT NULL,
@@ -1595,11 +1595,11 @@ CREATE TABLE figure (
   release_date DATE NOT NULL,
   observation TEXT NULL,
   PRIMARY KEY(id),
-  INDEX figure_FKIndex2(country_id),
-  INDEX figure_FKIndex3(scale_id),
-  INDEX figure_FKIndex4(currency_id),
-  INDEX figure_FKIndex5(figure_version_id),
-  INDEX figure_FKIndex5(entity_id),
+  INDEX goods_FKIndex2(country_id),
+  INDEX goods_FKIndex3(scale_id),
+  INDEX goods_FKIndex4(currency_id),
+  INDEX goods_FKIndex5(figure_version_id),
+  INDEX goods_FKIndex5(entity_id),
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE NO ACTION
@@ -1659,25 +1659,25 @@ CREATE TABLE lists_edition_list_entity_edition (
 )
 TYPE=InnoDB;
 
-CREATE TABLE lists_figure_list_figure (
-  lists_figure_id INTEGER UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
+CREATE TABLE lists_goods_list_goods (
+  lists_goods_id INTEGER UNSIGNED NOT NULL,
+  goods_id BIGINT UNSIGNED NOT NULL,
   ownership_status_id INTEGER UNSIGNED NOT NULL,
   box_condition_type_id INTEGER UNSIGNED NOT NULL,
   product_condition_type_id INTEGER UNSIGNED NOT NULL,
   observation TEXT NULL,
-  PRIMARY KEY(lists_figure_id, figure_id),
-  INDEX lists_figure_has_figure_FKIndex1(lists_figure_id),
-  INDEX lists_figure_has_figure_FKIndex2(figure_id),
-  INDEX lists_figure_list_figure_FKIndex3(product_condition_type_id),
-  INDEX lists_figure_list_figure_FKIndex4(box_condition_type_id),
-  INDEX lists_figure_list_figure_FKIndex5(ownership_status_id),
-  FOREIGN KEY(lists_figure_id)
-    REFERENCES lists_figure(id)
+  PRIMARY KEY(lists_goods_id, goods_id),
+  INDEX lists_goods_has_goods_FKIndex1(lists_goods_id),
+  INDEX lists_goods_has_goods_FKIndex2(goods_id),
+  INDEX lists_goods_list_goods_FKIndex3(product_condition_type_id),
+  INDEX lists_goods_list_goods_FKIndex4(box_condition_type_id),
+  INDEX lists_goods_list_goods_FKIndex5(ownership_status_id),
+  FOREIGN KEY(lists_goods_id)
+    REFERENCES lists_goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(product_condition_type_id)
@@ -1909,14 +1909,14 @@ CREATE TABLE entity_edition_has_currency (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_from_persona (
-  figure_id BIGINT UNSIGNED NOT NULL,
+CREATE TABLE goods_from_persona (
+  goods_id BIGINT UNSIGNED NOT NULL,
   persona_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(figure_id, persona_id),
-  INDEX figure_has_persona_FKIndex1(figure_id),
-  INDEX figure_has_persona_FKIndex2(persona_id),
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  PRIMARY KEY(goods_id, persona_id),
+  INDEX goods_has_persona_FKIndex1(goods_id),
+  INDEX goods_has_persona_FKIndex2(persona_id),
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(persona_id)
@@ -1926,18 +1926,18 @@ CREATE TABLE figure_from_persona (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_category (
+CREATE TABLE goods_has_category (
   category_id INTEGER UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY(category_id, figure_id),
-  INDEX category_has_figure_FKIndex1(category_id),
-  INDEX category_has_figure_FKIndex2(figure_id),
+  goods_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(category_id, goods_id),
+  INDEX category_has_goods_FKIndex1(category_id),
+  INDEX category_has_goods_FKIndex2(goods_id),
   FOREIGN KEY(category_id)
     REFERENCES category(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1977,14 +1977,14 @@ CREATE TABLE entity_release_has_language (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_material (
-  figure_id BIGINT UNSIGNED NOT NULL,
+CREATE TABLE goods_has_material (
+  goods_id BIGINT UNSIGNED NOT NULL,
   material_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(figure_id, material_id),
-  INDEX figure_has_material_FKIndex1(figure_id),
-  INDEX figure_has_material_FKIndex2(material_id),
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  PRIMARY KEY(goods_id, material_id),
+  INDEX goods_has_material_FKIndex1(goods_id),
+  INDEX goods_has_material_FKIndex2(material_id),
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(material_id)
@@ -2019,14 +2019,14 @@ CREATE TABLE mod_release (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_shop_location (
-  figure_id BIGINT UNSIGNED NOT NULL,
+CREATE TABLE goods_has_shop_location (
+  goods_id BIGINT UNSIGNED NOT NULL,
   shop_location_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(figure_id, shop_location_id),
-  INDEX figure_has_shop_location_FKIndex1(figure_id),
-  INDEX figure_has_shop_location_FKIndex2(shop_location_id),
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  PRIMARY KEY(goods_id, shop_location_id),
+  INDEX goods_has_shop_location_FKIndex1(goods_id),
+  INDEX goods_has_shop_location_FKIndex2(shop_location_id),
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(shop_location_id)
@@ -2036,33 +2036,33 @@ CREATE TABLE figure_has_shop_location (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_tag (
+CREATE TABLE goods_has_tag (
   tag_id INTEGER UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY(tag_id, figure_id),
-  INDEX tag_has_figure_FKIndex1(tag_id),
-  INDEX tag_has_figure_FKIndex2(figure_id),
+  goods_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(tag_id, goods_id),
+  INDEX tag_has_goods_FKIndex1(tag_id),
+  INDEX tag_has_goods_FKIndex2(goods_id),
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_shops (
-  figure_id BIGINT UNSIGNED NOT NULL,
+CREATE TABLE goods_has_shops (
+  goods_id BIGINT UNSIGNED NOT NULL,
   shops_id INTEGER UNSIGNED NOT NULL,
   product_url VARCHAR NOT NULL,
   checked_last DATETIME NOT NULL DEFAULT now(),
-  PRIMARY KEY(figure_id, shops_id),
-  INDEX figure_has_shops_FKIndex1(figure_id),
-  INDEX figure_has_shops_FKIndex2(shops_id),
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  PRIMARY KEY(goods_id, shops_id),
+  INDEX goods_has_shops_FKIndex1(goods_id),
+  INDEX goods_has_shops_FKIndex2(shops_id),
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(shops_id)
@@ -2163,7 +2163,7 @@ CREATE TABLE entity_has_company (
   entity_id BIGINT UNSIGNED NOT NULL,
   company_function_type_id INTEGER UNSIGNED NOT NULL,
   PRIMARY KEY(company_id, entity_id, company_function_type_id),
-  INDEX company_has_figure_FKIndex1(company_id),
+  INDEX company_has_goods_FKIndex1(company_id),
   INDEX entity_has_company_FKIndex3(company_function_type_id),
   INDEX entity_has_company_FKIndex3(entity_id),
   FOREIGN KEY(company_id)
@@ -2181,24 +2181,24 @@ CREATE TABLE entity_has_company (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_image (
+CREATE TABLE goods_has_image (
   image_id BIGINT UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
-  image_figure_type_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(image_id, figure_id),
-  INDEX image_has_figure_FKIndex1(image_id),
-  INDEX image_has_figure_FKIndex2(figure_id),
-  INDEX image_has_figure_FKIndex3(image_figure_type_id),
+  goods_id BIGINT UNSIGNED NOT NULL,
+  image_goods_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(image_id, goods_id),
+  INDEX image_has_goods_FKIndex1(image_id),
+  INDEX image_has_goods_FKIndex2(goods_id),
+  INDEX image_has_goods_FKIndex3(image_goods_type_id),
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(image_figure_type_id)
-    REFERENCES image_figure_type(id)
+  FOREIGN KEY(image_goods_type_id)
+    REFERENCES image_goods_type(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -2301,22 +2301,22 @@ CREATE TABLE lists_release_list_entity_release (
 )
 TYPE=InnoDB;
 
-CREATE TABLE people_produces_figure (
+CREATE TABLE people_produces_goods (
   people_id BIGINT UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
+  goods_id BIGINT UNSIGNED NOT NULL,
   people_alias_id INTEGER UNSIGNED NOT NULL,
   create_type_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(people_id, figure_id),
-  INDEX people_produces_figure_FKIndex1(people_id),
-  INDEX people_produces_figure_FKIndex2(figure_id),
-  INDEX people_produces_figure_FKIndex3(create_type_id),
-  INDEX people_produces_figure_FKIndex4(people_alias_id),
+  PRIMARY KEY(people_id, goods_id),
+  INDEX people_produces_goods_FKIndex1(people_id),
+  INDEX people_produces_goods_FKIndex2(goods_id),
+  INDEX people_produces_goods_FKIndex3(create_type_id),
+  INDEX people_produces_goods_FKIndex4(people_alias_id),
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(create_type_id)
@@ -2418,23 +2418,23 @@ CREATE TABLE people_comments (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_comments (
+CREATE TABLE goods_comments (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  figure_id BIGINT UNSIGNED NOT NULL,
+  goods_id BIGINT UNSIGNED NOT NULL,
   users_id INTEGER UNSIGNED NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
   create_date DATETIME NOT NULL DEFAULT now(),
   update_date DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
-  INDEX figure_comments_FKIndex1(users_id),
-  INDEX figure_comments_FKIndex2(figure_id),
+  INDEX goods_comments_FKIndex1(users_id),
+  INDEX goods_comments_FKIndex2(goods_id),
   FOREIGN KEY(users_id)
     REFERENCES users(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )

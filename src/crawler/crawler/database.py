@@ -383,7 +383,7 @@ class Database:
 	"""
 		Method used to insert a item name on a table type.
 		This method can be use to insert name on the follow tables:
-		hash_type, release_read_status_type, release_type, software_type, edition_type, image_edition_type, image_figure_type,
+		hash_type, release_read_status_type, release_type, software_type, edition_type, image_edition_type, image_goods_type,
 		produces_type, create_type, product_condition_type, figure_version, plataform_type, print_type, genre_type, related_type, 
 		release_ownership_type, entity_type, filter_type, edition_read_status_type, function_type,condition_type, classification_type,
 		collaborator_type, media_type, number_type, alias_type, mod_type, blood_type, box_condition_type, based_type, stage_developer_type,
@@ -489,7 +489,7 @@ class Database:
 	"""
 		Method used to insert a relationship for images that have a certain type.
 		This method can be use to insert name on the follow tables:
-		entity_edition_has_image, figure_has_image, soundtrack_has_image, audio_has_image, collaborator_has_image
+		entity_edition_has_image, goods_has_image, soundtrack_has_image, audio_has_image, collaborator_has_image
 		
 		For people_has_image table use the add_multi_relation method.
 		The methods add_image_to_ already uses the appropriate relation method 
@@ -518,8 +518,8 @@ class Database:
 		This method can be use to insert on the follow tables:
 		country_has_language, soundtrack_integrate_collection, category_has_filter_type, tag_has_filter_type,audio_has_language, company_sponsors_event,
 		company_owner_collection, company_has_country, people_has_image, genre_type_has_audio, entity_has_category, entity_has_tag, 
-		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, figure_from_persona, figure_has_category,
-		entity_release_has_version, entity_release_has_language, figure_has_material, figure_has_shop_location, figure_has_tag, mod_release_has_image,
+		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, goods_from_persona, goods_has_category,
+		entity_release_has_version, entity_release_has_language, goods_has_material, goods_has_shop_location, goods_has_tag, mod_release_has_image,
 		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
 		genre_has_filter_type, persona_has_image, requirements_has_driver
 		
@@ -1659,7 +1659,7 @@ class Database:
 		To add a relationship the other persona id on relationship must be already registered on database.
 	"""
 	def create_persona(self, name, gender, birthday = None, blood_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
-	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], figures = [], voices_actor = [], entities_appear_on = [],
+	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
 	relationship = [], images = []):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on create_persona method.")
@@ -1701,8 +1701,8 @@ class Database:
 			for affiliation in affiliations:
 				self.add_persona_items(affiliation, persona_id, 'affiliation')
 				
-			for figure in figures:
-				self.add_multi_relation(figure['id'], persona_id, 'figure', 'persona', 'from')
+			for good in goods:
+				self.add_multi_relation(good['id'], persona_id, 'goods', 'persona', 'from')
 				
 			for image in images:
 				self.add_image_to_persona(image['url'], image['extension'], image['name'], persona_id)
@@ -1903,7 +1903,7 @@ class Database:
 	"""
 		Method used to insert a relation with people on database.
 		This method can be use to insert a relation on the follow tables:
-		people_create_figure, people_produces_entity, people_compose_audio
+		people_create_goods, people_produces_entity, people_compose_audio
 	
 	"""
 	def add_relation_people(self, people_id, people_alias_used_id, second_id, relation_table, relation_type_id, relation_type = 'produces'):
@@ -2099,11 +2099,11 @@ class Database:
 		This method must be used instead other specified methods related with entity.
 		
 		To use this method the types must be already registered on database.
-		The parameters alias, nicknames, figures,entities_produced and audios_composed must have elements that are dictionary. 
+		The parameters alias, nicknames, goods,entities_produced and audios_composed must have elements that are dictionary. 
 	"""
 	def create_people(self, name, lastname,
 	country_id, blood_type_id = None, website = None, description = None,
-	aliases = [], nicknames = [], figures = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
+	aliases = [], nicknames = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on create_people method.")
 			
@@ -2124,8 +2124,8 @@ class Database:
 			for nick in nicknames:
 				self.add_people_alias(nick['name'], nick['lastname'], people_id, self.alias_type_nickname)
 			
-			for figure in figures:
-				self.add_relation_people(people_id, figure['people_alias_used_id'], figure['id'], 'figure', figure['people_relation_type_id'], 'create')
+			for good in goods:
+				self.add_relation_people(people_id, good['people_alias_used_id'], good['id'], 'goods', good['people_relation_type_id'], 'create')
 
 			for entity in entities_produced:
 				self.add_relation_people(people_id, entity['people_alias_used_id'], entity['id'], 'entity', entity['people_relation_type_id'])
@@ -2744,23 +2744,23 @@ class Database:
 	
 		
 	"""
-		Method used to insert a figure on database. This method don't insert any related item to a audio like soundtracks.
-		This method can be used to insert on figure table. Figure is specialization from entity.
+		Method used to insert a goods on database. This method don't insert any related item to a audio like soundtracks.
+		This method can be used to insert on goods table. Figure is specialization from entity.
 		
 	"""
-	def add_figure(self, entity_id, figure_version_id, currency_id, scale_id, country_id, height, launch_price, release_date, width = None, weight = None, observation = None):
+	def add_goods(self, entity_id, goods_version_id, currency_id, scale_id, country_id, height, launch_price, release_date, width = None, weight = None, observation = None):
 		if(entity_id == ""):
-			raise ValueError("entity_id cannot be empty on add_figure method.")
+			raise ValueError("entity_id cannot be empty on add_goods method.")
 		
 		self.check_id_exists('entity', entity_id)
 		
-		table = 'figure'
+		table = 'goods'
 		id = self.get_var(table, ['id'], "entity_id = {entity_id}".format(entity_id))
 		if(id == None):
-			columns = ['entity_id', 'figure_version_id', 'currency_id', 'scale_id','country_id','height','launch_price','release_date']
+			columns = ['entity_id', 'goods_version_id', 'currency_id', 'scale_id','country_id','height','launch_price','release_date']
 			value = []
 			value.append(entity_id)
-			value.append(figure_version_id)
+			value.append(goods_version_id)
 			value.append(currency_id)
 			value.append(scale_id)
 			value.append(country_id)
@@ -2781,46 +2781,46 @@ class Database:
 			
 			id = self.get_last_insert_id(table)
 			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_figure(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_id, figure_version_id, currency_id, scale_id, country_id, height, launch_price, release_date, width, weight, observation))
+				raise ValueError("There is no last insert id to return on add_goods(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_id, goods_version_id, currency_id, scale_id, country_id, height, launch_price, release_date, width, weight, observation))
 		return id
 		
 	"""
-		Method used to add a relationship between figure and shops table.
+		Method used to add a relationship between goods and shops table.
 		This method will insert data on the follow tables:
-		figure_has_shops
+		goods_has_shops
 
 	"""
-	def add_figure_relation_shops(self, figure_id, shop_id, product_url):
-		if(figure_id == ""):
-			raise ValueError("figure_id cannot be empty on add_figure method.")
+	def add_goods_relation_shops(self, goods_id, shop_id, product_url):
+		if(goods_id == ""):
+			raise ValueError("goods_id cannot be empty on add_goods method.")
 		
 		if(shop_id == ""):
-			raise ValueError("shop_id cannot be empty on add_figure method.")
+			raise ValueError("shop_id cannot be empty on add_goods method.")
 		
-		self.check_id_exists('figure', figure_id)
+		self.check_id_exists('goods', goods_id)
 		
-		table = 'figure_has_shops'
+		table = 'goods_has_shops'
 		#if already is registered on database update the checked_last
-		id = self.get_var(table, ['social_id'], "figure_id = {figure_id} and shops_id = {shop_id} and product_url = {product_url}".format(figure_id, shop_id, product_url))
+		id = self.get_var(table, ['social_id'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id, shop_id, product_url))
 		if(id == None):
-			columns = ['figure_id', 'shops_id', 'product_url']
+			columns = ['goods_id', 'shops_id', 'product_url']
 			value = []
-			value.append(figure_id)
+			value.append(goods_id)
 			value.append(shop_id)
 			value.append(product_url)
 			
 			if(self.insert(table, value, columns) == False):
-				raise ValueError("There is no last insert id to return on add_figure_relation_shops(%s, %s, %s)." % (figure_id, shop_id, product_url))
+				raise ValueError("There is no last insert id to return on add_goods_relation_shops(%s, %s, %s)." % (goods_id, shop_id, product_url))
 			return True
 		#else update last checked.
 		else:
-			if(self.update(table, ['now()'], ['checked_last'], "figure_id = {figure_id} and shops_id = {shop_id} and product_url = {product_url}".format(figure_id, shop_id, product_url)) == False):
-				raise ValueError("An error occurred while trying to update last_checked on add_figure_relation_shops(%s, %s, %s)." % (figure_id, shop_id, product_url))
+			if(self.update(table, ['now()'], ['checked_last'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id, shop_id, product_url)) == False):
+				raise ValueError("An error occurred while trying to update last_checked on add_goods_relation_shops(%s, %s, %s)." % (goods_id, shop_id, product_url))
 			return True
 	
 	"""
 		Method used to insert a shop on the database. 
-		This method not insert anything related with the shop like figures associated.
+		This method not insert anything related with the shop like goodss associated.
 	"""
 	def add_shops(self, name, url = None):
 		if(name == ""):
@@ -2849,14 +2849,14 @@ class Database:
 	
 	
 	"""
-		Method used to add a image and associated it with an figure.
+		Method used to add a image and associated it with an goods.
 		This method implements try except and return boolean, there is need to implement try except on method above because
 		on error a raise will be flagged.
 	"""	
-	def add_image_to_figure(self, url, extension, name, figure_id, image_type_id):
+	def add_image_to_goods(self, url, extension, name, goods_id, image_type_id):
 		try:
 			image_id = add_image(url, extension, name)
-			return add_relation_image('figure', image_id, figure_id, image_type_id)
+			return add_relation_image('goods', image_id, goods_id, image_type_id)
 			
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
@@ -2868,17 +2868,17 @@ class Database:
 		This method must be used instead other specified methods related with shops.
 		
 		To use this method the types must be already registered on database.
-		The parameters figures must have elements that are dictionary. 
+		The parameters goodss must have elements that are dictionary. 
 	"""
-	def create_shops(self, name, url = None, figures = []):
+	def create_shops(self, name, url = None, goodss = []):
 	
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
 			shop_id = self.add_shops(self, name, url)
-			for figure in figures:
-				self.add_figure_relation_shops(figure['id'], shop_id, figure['product_url'])
+			for goods in goodss:
+				self.add_goods_relation_shops(goods['id'], shop_id, goods['product_url'])
 			
 			#commit changes
 			self.commit()
@@ -2895,9 +2895,9 @@ class Database:
 		This method must be used instead other specified methods related with shops.
 		
 		To use this method the types must be already registered on database.
-		The parameters figures must have elements that are dictionary. 
+		The parameters goodss must have elements that are dictionary. 
 	"""
-	def create_figure(self, 
+	def create_goods(self, 
 	romanize_title, romanize_subtitle = None, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
 	titles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [],
 	alias = [], ):
@@ -2909,14 +2909,14 @@ class Database:
 			entity_id = self.create_entity(romanize_title, romanize_subtitle, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started, 
 			titles = [], [], synopsis = [], wiki, descriptions, categories, tags, personas = [], companies = [], True):
 			
-			figure_id = 
+			goods_id = 
 			
-			#Change how it work, entity and figure must be two separated things.
+			#Change how it work, entity and goods must be two separated things.
 			
 		#same items as create_entity
 		self.create_entity()
 		
-		#register figure shop
+		#register goods shop
 		
 		#register scale
 		
@@ -2924,11 +2924,11 @@ class Database:
 		
 		#register currency
 		
-		#figure version
+		#goods version
 		
 		#register entity_id
 		
-		#figure persona
+		#goods persona
 		
 		#company
 		
@@ -2938,7 +2938,7 @@ class Database:
 		#currency
 		#country
 		
-		#figure images
+		#goods images
 		#category
 		#tags
 		
@@ -2950,7 +2950,7 @@ class Database:
 		
 	"""
 		Method used to insert a event on database.
-		This method don't insert anything related with the event like edition launches or figure launch.
+		This method don't insert anything related with the event like edition launches or goods launch.
 	"""
 	def add_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0):
 		if(name == ""):
@@ -3487,7 +3487,7 @@ class Database:
 	"""
 		Method used to insert data on lists from users.
 		This method can be used for the follow tables:
-		lists_edition, lists_release, lists_figure
+		lists_edition, lists_release, lists_goods
 	
 	"""
 	def add_list(self, name, user_id, type = 'edition', entity_type_id = 0):
@@ -3500,7 +3500,7 @@ class Database:
 		self.check_id_exists('users', user_id)
 		
 		#check if already is a lists with this name
-		if(type == 'figure'):
+		if(type == 'goods'):
 			where =  "user_id = {user_id} and name = '{name}'".format(user_id,name)
 		else:
 			where =  "user_id = {user_id} and name = '{name}' and entity_type_id = {entity_type_id}".format(user_id, name, entity_type_id)
@@ -3513,7 +3513,7 @@ class Database:
 			value.append(user_id)
 			value.append(name)
 			
-			if(type != 'figure'):
+			if(type != 'goods'):
 				columns.append('entity_type_id')
 				value.append(entity_type_id)
 			self.insert(table, value, columns)
@@ -3561,12 +3561,12 @@ class Database:
 		return True
 
 	"""
-		Method used to add a figure to a list by the user.
-		This method can be used to insert on lists_figure_list_figure table.
+		Method used to add a goods to a list by the user.
+		This method can be used to insert on lists_goods_list_goods table.
 	"""
-	def add_figure_to_list(self, list_id, figure_id, ownership_status_id, box_condition_type_id, product_condition_type_id, observation = None):
-		if(figure_id == ""):
-			raise ValueError("figure_id cannot be empty on add_release_to_list method.")
+	def add_goods_to_list(self, list_id, goods_id, ownership_status_id, box_condition_type_id, product_condition_type_id, observation = None):
+		if(goods_id == ""):
+			raise ValueError("goods_id cannot be empty on add_release_to_list method.")
 		
 		if(list_id == ""):
 			raise ValueError("list_id cannot be empty on add_release_to_list method.")
@@ -3582,11 +3582,11 @@ class Database:
 		
 		self.check_id_exists('lists_release', list_id)
 		
-		table = 'lists_figure_list_figure'
+		table = 'lists_goods_list_goods'
 		
 		id = self.get_var(table, ['lists_release_id'], "lists_release_id = {list_id} and entity_release_id = {entity_id}".format(list_id, entity_id))
 		if(id == None):
-			columns = ['lists_figure_id', 'figure_id', 'ownership_status_id', 'box_condition_type_id', 'product_condition_type_id']
+			columns = ['lists_goods_id', 'goods_id', 'ownership_status_id', 'box_condition_type_id', 'product_condition_type_id']
 			value = []
 			value.append(list_id)
 			value.append(entity_id)
@@ -3599,7 +3599,7 @@ class Database:
 				value.append(observation)
 			
 			if(self.insert(table, value, columns) == False):
-				raise ValueError("An error occurred while trying to insert on add_figure_to_list(%s, %s, %s, %s, %s, %s)." % (list_id, figure_id, ownership_status_id, box_condition_type_id, product_condition_type_id, observation))
+				raise ValueError("An error occurred while trying to insert on add_goods_to_list(%s, %s, %s, %s, %s, %s)." % (list_id, goods_id, ownership_status_id, box_condition_type_id, product_condition_type_id, observation))
 		return True
   
 	"""
@@ -3880,7 +3880,7 @@ class Database:
 		Method used to insert comments from users.
 		This method can be used to insert on the follow tables:
 		soundtrack_comments, audio_comments, company_comments, people_comments, 
-		figure_comments, entity_edition_comments, entity_release_comments, collection_comments
+		goods_comments, entity_edition_comments, entity_release_comments, collection_comments
 	
 	"""
 	def add_comment(self, title, content, user_id, entity_id, type = 'release'):
