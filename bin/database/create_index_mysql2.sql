@@ -73,6 +73,14 @@ CREATE TABLE software_type (
 )
 TYPE=InnoDB;
 
+
+CREATE TABLE image_audio_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
 CREATE TABLE edition_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
@@ -226,6 +234,7 @@ CREATE TABLE alias_type (
 )
 TYPE=InnoDB;
 
+
 CREATE TABLE mod_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
@@ -288,6 +297,20 @@ CREATE TABLE image_soundtrack_type (
 )
 TYPE=InnoDB;
 
+CREATE TABLE image_user_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE image_collaborator_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
 CREATE TABLE image_company_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR UNIQUE NOT NULL,
@@ -308,6 +331,13 @@ CREATE TABLE social_type (
   name VARCHAR UNIQUE NOT NULL,
   website VARCHAR NOT NULL,
   website_secure VARCHAR NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE audio_channels (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -343,7 +373,7 @@ TYPE=InnoDB;
 
 CREATE TABLE shops (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  url VARCHAR UNIQUE NOT NULL,
+  url VARCHAR UNIQUE NULL,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
@@ -362,11 +392,20 @@ TYPE=InnoDB;
 
 CREATE TABLE collaborator (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  country_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
   irc VARCHAR NULL,
-  description TEXT NOT NULL,
+  description TEXT NULL,
+  foundation_date DATE NOT NULL DEFAULT now(),
   create_date DATETIME NOT NULL DEFAULT now(),
-  PRIMARY KEY(id)
+  UNIQUE(country_id, name)
+  PRIMARY KEY(id),
+  INDEX collaborator_FKIndex1(country_id),
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+  
 )
 TYPE=InnoDB;
 
@@ -384,7 +423,7 @@ CREATE TABLE users (
   username VARCHAR UNIQUE NOT NULL,
   pass VARCHAR NOT NULL,
   gender SET('M','F','I') NOT NULL,
-  location VARCHAR NOT NULL,
+  location VARCHAR NULL,
   birthday DATE NOT NULL,
   signup_date DATETIME NOT NULL DEFAULT now(),
   activated BOOLEAN NOT NULL DEFAULT 1,
@@ -493,18 +532,24 @@ TYPE=InnoDB;
 
 CREATE TABLE soundtrack (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  country_id INTEGER UNSIGNED NOT NULL,
   soundtrack_type_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
   launch_year YEAR NOT NULL,
+  code VARCHAR NULL,
   PRIMARY KEY(id),
   INDEX soundtrack_FKIndex1(soundtrack_type_id),
+  INDEX soundtrack_FKIndex2(country_id),
   FOREIGN KEY(soundtrack_type_id)
     REFERENCES soundtrack_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
-
 CREATE TABLE social (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   social_type_id INTEGER UNSIGNED NOT NULL,
@@ -524,10 +569,16 @@ CREATE TABLE event (
   edition VARCHAR NOT NULL,
   location VARCHAR NULL,
   website VARCHAR NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
   date DATE NOT NULL,
   duration INTEGER UNSIGNED NULL,
-  free BOOLEAN NOT NULL DEFAULT 1
+  free BOOLEAN NOT NULL DEFAULT 0
   PRIMARY KEY(id),
+  INDEX event_FKIndex1(country_id),
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
@@ -603,8 +654,8 @@ TYPE=InnoDB;
 CREATE TABLE users_has_social (
   users_id INTEGER UNSIGNED NOT NULL,
   social_id INTEGER UNSIGNED NOT NULL,
-  last_checked DATETIME NOT NULL,
-  create_date DATETIME NOT NULL,
+  last_checked DATETIME NOT NULL DEFAULT now(),
+  create_date DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(users_id, social_id),
   INDEX users_has_social_FKIndex1(users_id),
   INDEX users_has_social_FKIndex2(social_id),
@@ -639,8 +690,8 @@ TYPE=InnoDB;
 CREATE TABLE people_has_social (
   social_id INTEGER UNSIGNED NOT NULL,
   people_id BIGINT UNSIGNED NOT NULL,
-  last_checked DATETIME NOT NULL,
-  create_date DATETIME NOT NULL,
+  last_checked DATETIME NOT NULL DEFAULT now(),
+  create_date DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, people_id),
   INDEX social_has_people_FKIndex1(social_id),
   INDEX social_has_people_FKIndex2(people_id),
@@ -658,8 +709,8 @@ TYPE=InnoDB;
 CREATE TABLE collaborator_has_social (
   social_id INTEGER UNSIGNED NOT NULL,
   collaborator_id INTEGER UNSIGNED NOT NULL,
-  create_date DATETIME NOT NULL,
-  last_checked DATETIME NOT NULL,
+  last_checked DATETIME NOT NULL DEFAULT now(),
+  create_date DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, collaborator_id),
   INDEX collaborator_has_social_FKIndex1(social_id),
   INDEX collaborator_has_social_FKIndex2(collaborator_id),
@@ -794,6 +845,7 @@ TYPE=InnoDB;
 
 CREATE TABLE audio (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  audio_channels_id INTEGER UNSIGNED NOT NULL,
   country_id INTEGER UNSIGNED NOT NULL,
   audio_codec_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
@@ -802,6 +854,7 @@ CREATE TABLE audio (
   PRIMARY KEY(id),
   INDEX audio_FKIndex1(audio_codec_id),
   INDEX audio_FKIndex2(country_id),
+  INDEX audio_FKIndex3(audio_channels_id),
   FOREIGN KEY(audio_codec_id)
     REFERENCES audio_codec(id)
       ON DELETE NO ACTION
@@ -809,6 +862,10 @@ CREATE TABLE audio (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(audio_channels_id)
+    REFERENCES audio_channels(id)
+      ON DELETE NO ACTION
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -902,8 +959,8 @@ TYPE=InnoDB;
 CREATE TABLE company_has_social (
   social_id INTEGER UNSIGNED NOT NULL,
   company_id INTEGER UNSIGNED NOT NULL,
-  last_checked DATETIME NOT NULL,
-  create_date DATETIME NOT NULL,
+  last_checked DATETIME NOT NULL DEFAULT now(),
+  create_date DATETIME NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, company_id),
   INDEX social_has_company_FKIndex1(social_id),
   INDEX social_has_company_FKIndex2(company_id),
@@ -2394,6 +2451,28 @@ CREATE TABLE entity_edition_comments (
 )
 TYPE=InnoDB;
 
+CREATE TABLE collection_comments (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  collection_id BIGINT UNSIGNED NOT NULL,
+  users_id INTEGER UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date DATETIME NOT NULL DEFAULT now(),
+  update_date DATETIME NOT NULL DEFAULT now(),
+  PRIMARY KEY(id),
+  INDEX comments_FKIndex1(users_id),
+  INDEX comments_FKIndex2(collection_id),
+  FOREIGN KEY(users_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collection_id)
+    REFERENCES collection(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
 CREATE TABLE entity_release_comments (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   entity_release_id BIGINT UNSIGNED NOT NULL,
@@ -2609,6 +2688,75 @@ CREATE TABLE requirements_has_driver (
   FOREIGN KEY(driver_id)
     REFERENCES driver(id)
       ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE audio_has_image (
+  audio_id INTEGER UNSIGNED NOT NULL,
+  image_id BIGINT UNSIGNED NOT NULL,
+  image_audio_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(audio_id, image_id),
+  INDEX audio_has_image_FKIndex1(audio_id),
+  INDEX audio_has_image_FKIndex2(image_id),
+  INDEX audio_has_image_FKIndex3(image_audio_type_id),
+  FOREIGN KEY(audio_id)
+    REFERENCES audio(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_audio_type_id)
+    REFERENCES image_audio_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE collaborator_has_image (
+  collaborator_id INTEGER UNSIGNED NOT NULL,
+  image_id BIGINT UNSIGNED NOT NULL,
+  image_collaborator_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(collaborator_id, image_id),
+  INDEX soundtrack_has_image_FKIndex1(collaborator_id),
+  INDEX soundtrack_has_image_FKIndex2(image_id),
+  INDEX soundtrack_has_image_FKIndex3(image_collaborator_type_id),
+  FOREIGN KEY(collaborator_id)
+    REFERENCES collaborator(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_collaborator_type_id)
+    REFERENCES image_collaborator_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE user_has_image (
+  user_id INTEGER UNSIGNED NOT NULL,
+  image_id BIGINT UNSIGNED NOT NULL,
+  image_user_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(user_id, image_id),
+  INDEX user_has_image_FKIndex1(user_id),
+  INDEX user_has_image_FKIndex2(image_id),
+  INDEX user_has_image_FKIndex3(image_user_type_id),
+  FOREIGN KEY(user_id)
+    REFERENCES user(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_user_type_id)
+    REFERENCES image_user_type(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;

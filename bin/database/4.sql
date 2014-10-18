@@ -13,13 +13,6 @@ CREATE TABLE language (
 )
 TYPE=InnoDB;
 
-CREATE TABLE image_entity_edition_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE image_figure_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -27,7 +20,14 @@ CREATE TABLE image_figure_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE lyric_type (
+CREATE TABLE image_audio_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE image_entity_edition_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -48,13 +48,6 @@ CREATE TABLE number_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE material (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE media_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -62,16 +55,14 @@ CREATE TABLE media_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE image (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  url VARCHAR NOT NULL,
-  extension VARCHAR NOT NULL,
+CREATE TABLE lyric_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
 
-CREATE TABLE edition_type (
+CREATE TABLE material (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -79,6 +70,20 @@ CREATE TABLE edition_type (
 TYPE=InnoDB;
 
 CREATE TABLE entity_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE figure_version (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE edition_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -100,21 +105,23 @@ CREATE TABLE edition_read_status_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_version (
+CREATE TABLE hash_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE image (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  url VARCHAR NOT NULL,
+  extension VARCHAR NOT NULL,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
 
 CREATE TABLE genre (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
-CREATE TABLE hash_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -135,13 +142,6 @@ CREATE TABLE function_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE ownership_status (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE software_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -150,13 +150,6 @@ CREATE TABLE software_type (
 TYPE=InnoDB;
 
 CREATE TABLE soundtrack_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
-CREATE TABLE shop_location_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -172,11 +165,17 @@ CREATE TABLE social_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE spider_item (
+CREATE TABLE shops (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  identify VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
-  complete_crawled BOOL NOT NULL,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE shop_location_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -201,13 +200,6 @@ CREATE TABLE user_filter_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE stage_developer_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE tag (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -216,9 +208,17 @@ CREATE TABLE tag (
 )
 TYPE=InnoDB;
 
-CREATE TABLE shops (
+CREATE TABLE spider_item (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  identify VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
+  complete_crawled BOOL NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE stage_developer_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
@@ -238,13 +238,6 @@ CREATE TABLE product_condition_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE plataform_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE print_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -252,7 +245,14 @@ CREATE TABLE print_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE related_type (
+CREATE TABLE ownership_status (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE plataform_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -273,13 +273,6 @@ CREATE TABLE scale (
 )
 TYPE=InnoDB;
 
-CREATE TABLE release_ownership_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
 CREATE TABLE release_read_status_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
@@ -287,26 +280,25 @@ CREATE TABLE release_read_status_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE condition_type (
+CREATE TABLE related_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
 
-CREATE TABLE collaborator (
+CREATE TABLE release_ownership_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
-  irc VARCHAR NULL,
-  description TEXT NOT NULL,
-  create_date DATETIME NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
 
-CREATE TABLE compose_type (
+CREATE TABLE currency (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
+  symbol VARCHAR NOT NULL,
+  code VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -318,20 +310,29 @@ CREATE TABLE company_function_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE classification_type (
+CREATE TABLE audio_channels (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
 
-CREATE TABLE blood_type (
+CREATE TABLE box_condition_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
-);
+)
+TYPE=InnoDB;
 
-CREATE TABLE audio_codec (
+CREATE TABLE category (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  user_filter INTEGER UNSIGNED NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE classification_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
@@ -354,9 +355,20 @@ CREATE TABLE country (
 )
 TYPE=InnoDB;
 
-CREATE TABLE based_type (
+CREATE TABLE collection (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
+  description TEXT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE collaborator (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  irc VARCHAR NULL,
+  description TEXT NOT NULL,
+  create_date DATETIME NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -368,26 +380,15 @@ CREATE TABLE alias_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE box_condition_type (
+CREATE TABLE blood_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id)
-)
-TYPE=InnoDB;
+);
 
-CREATE TABLE collection (
+CREATE TABLE based_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
-  description TEXT NULL,
-  PRIMARY KEY(id)
-)
-TYPE=InnoDB;
-
-CREATE TABLE currency (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  symbol VARCHAR NOT NULL,
-  code VARCHAR NOT NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -399,10 +400,9 @@ CREATE TABLE create_type (
 )
 TYPE=InnoDB;
 
-CREATE TABLE category (
+CREATE TABLE audio_codec (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR NOT NULL,
-  user_filter INTEGER UNSIGNED NULL,
   PRIMARY KEY(id)
 )
 TYPE=InnoDB;
@@ -413,28 +413,34 @@ CREATE TABLE collaborator_type (
   PRIMARY KEY(id)
 );
 
-CREATE TABLE lists_figure (
+CREATE TABLE compose_type (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_2_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NULL,
-  create_date DATETIME NULL,
-  PRIMARY KEY(id),
-  INDEX lists_figure_FKIndex1(user_2_id),
-  FOREIGN KEY(user_2_id)
-    REFERENCES users(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE soundtrack (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  soundtrack_type_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
-  launch_year YEAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE condition_type (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+
+CREATE TABLE event (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  currency_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  location VARCHAR NULL,
+  website VARCHAR NULL,
+  date DATE NOT NULL,
+  duration INTEGER UNSIGNED NULL,
+  free BOOL NOT NULL,
+  edition VARCHAR NULL,
   PRIMARY KEY(id),
-  INDEX soundtrack_FKIndex1(soundtrack_type_id),
-  FOREIGN KEY(soundtrack_type_id)
-    REFERENCES soundtrack_type(id)
+  INDEX event_FKIndex1(currency_id),
+  FOREIGN KEY(currency_id)
+    REFERENCES currency(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -471,32 +477,15 @@ CREATE TABLE company (
 )
 TYPE=InnoDB;
 
-CREATE TABLE collaborator_website (
-  collaborator_id INTEGER UNSIGNED NOT NULL,
-  website VARCHAR NOT NULL,
-  PRIMARY KEY(collaborator_id, website),
-  INDEX collaborator_website_FKIndex1(collaborator_id),
-  FOREIGN KEY(collaborator_id)
-    REFERENCES collaborator(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE event (
+CREATE TABLE version (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  currency_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
-  location VARCHAR NULL,
-  website VARCHAR NULL,
-  date DATE NOT NULL,
-  duration INTEGER UNSIGNED NULL,
-  free BOOL NOT NULL,
-  edition VARCHAR NULL,
+  stage_developer_type_id INTEGER UNSIGNED NOT NULL,
+  number VARCHAR NOT NULL,
+  changelog TEXT NULL,
   PRIMARY KEY(id),
-  INDEX event_FKIndex1(currency_id),
-  FOREIGN KEY(currency_id)
-    REFERENCES currency(id)
+  INDEX version_FKIndex1(stage_developer_type_id),
+  FOREIGN KEY(stage_developer_type_id)
+    REFERENCES stage_developer_type(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -513,16 +502,83 @@ CREATE TABLE user_email (
 )
 TYPE=InnoDB;
 
-CREATE TABLE version (
+CREATE TABLE collaborator_website (
+  collaborator_id INTEGER UNSIGNED NOT NULL,
+  website VARCHAR NOT NULL,
+  PRIMARY KEY(collaborator_id, website),
+  INDEX collaborator_website_FKIndex1(collaborator_id),
+  FOREIGN KEY(collaborator_id)
+    REFERENCES collaborator(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE requirements (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  stage_developer_type_id INTEGER UNSIGNED NOT NULL,
-  number VARCHAR NOT NULL,
-  changelog TEXT NULL,
+  version_id INTEGER UNSIGNED NOT NULL,
+  video_board VARCHAR NOT NULL,
+  processor VARCHAR NOT NULL,
+  memory VARCHAR NOT NULL,
+  hd_storage VARCHAR NOT NULL,
   PRIMARY KEY(id),
-  INDEX version_FKIndex1(stage_developer_type_id),
-  FOREIGN KEY(stage_developer_type_id)
-    REFERENCES stage_developer_type(id)
+  INDEX requirements_FKIndex1(version_id),
+  FOREIGN KEY(version_id)
+    REFERENCES version(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE lists_figure (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_2_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NULL,
+  create_date DATETIME NULL,
+  PRIMARY KEY(id),
+  INDEX lists_figure_FKIndex1(user_2_id),
+  FOREIGN KEY(user_2_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
+
+CREATE TABLE soundtrack (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  country_id INTEGER UNSIGNED NOT NULL,
+  soundtrack_type_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  launch_year YEAR NOT NULL,
+  code VARCHAR NULL,
+  PRIMARY KEY(id),
+  INDEX soundtrack_FKIndex1(soundtrack_type_id),
+  INDEX soundtrack_FKIndex2(country_id),
+  FOREIGN KEY(soundtrack_type_id)
+    REFERENCES soundtrack_type(id)
       ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE collaborator_has_social (
+  social_id INTEGER UNSIGNED NOT NULL,
+  collaborator_id INTEGER UNSIGNED NOT NULL,
+  create_date DATETIME NOT NULL,
+  last_checked DATETIME NOT NULL,
+  PRIMARY KEY(social_id, collaborator_id),
+  INDEX social_has_collaborator_FKIndex1(social_id),
+  INDEX social_has_collaborator_FKIndex2(collaborator_id),
+  FOREIGN KEY(social_id)
+    REFERENCES social(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collaborator_id)
+    REFERENCES collaborator(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -543,40 +599,6 @@ CREATE TABLE people (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE category_has_filter_type (
-  category_id INTEGER UNSIGNED NOT NULL,
-  user_filter_type_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(category_id, user_filter_type_id),
-  INDEX category_has_filter_type_FKIndex1(category_id),
-  INDEX category_has_filter_type_FKIndex2(user_filter_type_id),
-  FOREIGN KEY(category_id)
-    REFERENCES category(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(user_filter_type_id)
-    REFERENCES filter_type(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE shops_operate_on_country (
-  shops_id INTEGER UNSIGNED NOT NULL,
-  country_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(shops_id, country_id),
-  INDEX shops_has_country_FKIndex1(shops_id),
-  INDEX shops_has_country_FKIndex2(country_id),
-  FOREIGN KEY(shops_id)
-    REFERENCES shops(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -603,64 +625,6 @@ CREATE TABLE soundtrack_comments (
 )
 TYPE=InnoDB;
 
-CREATE TABLE people_comments (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  people_id BIGINT UNSIGNED NOT NULL,
-  users_id INTEGER UNSIGNED NOT NULL,
-  content TEXT NOT NULL,
-  title VARCHAR NOT NULL,
-  create_date DATETIME NOT NULL,
-  update_date DATETIME NOT NULL,
-  PRIMARY KEY(id),
-  INDEX people_comments_FKIndex1(users_id),
-  INDEX people_comments_FKIndex2(people_id),
-  FOREIGN KEY(users_id)
-    REFERENCES users(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(people_id)
-    REFERENCES people(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE collaborator_has_social (
-  social_id INTEGER UNSIGNED NOT NULL,
-  collaborator_id INTEGER UNSIGNED NOT NULL,
-  create_date DATETIME NOT NULL,
-  last_checked DATETIME NOT NULL,
-  PRIMARY KEY(social_id, collaborator_id),
-  INDEX social_has_collaborator_FKIndex1(social_id),
-  INDEX social_has_collaborator_FKIndex2(collaborator_id),
-  FOREIGN KEY(social_id)
-    REFERENCES social(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(collaborator_id)
-    REFERENCES collaborator(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE people_nacionalization (
-  people_id BIGINT UNSIGNED NOT NULL,
-  country_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(people_id, country_id),
-  INDEX people_has_country_FKIndex1(people_id),
-  INDEX people_has_country_FKIndex2(country_id),
-  FOREIGN KEY(people_id)
-    REFERENCES people(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
 CREATE TABLE collaborator_has_member (
   collaborator_id INTEGER UNSIGNED NOT NULL,
   collaborator_member_id INTEGER UNSIGNED NOT NULL,
@@ -677,6 +641,56 @@ CREATE TABLE collaborator_has_member (
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
+
+CREATE TABLE requirements_has_driver (
+  requirements_id INTEGER UNSIGNED NOT NULL,
+  driver_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(requirements_id, driver_id),
+  INDEX requirements_has_driver_FKIndex1(requirements_id),
+  INDEX requirements_has_driver_FKIndex2(driver_id),
+  FOREIGN KEY(requirements_id)
+    REFERENCES requirements(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(driver_id)
+    REFERENCES driver(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
+
+CREATE TABLE shops_operate_on_country (
+  shops_id INTEGER UNSIGNED NOT NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(shops_id, country_id),
+  INDEX shops_has_country_FKIndex1(shops_id),
+  INDEX shops_has_country_FKIndex2(country_id),
+  FOREIGN KEY(shops_id)
+    REFERENCES shops(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE category_has_filter_type (
+  category_id INTEGER UNSIGNED NOT NULL,
+  user_filter_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(category_id, user_filter_type_id),
+  INDEX category_has_filter_type_FKIndex1(category_id),
+  INDEX category_has_filter_type_FKIndex2(user_filter_type_id),
+  FOREIGN KEY(category_id)
+    REFERENCES category(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(user_filter_type_id)
+    REFERENCES filter_type(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
 
 CREATE TABLE people_has_image (
   image_id BIGINT UNSIGNED NOT NULL,
@@ -714,6 +728,23 @@ CREATE TABLE people_has_social (
 )
 TYPE=InnoDB;
 
+CREATE TABLE people_nacionalization (
+  people_id BIGINT UNSIGNED NOT NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(people_id, country_id),
+  INDEX people_has_country_FKIndex1(people_id),
+  INDEX people_has_country_FKIndex2(country_id),
+  FOREIGN KEY(people_id)
+    REFERENCES people(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
 CREATE TABLE tag_has_filter_type (
   user_filter_type_id INTEGER UNSIGNED NOT NULL,
   tag_id INTEGER UNSIGNED NOT NULL,
@@ -726,62 +757,6 @@ CREATE TABLE tag_has_filter_type (
       ON UPDATE NO ACTION,
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE audio (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  country_id INTEGER UNSIGNED NOT NULL,
-  audio_codec_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
-  duration TIME NULL,
-  bitrate INTEGER UNSIGNED NULL,
-  PRIMARY KEY(id),
-  INDEX audio_FKIndex1(audio_codec_id),
-  INDEX audio_FKIndex2(country_id),
-  FOREIGN KEY(audio_codec_id)
-    REFERENCES audio_codec(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE country_has_currency (
-  currency_id INTEGER UNSIGNED NOT NULL,
-  country_id INTEGER UNSIGNED NOT NULL,
-  main BOOL NOT NULL,
-  PRIMARY KEY(currency_id, country_id),
-  INDEX currency_has_country_FKIndex1(currency_id),
-  INDEX currency_has_country_FKIndex2(country_id),
-  FOREIGN KEY(currency_id)
-    REFERENCES currency(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE country_has_language (
-  language_id INTEGER UNSIGNED NOT NULL,
-  country_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(language_id, country_id),
-  INDEX language_has_country_FKIndex1(language_id),
-  INDEX language_has_country_FKIndex2(country_id),
-  FOREIGN KEY(language_id)
-    REFERENCES language(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -806,6 +781,41 @@ CREATE TABLE user_filter (
 )
 TYPE=InnoDB;
 
+CREATE TABLE country_has_language (
+  language_id INTEGER UNSIGNED NOT NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(language_id, country_id),
+  INDEX language_has_country_FKIndex1(language_id),
+  INDEX language_has_country_FKIndex2(country_id),
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE country_has_currency (
+  currency_id INTEGER UNSIGNED NOT NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
+  main BOOL NOT NULL,
+  PRIMARY KEY(currency_id, country_id),
+  INDEX currency_has_country_FKIndex1(currency_id),
+  INDEX currency_has_country_FKIndex2(country_id),
+  FOREIGN KEY(currency_id)
+    REFERENCES currency(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
 CREATE TABLE users_has_social (
   users_id INTEGER UNSIGNED NOT NULL,
   social_id INTEGER UNSIGNED NOT NULL,
@@ -820,23 +830,6 @@ CREATE TABLE users_has_social (
       ON UPDATE NO ACTION,
   FOREIGN KEY(social_id)
     REFERENCES social(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE company_has_country (
-  country_id INTEGER UNSIGNED NOT NULL,
-  company_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(country_id, company_id),
-  INDEX country_has_company_FKIndex1(country_id),
-  INDEX country_has_company_FKIndex2(company_id),
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(company_id)
-    REFERENCES company(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -864,47 +857,6 @@ CREATE TABLE company_comments (
 )
 TYPE=InnoDB;
 
-CREATE TABLE company_has_social (
-  social_id INTEGER UNSIGNED NOT NULL,
-  company_id INTEGER UNSIGNED NOT NULL,
-  last_checked DATETIME NOT NULL,
-  create_date DATETIME NOT NULL,
-  PRIMARY KEY(social_id, company_id),
-  INDEX social_has_company_FKIndex1(social_id),
-  INDEX social_has_company_FKIndex2(company_id),
-  FOREIGN KEY(social_id)
-    REFERENCES social(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(company_id)
-    REFERENCES company(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE audio_comments (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  audio_id INTEGER UNSIGNED NOT NULL,
-  users_id INTEGER UNSIGNED NOT NULL,
-  content TEXT NOT NULL,
-  title VARCHAR NOT NULL,
-  create_date DATETIME NOT NULL,
-  update_date DATETIME NOT NULL,
-  PRIMARY KEY(id),
-  INDEX audio_comments_FKIndex1(users_id),
-  INDEX audio_comments_FKIndex2(audio_id),
-  FOREIGN KEY(users_id)
-    REFERENCES users(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(audio_id)
-    REFERENCES audio(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
 CREATE TABLE lists_edition (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   entity_type_id INTEGER UNSIGNED NOT NULL,
@@ -925,56 +877,38 @@ CREATE TABLE lists_edition (
 )
 TYPE=InnoDB;
 
-CREATE TABLE lists_release (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  entity_type_id INTEGER UNSIGNED NOT NULL,
-  user_2_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
+CREATE TABLE company_has_social (
+  social_id INTEGER UNSIGNED NOT NULL,
+  company_id INTEGER UNSIGNED NOT NULL,
+  last_checked DATETIME NOT NULL,
   create_date DATETIME NOT NULL,
-  PRIMARY KEY(id),
-  INDEX lists_release_FKIndex1(user_2_id),
-  INDEX lists_release_FKIndex2(entity_type_id),
-  FOREIGN KEY(user_2_id)
-    REFERENCES users(id)
+  PRIMARY KEY(social_id, company_id),
+  INDEX social_has_company_FKIndex1(social_id),
+  INDEX social_has_company_FKIndex2(company_id),
+  FOREIGN KEY(social_id)
+    REFERENCES social(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_type_id)
-    REFERENCES entity_type(id)
-      ON DELETE SET NULL
+  FOREIGN KEY(company_id)
+    REFERENCES company(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE soundtrack_has_audio (
-  soundtrack_id INTEGER UNSIGNED NOT NULL,
-  audio_id INTEGER UNSIGNED NOT NULL,
-  exclusive BOOL NULL,
-  PRIMARY KEY(soundtrack_id, audio_id),
-  INDEX soundtrack_has_audio_FKIndex1(soundtrack_id),
-  INDEX soundtrack_has_audio_FKIndex2(audio_id),
-  FOREIGN KEY(soundtrack_id)
-    REFERENCES soundtrack(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(audio_id)
-    REFERENCES audio(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE audio_has_genre_type (
-  audio_id INTEGER UNSIGNED NOT NULL,
-  genre_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(audio_id, genre_id),
-  INDEX genre_type_has_audio_FKIndex2(audio_id),
-  INDEX audio_has_genre_type_FKIndex3(genre_id),
-  FOREIGN KEY(audio_id)
-    REFERENCES audio(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(genre_id)
-    REFERENCES genre(id)
+CREATE TABLE company_has_country (
+  country_id INTEGER UNSIGNED NOT NULL,
+  company_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(country_id, company_id),
+  INDEX country_has_company_FKIndex1(country_id),
+  INDEX country_has_company_FKIndex2(company_id),
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
       ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(company_id)
+    REFERENCES company(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -992,6 +926,26 @@ CREATE TABLE soundtrack_integrate_collection (
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE lists_release (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  entity_type_id INTEGER UNSIGNED NOT NULL,
+  user_2_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  create_date DATETIME NOT NULL,
+  PRIMARY KEY(id),
+  INDEX lists_release_FKIndex1(user_2_id),
+  INDEX lists_release_FKIndex2(entity_type_id),
+  FOREIGN KEY(user_2_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(entity_type_id)
+    REFERENCES entity_type(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -1026,6 +980,56 @@ CREATE TABLE company_sponsors_event (
   FOREIGN KEY(event_id)
     REFERENCES event(id)
       ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE audio (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  audio_channels_id INTEGER UNSIGNED NOT NULL,
+  country_id INTEGER UNSIGNED NOT NULL,
+  audio_codec_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  duration TIME NULL,
+  bitrate INTEGER UNSIGNED NULL,
+  PRIMARY KEY(id),
+  INDEX audio_FKIndex1(audio_codec_id),
+  INDEX audio_FKIndex2(country_id),
+  INDEX audio_FKIndex3(audio_channels_id),
+  FOREIGN KEY(audio_codec_id)
+    REFERENCES audio_codec(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(country_id)
+    REFERENCES country(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(audio_channels_id)
+    REFERENCES audio_channels(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE audio_has_image (
+  audio_id INTEGER UNSIGNED NOT NULL,
+  image_id BIGINT UNSIGNED NOT NULL,
+  image_audio_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(audio_id, image_id),
+  INDEX audio_has_image_FKIndex1(audio_id),
+  INDEX audio_has_image_FKIndex2(image_id),
+  INDEX audio_has_image_FKIndex3(image_audio_type_id),
+  FOREIGN KEY(audio_id)
+    REFERENCES audio(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(image_audio_type_id)
+    REFERENCES image_audio_type(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -1181,17 +1185,77 @@ CREATE TABLE archive (
 )
 TYPE=InnoDB;
 
-CREATE TABLE requirements (
+CREATE TABLE people_alias (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  version_id INTEGER UNSIGNED NOT NULL,
-  video_board VARCHAR NOT NULL,
-  processor VARCHAR NOT NULL,
-  memory VARCHAR NOT NULL,
-  hd_storage VARCHAR NOT NULL,
+  alias_type_id INTEGER UNSIGNED NOT NULL,
+  people_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  lastname VARCHAR NULL,
   PRIMARY KEY(id),
-  INDEX requirements_FKIndex1(version_id),
-  FOREIGN KEY(version_id)
-    REFERENCES version(id)
+  INDEX alias_FKIndex1(people_id),
+  INDEX people_alias_FKIndex2(alias_type_id),
+  FOREIGN KEY(people_id)
+    REFERENCES people(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(alias_type_id)
+    REFERENCES alias_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE people_comments (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  people_id BIGINT UNSIGNED NOT NULL,
+  users_id INTEGER UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date DATETIME NOT NULL,
+  update_date DATETIME NOT NULL,
+  PRIMARY KEY(id),
+  INDEX people_comments_FKIndex1(users_id),
+  INDEX people_comments_FKIndex2(people_id),
+  FOREIGN KEY(users_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(people_id)
+    REFERENCES people(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE audio_has_genre_type (
+  audio_id INTEGER UNSIGNED NOT NULL,
+  genre_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(audio_id, genre_id),
+  INDEX genre_type_has_audio_FKIndex2(audio_id),
+  INDEX audio_has_genre_type_FKIndex3(genre_id),
+  FOREIGN KEY(audio_id)
+    REFERENCES audio(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(genre_id)
+    REFERENCES genre(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE classification_user_filter (
+  user_filter_id INTEGER UNSIGNED NOT NULL,
+  classification_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(user_filter_id),
+  INDEX classification_user_filter_FKIndex1(user_filter_id),
+  INDEX classification_user_filter_FKIndex2(classification_type_id),
+  FOREIGN KEY(user_filter_id)
+    REFERENCES user_filter(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(classification_type_id)
+    REFERENCES classification_type(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1214,26 +1278,6 @@ CREATE TABLE audio_has_language (
 )
 TYPE=InnoDB;
 
-CREATE TABLE people_alias (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  alias_type_id INTEGER UNSIGNED NOT NULL,
-  people_id BIGINT UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
-  lastname VARCHAR NULL,
-  PRIMARY KEY(id),
-  INDEX alias_FKIndex1(people_id),
-  INDEX people_alias_FKIndex2(alias_type_id),
-  FOREIGN KEY(people_id)
-    REFERENCES people(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(alias_type_id)
-    REFERENCES alias_type(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
 CREATE TABLE category_user_filter (
   user_filter_id INTEGER UNSIGNED NOT NULL,
   category_id INTEGER UNSIGNED NOT NULL,
@@ -1249,8 +1293,6 @@ CREATE TABLE category_user_filter (
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
-
-
 
 CREATE TABLE persona (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1276,18 +1318,37 @@ CREATE TABLE persona (
 )
 TYPE=InnoDB;
 
-CREATE TABLE classification_user_filter (
+CREATE TABLE persona_alias (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  alias_type_id INTEGER UNSIGNED NOT NULL,
+  persona_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id),
+  INDEX persona_associated_name_FKIndex1(persona_id),
+  INDEX persona_alias_FKIndex2(alias_type_id),
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(alias_type_id)
+    REFERENCES alias_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE tag_user_filter (
   user_filter_id INTEGER UNSIGNED NOT NULL,
-  classification_type_id INTEGER UNSIGNED NOT NULL,
+  tag_id INTEGER UNSIGNED NOT NULL,
   PRIMARY KEY(user_filter_id),
-  INDEX classification_user_filter_FKIndex1(user_filter_id),
-  INDEX classification_user_filter_FKIndex2(classification_type_id),
+  INDEX tag_user_filter_FKIndex1(user_filter_id),
+  INDEX tag_user_filter_FKIndex2(tag_id),
   FOREIGN KEY(user_filter_id)
     REFERENCES user_filter(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(classification_type_id)
-    REFERENCES classification_type(id)
+  FOREIGN KEY(tag_id)
+    REFERENCES tag(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1330,6 +1391,28 @@ CREATE TABLE entity_wiki (
 )
 TYPE=InnoDB;
 
+CREATE TABLE figure_comments (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  figure_id BIGINT UNSIGNED NOT NULL,
+  users_id INTEGER UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date DATETIME NOT NULL,
+  update_date DATETIME NOT NULL,
+  PRIMARY KEY(id),
+  INDEX figure_comments_FKIndex1(users_id),
+  INDEX figure_comments_FKIndex2(figure_id),
+  FOREIGN KEY(users_id)
+    REFERENCES users(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(figure_id)
+    REFERENCES figure(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
 CREATE TABLE entity_synopse (
   entity_id BIGINT UNSIGNED NOT NULL,
   language_id INTEGER UNSIGNED NOT NULL,
@@ -1348,18 +1431,18 @@ CREATE TABLE entity_synopse (
 )
 TYPE=InnoDB;
 
-CREATE TABLE tag_user_filter (
-  user_filter_id INTEGER UNSIGNED NOT NULL,
-  tag_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(user_filter_id),
-  INDEX tag_user_filter_FKIndex1(user_filter_id),
-  INDEX tag_user_filter_FKIndex2(tag_id),
-  FOREIGN KEY(user_filter_id)
-    REFERENCES user_filter(id)
+CREATE TABLE entity_has_category (
+  entity_id BIGINT UNSIGNED NOT NULL,
+  category_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(entity_id, category_id),
+  INDEX entity_has_category_FKIndex1(entity_id),
+  INDEX entity_has_category_FKIndex2(category_id),
+  FOREIGN KEY(entity_id)
+    REFERENCES entity(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(tag_id)
-    REFERENCES tag(id)
+  FOREIGN KEY(category_id)
+    REFERENCES category(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1383,57 +1466,94 @@ CREATE TABLE entity_description (
 )
 TYPE=InnoDB;
 
-CREATE TABLE entity_has_category (
-  entity_id BIGINT UNSIGNED NOT NULL,
-  category_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(entity_id, category_id),
-  INDEX entity_has_category_FKIndex1(entity_id),
-  INDEX entity_has_category_FKIndex2(category_id),
-  FOREIGN KEY(entity_id)
-    REFERENCES entity(id)
+CREATE TABLE figure_from_persona (
+  figure_id BIGINT UNSIGNED NOT NULL,
+  persona_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(figure_id, persona_id),
+  INDEX figure_has_persona_FKIndex1(figure_id),
+  INDEX figure_has_persona_FKIndex2(persona_id),
+  FOREIGN KEY(figure_id)
+    REFERENCES figure(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(category_id)
-    REFERENCES category(id)
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_comments (
+CREATE TABLE audio_comments (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  figure_id BIGINT UNSIGNED NOT NULL,
+  audio_id INTEGER UNSIGNED NOT NULL,
   users_id INTEGER UNSIGNED NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
   create_date DATETIME NOT NULL,
   update_date DATETIME NOT NULL,
   PRIMARY KEY(id),
-  INDEX figure_comments_FKIndex1(users_id),
-  INDEX figure_comments_FKIndex2(figure_id),
+  INDEX audio_comments_FKIndex1(users_id),
+  INDEX audio_comments_FKIndex2(audio_id),
   FOREIGN KEY(users_id)
     REFERENCES users(id)
-      ON DELETE SET NULL
+      ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(audio_id)
+    REFERENCES audio(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_has_material (
-  figure_id BIGINT UNSIGNED NOT NULL,
-  material_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(figure_id, material_id),
-  INDEX figure_has_material_FKIndex1(figure_id),
-  INDEX figure_has_material_FKIndex2(material_id),
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+CREATE TABLE soundtrack_has_audio (
+  soundtrack_id INTEGER UNSIGNED NOT NULL,
+  audio_id INTEGER UNSIGNED NOT NULL,
+  exclusive BOOL NULL,
+  PRIMARY KEY(soundtrack_id, audio_id),
+  INDEX soundtrack_has_audio_FKIndex1(soundtrack_id),
+  INDEX soundtrack_has_audio_FKIndex2(audio_id),
+  FOREIGN KEY(soundtrack_id)
+    REFERENCES soundtrack(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(material_id)
-    REFERENCES material(id)
+  FOREIGN KEY(audio_id)
+    REFERENCES audio(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
+
+CREATE TABLE hash (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  hash_type_id INTEGER UNSIGNED NOT NULL,
+  archive_id BIGINT UNSIGNED NOT NULL,
+  code TEXT NOT NULL,
+  create_date DATETIME NOT NULL,
+  PRIMARY KEY(id),
+  INDEX hash_FKIndex2(archive_id),
+  INDEX hash_FKIndex2(hash_type_id),
+  FOREIGN KEY(archive_id)
+    REFERENCES archive(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(hash_type_id)
+    REFERENCES hash_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE figure_has_category (
+  category_id INTEGER UNSIGNED NOT NULL,
+  figure_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(category_id, figure_id),
+  INDEX category_has_figure_FKIndex1(category_id),
+  INDEX category_has_figure_FKIndex2(figure_id),
+  FOREIGN KEY(category_id)
+    REFERENCES category(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(figure_id)
+    REFERENCES figure(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1458,35 +1578,18 @@ CREATE TABLE figure_has_shops (
 )
 TYPE=InnoDB;
 
-CREATE TABLE figure_from_persona (
+CREATE TABLE figure_has_material (
   figure_id BIGINT UNSIGNED NOT NULL,
-  persona_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(figure_id, persona_id),
-  INDEX figure_has_persona_FKIndex1(figure_id),
-  INDEX figure_has_persona_FKIndex2(persona_id),
+  material_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(figure_id, material_id),
+  INDEX figure_has_material_FKIndex1(figure_id),
+  INDEX figure_has_material_FKIndex2(material_id),
   FOREIGN KEY(figure_id)
     REFERENCES figure(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(persona_id)
-    REFERENCES persona(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE figure_has_category (
-  category_id INTEGER UNSIGNED NOT NULL,
-  figure_id BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY(category_id, figure_id),
-  INDEX category_has_figure_FKIndex1(category_id),
-  INDEX category_has_figure_FKIndex2(figure_id),
-  FOREIGN KEY(category_id)
-    REFERENCES category(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_id)
-    REFERENCES figure(id)
+  FOREIGN KEY(material_id)
+    REFERENCES material(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -1505,26 +1608,6 @@ CREATE TABLE figure_has_shop_location (
   FOREIGN KEY(shop_location_type_id)
     REFERENCES shop_location_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE hash (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  hash_type_id INTEGER UNSIGNED NOT NULL,
-  archive_id BIGINT UNSIGNED NOT NULL,
-  code TEXT NOT NULL,
-  create_date DATETIME NOT NULL,
-  PRIMARY KEY(id),
-  INDEX hash_FKIndex2(archive_id),
-  INDEX hash_FKIndex2(hash_type_id),
-  FOREIGN KEY(archive_id)
-    REFERENCES archive(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(hash_type_id)
-    REFERENCES hash_type(id)
-      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -1981,6 +2064,19 @@ CREATE TABLE lists_edition_list_entity_edition (
 )
 TYPE=InnoDB;
 
+CREATE TABLE persona_occupation (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  persona_id INTEGER UNSIGNED NOT NULL,
+  occupation VARCHAR NOT NULL,
+  PRIMARY KEY(id),
+  INDEX persona_occupation_FKIndex1(persona_id),
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
 CREATE TABLE persona_affiliation (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   persona_id INTEGER UNSIGNED NOT NULL,
@@ -2007,19 +2103,6 @@ CREATE TABLE game_release (
 )
 TYPE=InnoDB;
 
-CREATE TABLE persona_race (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  persona_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id),
-  INDEX Race_FKIndex1(persona_id),
-  FOREIGN KEY(persona_id)
-    REFERENCES persona(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
 CREATE TABLE persona_unusual_features (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   persona_id INTEGER UNSIGNED NOT NULL,
@@ -2033,102 +2116,54 @@ CREATE TABLE persona_unusual_features (
 )
 TYPE=InnoDB;
 
-CREATE TABLE persona_occupation (
+CREATE TABLE persona_race (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  persona_id INTEGER UNSIGNED NOT NULL,
-  occupation VARCHAR NOT NULL,
-  PRIMARY KEY(id),
-  INDEX persona_occupation_FKIndex1(persona_id),
-  FOREIGN KEY(persona_id)
-    REFERENCES persona(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE soundtrack_for_entity_edition (
-  soundtrack_id INTEGER UNSIGNED NOT NULL,
-  entity_edition_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(soundtrack_id, entity_edition_id),
-  INDEX soundtrack_has_entity_edition_FKIndex1(soundtrack_id),
-  INDEX soundtrack_has_entity_edition_FKIndex2(entity_edition_id),
-  FOREIGN KEY(soundtrack_id)
-    REFERENCES soundtrack(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_edition_id)
-    REFERENCES entity_edition(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE persona_appear_on_entity (
-  persona_id INTEGER UNSIGNED NOT NULL,
-  entity_id BIGINT UNSIGNED NOT NULL,
-  first_appear BOOL NOT NULL,
-  PRIMARY KEY(persona_id, entity_id),
-  INDEX persona_has_entity_FKIndex1(persona_id),
-  INDEX persona_has_entity_FKIndex2(entity_id),
-  FOREIGN KEY(persona_id)
-    REFERENCES persona(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_id)
-    REFERENCES entity(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE persona_alias (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  alias_type_id INTEGER UNSIGNED NOT NULL,
   persona_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
   PRIMARY KEY(id),
-  INDEX persona_associated_name_FKIndex1(persona_id),
-  INDEX persona_alias_FKIndex2(alias_type_id),
+  INDEX Race_FKIndex1(persona_id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(alias_type_id)
-    REFERENCES alias_type(id)
-      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE software_edition_has_subtitle (
-  software_edition_entity_edition_id INTEGER UNSIGNED NOT NULL,
-  language_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(software_edition_entity_edition_id, language_id),
-  INDEX software_edition_has_language_FKIndex1(software_edition_entity_edition_id),
-  INDEX software_edition_has_language_FKIndex2(language_id),
-  FOREIGN KEY(software_edition_entity_edition_id)
-    REFERENCES software_edition(entity_edition_id)
-      ON DELETE CASCADE
+CREATE TABLE mod (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  entity_release_id BIGINT UNSIGNED NOT NULL,
+  mod_type_id INTEGER UNSIGNED NOT NULL,
+  name VARCHAR NOT NULL,
+  author VARCHAR NOT NULL,
+  launch_date DATE NULL,
+  description TEXT NULL,
+  installation_instruction TEXT NULL,
+  PRIMARY KEY(id),
+  INDEX mod_FKIndex2(mod_type_id),
+  INDEX mod_FKIndex2(entity_release_id),
+  FOREIGN KEY(mod_type_id)
+    REFERENCES mod_type(id)
+      ON DELETE NO ACTION
       ON UPDATE NO ACTION,
-  FOREIGN KEY(language_id)
-    REFERENCES language(id)
+  FOREIGN KEY(entity_release_id)
+    REFERENCES entity_release(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
 
-CREATE TABLE software_edition_has_version (
-  software_edition_entity_edition_id INTEGER UNSIGNED NOT NULL,
-  version_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(software_edition_entity_edition_id, version_id),
-  INDEX software_edition_has_version_FKIndex1(software_edition_entity_edition_id),
-  INDEX software_edition_has_version_FKIndex2(version_id),
-  FOREIGN KEY(software_edition_entity_edition_id)
-    REFERENCES software_edition(entity_edition_id)
+CREATE TABLE mod_has_image (
+  mod_id INTEGER UNSIGNED NOT NULL,
+  image_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(mod_id, image_id),
+  INDEX mod_has_image_FKIndex1(mod_id),
+  INDEX mod_has_image_FKIndex2(image_id),
+  FOREIGN KEY(mod_id)
+    REFERENCES mod(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(version_id)
-    REFERENCES version(id)
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -2152,24 +2187,53 @@ CREATE TABLE read_edition (
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE mod (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  entity_release_id BIGINT UNSIGNED NOT NULL,
-  mod_type_id INTEGER UNSIGNED NOT NULL,
-  name VARCHAR NOT NULL,
-  author VARCHAR NOT NULL,
-  launch_date DATE NULL,
-  description TEXT NULL,
-  installation_instruction TEXT NULL,
-  PRIMARY KEY(id),
-  INDEX mod_FKIndex2(mod_type_id),
-  INDEX mod_FKIndex2(entity_release_id),
-  FOREIGN KEY(mod_type_id)
-    REFERENCES mod_type(id)
-      ON DELETE NO ACTION
+CREATE TABLE persona_appear_on_entity (
+  persona_id INTEGER UNSIGNED NOT NULL,
+  entity_id BIGINT UNSIGNED NOT NULL,
+  first_appear BOOL NOT NULL,
+  PRIMARY KEY(persona_id, entity_id),
+  INDEX persona_has_entity_FKIndex1(persona_id),
+  INDEX persona_has_entity_FKIndex2(entity_id),
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_release_id)
-    REFERENCES entity_release(id)
+  FOREIGN KEY(entity_id)
+    REFERENCES entity(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE software_edition_has_version (
+  software_edition_entity_edition_id INTEGER UNSIGNED NOT NULL,
+  version_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(software_edition_entity_edition_id, version_id),
+  INDEX software_edition_has_version_FKIndex1(software_edition_entity_edition_id),
+  INDEX software_edition_has_version_FKIndex2(version_id),
+  FOREIGN KEY(software_edition_entity_edition_id)
+    REFERENCES software_edition(entity_edition_id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(version_id)
+    REFERENCES version(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE software_edition_has_subtitle (
+  software_edition_entity_edition_id INTEGER UNSIGNED NOT NULL,
+  language_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(software_edition_entity_edition_id, language_id),
+  INDEX software_edition_has_language_FKIndex1(software_edition_entity_edition_id),
+  INDEX software_edition_has_language_FKIndex2(language_id),
+  FOREIGN KEY(software_edition_entity_edition_id)
+    REFERENCES software_edition(entity_edition_id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
@@ -2253,19 +2317,19 @@ CREATE TABLE entity_edition_comments (
 )
 TYPE=InnoDB;
 
-CREATE TABLE entity_edition_has_currency (
+CREATE TABLE entity_edition_has_language (
   entity_edition_id INTEGER UNSIGNED NOT NULL,
-  currency_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(entity_edition_id, currency_id),
-  INDEX entity_edition_has_currency_FKIndex1(entity_edition_id),
-  INDEX entity_edition_has_currency_FKIndex2(currency_id),
+  language_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(entity_edition_id, language_id),
+  INDEX entity_edition_has_language_FKIndex1(entity_edition_id),
+  INDEX entity_edition_has_language_FKIndex2(language_id),
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
-      ON DELETE NO ACTION
+      ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(currency_id)
-    REFERENCES currency(id)
-      ON DELETE NO ACTION
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -2287,19 +2351,82 @@ CREATE TABLE entity_edition_has_subtitle (
 )
 TYPE=InnoDB;
 
-CREATE TABLE entity_edition_has_language (
+CREATE TABLE entity_edition_has_currency (
   entity_edition_id INTEGER UNSIGNED NOT NULL,
-  language_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(entity_edition_id, language_id),
-  INDEX entity_edition_has_language_FKIndex1(entity_edition_id),
-  INDEX entity_edition_has_language_FKIndex2(language_id),
+  currency_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(entity_edition_id, currency_id),
+  INDEX entity_edition_has_currency_FKIndex1(entity_edition_id),
+  INDEX entity_edition_has_currency_FKIndex2(currency_id),
+  FOREIGN KEY(entity_edition_id)
+    REFERENCES entity_edition(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(currency_id)
+    REFERENCES currency(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE soundtrack_for_entity_edition (
+  soundtrack_id INTEGER UNSIGNED NOT NULL,
+  entity_edition_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(soundtrack_id, entity_edition_id),
+  INDEX soundtrack_has_entity_edition_FKIndex1(soundtrack_id),
+  INDEX soundtrack_has_entity_edition_FKIndex2(entity_edition_id),
+  FOREIGN KEY(soundtrack_id)
+    REFERENCES soundtrack(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(language_id)
-    REFERENCES language(id)
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE collaborator_provides_release (
+  collaborator_id INTEGER UNSIGNED NOT NULL,
+  entity_release_id BIGINT UNSIGNED NOT NULL,
+  collaborator_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(collaborator_id, entity_release_id),
+  INDEX collaborator_has_entity_release_FKIndex1(collaborator_id),
+  INDEX collaborator_has_entity_release_FKIndex2(entity_release_id),
+  INDEX collaborator_provides_release_FKIndex3(collaborator_type_id),
+  FOREIGN KEY(collaborator_id)
+    REFERENCES collaborator(id)
       ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(entity_release_id)
+    REFERENCES entity_release(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collaborator_type_id)
+    REFERENCES collaborator_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+TYPE=InnoDB;
+
+CREATE TABLE collaborator_member_produces_entity_release (
+  collaborator_member_id INTEGER UNSIGNED NOT NULL,
+  entity_release_id BIGINT UNSIGNED NOT NULL,
+  function_type_id INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(collaborator_member_id, entity_release_id),
+  INDEX member_has_entity_release_FKIndex1(collaborator_member_id),
+  INDEX member_has_entity_release_FKIndex2(entity_release_id),
+  INDEX member_produces_entity_release_FKIndex3(function_type_id),
+  FOREIGN KEY(collaborator_member_id)
+    REFERENCES collaborator_member(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(entity_release_id)
+    REFERENCES entity_release(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(function_type_id)
+    REFERENCES function_type(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
@@ -2327,60 +2454,6 @@ CREATE TABLE number_edition (
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
-
-CREATE TABLE number_release (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  number_release_id INTEGER UNSIGNED NOT NULL,
-  entity_release_id BIGINT UNSIGNED NOT NULL,
-  number_type_id INTEGER UNSIGNED NOT NULL,
-  entity_type_id INTEGER UNSIGNED NOT NULL,
-  number INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(id),
-  INDEX number_release_FKIndex1(entity_type_id),
-  INDEX number_release_FKIndex2(number_type_id),
-  INDEX number_release_FKIndex3(entity_release_id),
-  INDEX number_release_FKIndex4(number_release_id),
-  FOREIGN KEY(entity_type_id)
-    REFERENCES entity_type(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(number_type_id)
-    REFERENCES number_type(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_release_id)
-    REFERENCES entity_release(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(number_release_id)
-    REFERENCES number_release(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE collaborator_provides_release (
-  collaborator_id INTEGER UNSIGNED NOT NULL,
-  entity_release_id BIGINT UNSIGNED NOT NULL,
-  collaborator_type_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(collaborator_id, entity_release_id),
-  INDEX collaborator_has_entity_release_FKIndex1(collaborator_id),
-  INDEX collaborator_has_entity_release_FKIndex2(entity_release_id),
-  INDEX collaborator_provides_release_FKIndex3(collaborator_type_id),
-  FOREIGN KEY(collaborator_id)
-    REFERENCES collaborator(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_release_id)
-    REFERENCES entity_release(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(collaborator_type_id)
-    REFERENCES collaborator_type(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
 
 CREATE TABLE company_has_entity_edition (
   company_id INTEGER UNSIGNED NOT NULL,
@@ -2453,42 +2526,33 @@ CREATE TABLE entity_edition_has_image (
 )
 TYPE=InnoDB;
 
-CREATE TABLE collaborator_member_produces_entity_release (
-  collaborator_member_id INTEGER UNSIGNED NOT NULL,
+CREATE TABLE number_release (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  number_release_id INTEGER UNSIGNED NOT NULL,
   entity_release_id BIGINT UNSIGNED NOT NULL,
-  function_type_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(collaborator_member_id, entity_release_id),
-  INDEX member_has_entity_release_FKIndex1(collaborator_member_id),
-  INDEX member_has_entity_release_FKIndex2(entity_release_id),
-  INDEX member_produces_entity_release_FKIndex3(function_type_id),
-  FOREIGN KEY(collaborator_member_id)
-    REFERENCES collaborator_member(id)
-      ON DELETE CASCADE
+  number_type_id INTEGER UNSIGNED NOT NULL,
+  entity_type_id INTEGER UNSIGNED NOT NULL,
+  number INTEGER UNSIGNED NOT NULL,
+  PRIMARY KEY(id),
+  INDEX number_release_FKIndex1(entity_type_id),
+  INDEX number_release_FKIndex2(number_type_id),
+  INDEX number_release_FKIndex3(entity_release_id),
+  INDEX number_release_FKIndex4(number_release_id),
+  FOREIGN KEY(entity_type_id)
+    REFERENCES entity_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(number_type_id)
+    REFERENCES number_type(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(function_type_id)
-    REFERENCES function_type(id)
+  FOREIGN KEY(number_release_id)
+    REFERENCES number_release(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-TYPE=InnoDB;
-
-CREATE TABLE mod_has_image (
-  mod_id INTEGER UNSIGNED NOT NULL,
-  image_id BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY(mod_id, image_id),
-  INDEX mod_has_image_FKIndex1(mod_id),
-  INDEX mod_has_image_FKIndex2(image_id),
-  FOREIGN KEY(mod_id)
-    REFERENCES mod(id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(image_id)
-    REFERENCES image(id)
-      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;

@@ -4,6 +4,15 @@ INSERT INTO shop_location (
 )
 VALUES()
 
+
+CREATE TABLE audio_channels (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id)
+)
+TYPE=InnoDB;
+CREATE TABLE image_audio_type ( id, name ) VALUES ()
+
 INSERT INTO scale ( id, name ) VALUES (1, '1/1')
 INSERT INTO scale ( id, name ) VALUES (2, '1/2')
 INSERT INTO scale ( id, name ) VALUES (3, '1/3')
@@ -384,6 +393,9 @@ INSERT INTO image_soundtrack_type (
   name 
 )
 VALUES()
+
+INSERT INTO image_user_type ( id, name ) VALUES( 1, 'profile')
+
 INSERT INTO lyric_type (
   id
   name 
