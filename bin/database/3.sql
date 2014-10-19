@@ -225,7 +225,7 @@ INSERT INTO image_company_type (id, name) VALUES(6, 'Google Map')
 
 
 
-INSERT INTO image_figure_type (
+INSERT INTO image_goods_type (
   id
   name 
 )
@@ -494,7 +494,7 @@ INSERT INTO collection (
   description 
 )
 VALUES()
-INSERT INTO lists_figure (
+INSERT INTO lists_goods (
   id
   user_id
   name 
@@ -880,10 +880,10 @@ INSERT INTO people_produces_entity (
   produces_type_id
 )
 VALUES()
-INSERT INTO figure (
+INSERT INTO goods (
   id 
   entity_id 
-  figure_version_id
+  goods_version_id
   currency_id
   scale_id
   country_id
@@ -904,9 +904,9 @@ INSERT INTO lists_edition_list_entity_edition (
   observation 
 )
 VALUES()
-INSERT INTO lists_figure_list_figure (
-  lists_figure_id
-  figure_id 
+INSERT INTO lists_goods_list_goods (
+  lists_goods_id
+  goods_id 
   ownership_status_id
   box_condition_type_id
   product_condition_type_id
@@ -993,14 +993,14 @@ INSERT INTO entity_edition_has_currency (
   currency_id
 )
 VALUES()
-INSERT INTO figure_from_persona (
-  figure_id 
+INSERT INTO goods_from_persona (
+  goods_id 
   persona_id
 )
 VALUES()
-INSERT INTO figure_has_category (
+INSERT INTO goods_has_category (
   category_id
-  figure_id 
+  goods_id 
 )
 VALUES()
 INSERT INTO entity_release_has_version (
@@ -1013,8 +1013,8 @@ INSERT INTO entity_release_has_language (
   language_id
 )
 VALUES()
-INSERT INTO figure_has_material (
-  figure_id 
+INSERT INTO goods_has_material (
+  goods_id 
   material_id
 )
 VALUES()
@@ -1029,18 +1029,18 @@ INSERT INTO mod (
   installation_instruction 
 )
 VALUES()
-INSERT INTO figure_has_shop_location (
-  figure_id 
+INSERT INTO goods_has_shop_location (
+  goods_id 
   shop_location_id
 )
 VALUES()
-INSERT INTO figure_has_tag (
+INSERT INTO goods_has_tag (
   tag_id
-  figure_id 
+  goods_id 
 )
 VALUES()
-INSERT INTO figure_has_shops (
-  figure_id 
+INSERT INTO goods_has_shops (
+  goods_id 
   shops_id
   product_url 
   checked_last
@@ -1089,10 +1089,10 @@ INSERT INTO entity_has_company (
   company_function_type_id
 )
 VALUES()
-INSERT INTO figure_has_image (
+INSERT INTO goods_has_image (
   image_id 
-  figure_id 
-  image_figure_type_id
+  goods_id 
+  image_goods_type_id
 )
 VALUES()
 INSERT INTO entity_edition_has_image (
@@ -1125,9 +1125,9 @@ INSERT INTO lists_release_list_entity_release (
   local_storage 
 )
 VALUES()
-INSERT INTO people_produces_figure (
+INSERT INTO people_produces_goods (
   people_id 
-  figure_id 
+  goods_id 
   people_alias_id
   create_type_id
 )
@@ -1172,9 +1172,9 @@ INSERT INTO people_comments (
   update_date
 )
 VALUES()
-INSERT INTO figure_comments (
+INSERT INTO goods_comments (
   id
-  figure_id 
+  goods_id 
   users_id
   content 
   title 
