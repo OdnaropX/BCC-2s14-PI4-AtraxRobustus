@@ -778,7 +778,7 @@ CREATE TABLE collaborator_has_collaborator_member (
 );
 
 CREATE TABLE soundtrack_integrate_collection (
-  collection_id INTEGER UNSIGNED NOT NULL,
+  collection_id INTEGER UNSIGNED NULL,
   soundtrack_id INTEGER UNSIGNED NOT NULL,
   PRIMARY KEY(collection_id, soundtrack_id),
   FOREIGN KEY(collection_id)
@@ -1057,7 +1057,7 @@ CREATE TABLE entity (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   entity_type_id INTEGER UNSIGNED NOT NULL,
   classification_type_id INTEGER UNSIGNED NOT NULL,
-  collection_id INTEGER UNSIGNED NOT NULL,
+  collection_id INTEGER UNSIGNED NULL,
   language_id INTEGER UNSIGNED NOT NULL,
   country_id INTEGER UNSIGNED NOT NULL,
   gender_id INTEGER UNSIGNED NOT NULL,
@@ -1307,7 +1307,7 @@ TYPE=InnoDB;
 
 CREATE TABLE entity_alias (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  people_alias_type_id INTEGER UNSIGNED NOT NULL,
+  alias_type_id INTEGER UNSIGNED NOT NULL,
   entity_id BIGINT UNSIGNED NOT NULL,
   language_id INTEGER UNSIGNED NOT NULL,
   name VARCHAR NOT NULL,
@@ -1320,7 +1320,7 @@ CREATE TABLE entity_alias (
     REFERENCES entity(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
-  FOREIGN KEY(people_alias_type_id)
+  FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
@@ -2413,13 +2413,11 @@ TYPE=InnoDB;
 
 CREATE TABLE goods (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  collection_id INTEGER UNSIGNED NOT NULL,
+  collection_id INTEGER UNSIGNED NULL,
   goods_type_id INTEGER UNSIGNED NOT NULL,
   height TINYINT UNSIGNED NOT NULL,
   width TINYINT UNSIGNED NULL,
   weight DECIMAL NULL,
-  launch_price DECIMAL NOT NULL,
-  release_date DATE NOT NULL,
   observation TEXT NULL,
   has_counterfeit BOOL NOT NULL,
   collection_started BOOL NOT NULL,
@@ -2481,7 +2479,7 @@ CREATE TABLE goods_description (
   id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   goods_id BIGINT UNSIGNED NOT NULL,
   language_id INTEGER UNSIGNED NOT NULL,
-  content TEXT NOT NULL,
+  description TEXT NOT NULL,
   PRIMARY KEY(id),
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
@@ -2515,7 +2513,6 @@ CREATE TABLE goods_launch_country (
       ON UPDATE NO ACTION
 )
 TYPE=InnoDB;
-
 
 CREATE TABLE people_create_goods (
   people_id BIGINT UNSIGNED NOT NULL,
@@ -2656,7 +2653,7 @@ CREATE TABLE goods_has_material (
 )
 TYPE=InnoDB;
 
-CREATE TABLE company_produces_goods (
+CREATE TABLE goods_has_company (
   company_id INTEGER UNSIGNED NOT NULL,
   goods_id BIGINT UNSIGNED NOT NULL,
   company_function_type_id INTEGER UNSIGNED NOT NULL,
