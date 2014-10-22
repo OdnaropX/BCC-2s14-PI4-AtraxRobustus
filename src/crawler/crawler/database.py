@@ -1,5 +1,7 @@
 import psycopg2
 import warnings
+import types
+import collections
 
 """
 	Class for connection and manipulation of database.
@@ -52,6 +54,8 @@ class Database:
 	#Default image types registered
 	image_user_type_profile = 1
 	
+	classification_type_18 = 17
+	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
 		self.dbuser = dbuser
@@ -60,8 +64,8 @@ class Database:
 		self.dbport = dbport	
 		
 		#Load used type from database 
-		if(load_types):
-			self.type_alias = self.get_results('alias_type')
+		#if(load_types):
+		#	self.type_alias = self.get_results('alias_type')
 
 	"""
 		Method to set the auto transaction option status]
@@ -156,6 +160,7 @@ class Database:
 		Please don't use this method, use the others available method instead.
 	"""
 	def query(self,sql, parameters = None):		
+		print sql
 		if(sql == "" or sql == None):
 			#error returning
 			self.set_error("No SQL query to execute")
@@ -170,9 +175,12 @@ class Database:
 			
 			self.last_query = self.cursor.query
 			self.status_message = self.cursor.statusmessage
+			print self.last_query
 			return True
 		except psycopg2 as e:
 			print e.pgerror
+			return False
+		except:
 			return False
 
 	"""
@@ -193,7 +201,7 @@ class Database:
 		If was found a error the message make a roll back.
 	"""
 	def change(self, sql, parameters = None):
-		if(self.query(sql, parameters) == False or self.has_error()):
+		if(self.query(sql, parameters) == False or self.has_error() == True):
 			if(self.auto_transaction):
 				self.rollback()
 			return False
@@ -212,9 +220,9 @@ class Database:
 		if(column == ""):
 			raise ValueError("Column name cannot be empty on _fetch_last_inserted_id method.")
 			
-		column = []
-		column.append("currval('{table}_{column}_seq')".format(table=table, column=column))
-		row = select("", column, None, [], [], ["INNER"], None, False)
+		columns = []
+		columns.append("currval('{table}_{column}_seq')".format(table=table, column=column))
+		row = self.select("", columns, None, None, [], [], ["INNER"], None, False)
 		
 		if(row != None):
 			return row[0]
@@ -254,9 +262,9 @@ class Database:
 			value.append("%s")
 		
 		if(length_columns > 0):
-			sql = "INSERT INTO {table} ({columns}) VALUES ({values}) returning id;".format(table=table, columns = ",".join(columns), values=",".join(value))
+			sql = "INSERT INTO {table} ({columns}) VALUES ({values});".format(table=table, columns = ",".join(columns), values=",".join(value))
 		else:
-			sql = "INSERT INTO {table} VALUES ({values}) returning id;".format(table, values=value.join(","))
+			sql = "INSERT INTO {table} VALUES ({values});".format(table=table, values=",".join(value))
 		
 		self.insert_id = 0;
 		
@@ -291,8 +299,9 @@ class Database:
 	"""
 		Method used to delete data from database. 
 		Case Where is not provide all row of the table will be delete, be aware of that.
+		Condition on where must have %s on instead of values and parameter values must contain the values used on where in the correct order.
 	"""
-	def delete(self, table, where = None):
+	def delete(self, table, where = None, values = None):
 		if(table == ""):
 			self.set_error("Table cannot be empty")
 			return False
@@ -301,13 +310,13 @@ class Database:
 			sql = "DELETE FROM {table};".format(table=table)
 		else:
 			sql = "DELETE FROM {table} WHERE {condition};".format(table=table, condition=where)
-		return self.change(sql)
+		return self.change(sql, values)
 	
 	"""
 		Method use to select the data from database.
 		If there is no data None is returned.
 	"""
-	def select(self, table, columns = ['*'], where = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None, from_table = True):
+	def select(self, table, columns = ['*'], where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None, from_table = True):
 		if(table == "" and from_table == True):
 			raise ValueError("Table name cannot be empty on select method.")
 		
@@ -339,7 +348,7 @@ class Database:
 				sql + " LIMIT {0}".format(limit);
 			sql = sql + ";"
 			
-		if(self.change(sql)):
+		if(self.change(sql, where_values)):
 			if(limit):
 				return self.cursor.fetchone();
 			else:
@@ -350,29 +359,29 @@ class Database:
 		Method used to get only one row and one column from database.
 		This method is projection and selection with limit 1.
 	"""
-	def get_var(self, table, columns = ['*'], where = None, joins = [], join_columns = [], join_type = ["INNER"]):
-		return self.select(table, columns, where, joins, join_columns, join_type, 1)
+	def get_var(self, table, columns = ['*'], where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
+		return self.select(table, columns, where, where_values, joins, join_columns, join_type, 1)
 		
 	"""
 		Method used to get only one row from database.
 	"""
-	def get_row(self, table, where = None, joins = [], join_columns = [], join_type = ["INNER"]):
-		return self.select(table, ['*'], where, joins, join_columns, join_type, 1)
+	def get_row(self, table, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
+		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, 1)
 				
 	"""
 		Method used to get only one column from database.
 		All rows within the column will be returned.
 	"""
-	def get_col(self, table, column, where = None, joins = [], join_columns = [], join_type = ["INNER"]):
+	def get_col(self, table, column, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
 		columns = []
 		columns.append(column)
-		return self.select(table, columns, where, joins, join_columns, join_type)
+		return self.select(table, columns, where, where_values, joins, join_columns, join_type)
 	
 	"""
 		Method used to get all the data from a database query.
 	"""
-	def get_results(self, table, where = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None):
-		return self.select(table, ['*'], where, joins, join_columns, join_type, limit)
+	def get_results(self, table, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None):
+		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, limit)
 	
 	
 	############################### Begin of specified methods for the crawler ################################### 
@@ -380,6 +389,37 @@ class Database:
 	
 	################### Internal Methods Used by Other Methods #################### 
 	
+	"""
+		Method used to get id from a table given a name.
+	
+	"""
+	def get_id_from_name(self, table, name):
+		return self.get_id_from_field(table, 'name', name)
+	
+	"""
+		Method used to return the value from column ID from database
+		given a field and value for where condition.
+	"""
+	def get_id_from_field(self, table, field, value):
+		print table, field, value
+		if(isinstance(field, types.StringTypes) and isinstance(value, types.StringTypes)):
+			print "here"
+			where = "{field} = %s".format(field=field)
+			sanitize_value = []
+			sanitize_value.append(value)
+		elif(isinstance(field, collections.Iterable) and isinstance(value, collections.Iterable)):
+			print "here2"
+			where = []
+			for element in field:
+				where.append("{element}=%s".format(element=element))
+			where = " and ".join(where)
+			sanitize_value = value
+		else:
+			print "here3"
+			raise ValueError("Invalid field name input on get_id_from_field(%s, %s, %s)" % (table, field, value))
+			
+		return self.get_var(table, ['id'], where, sanitize_value)
+		
 	"""
 		Method used to insert a item name on a table type.
 		This method can be use to insert name on the follow tables:
@@ -397,8 +437,10 @@ class Database:
 			raise ValueError("Name cannot be empty on add_type method.")
 		
 		table = type_name + '_type'
+		
 		#create name on table if there isn't none. 
-		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		id = self.get_id_from_name(table, name)
+		
 		if(id == None):
 			value = []
 			value.append(name)
@@ -421,7 +463,8 @@ class Database:
 			raise ValueError("Table cannot be empty on add_name_to_table method.")
 			
 		#create name on table if there isnt none. 
-		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		id = self.get_id_from_name(table, name)
+		
 		if(id == None):
 			value = []
 			value.append(name)
@@ -441,7 +484,8 @@ class Database:
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 		
 		table = type + '_codec'
-		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		
+		id = self.get_id_from_name(table, name)
 		if(id == None):
 			columns = ['name', 'lossless']
 			
@@ -472,7 +516,7 @@ class Database:
 			raise ValueError("Url cannot be empty on add_image method.")
 			
 		table = 'image'
-		id = self.get_var(table, ['id'], "url = '{url}'".format(url))
+		id = self.get_id_from_field(table, 'url', url)
 		if(id == None):
 			columns = ['url', 'extension', 'name']
 			value = []
@@ -502,7 +546,12 @@ class Database:
 		
 		table = relation_table + "_has_image"
 		
-		id = self.get_var(table, ['image_id'], "image_id = {image_id} and {relation_table}_id = {second_id}".format(image_id, relation_table, second_id))
+		where_values = []
+		where_values.append(image_id)
+		where_values.append(second_id)
+		where_values.append(image_id)
+		id = self.get_var(table, ['image_id'], "image_id = %s and {relation_table}_id = %s".format(relation_table=relation_table), where_values)
+		
 		if(id == None):
 			columns = ['image_id', relation_table + '_id', 'image_' + relation_table + '_type_id']
 			value = []
@@ -517,7 +566,7 @@ class Database:
 		Method used to insert on tables with cardinality N:M that have only the foreign keys.
 		This method can be use to insert on the follow tables:
 		country_has_language, soundtrack_integrate_collection, category_has_filter_type, tag_has_filter_type,audio_has_language, company_sponsors_event,
-		company_owner_collection, company_has_country, people_has_image, genre_type_has_audio, entity_has_category, entity_has_tag, 
+		company_owner_collection, company_has_country, people_has_image, genre_type_has_audio, entity_has_category, entity_has_tag, entity_has_gender,
 		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, goods_from_persona, goods_has_category,
 		entity_release_has_version, entity_release_has_language, goods_has_material, goods_has_shop_location, goods_has_tag, mod_release_has_image,
 		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
@@ -537,7 +586,12 @@ class Database:
 			another = 'another_'
 		
 		table = first_table + '_' + relation_type + '_' + second_table
-		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and {another}{second_table}_id = {second_id}".format(first_table, first_id, another, second_table, second_id))
+		
+		where_values = []
+		where_values.append(first_id)
+		where_values.append(second_id)
+		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = %s and {another}{second_table}_id = %s".format(first_table=first_table, another=another, second_table=second_table), where_values)
+		
 		if(id == None):
 			if(first_table != second_table):
 				columns = [first_table + '_id', second_table + '_id']
@@ -585,7 +639,11 @@ class Database:
 			
 		table = first_table + "_" + relation_type + "_" + second_table
 		
-		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = {first_id} and {another}{second_table}_id = {second_id} and {relation_type}{type}_id = {relation_type_id}".format(first_table, first_id, another, second_table, second_id, relation_type, type, relation_type_id))
+		where_values = []
+		where_values.append(first_id)
+		where_values.append(second_id)
+		where_values.append(relation_type_id)
+		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = %s and {another}{second_table}_id = %s and {relation_type}{type}_id = %s".format(first_table=first_table, another=another, second_table=second_table, relation_type=relation_type, type=type),where_values)
 		if(id == None):
 			columns = [first_table + '_id', another + second_table + '_id', relation_table + type + '_id']
 			value = []
@@ -608,29 +666,40 @@ class Database:
 		To insert a number associated with another on number_release use the method add_number_to_release instead.
 		add_number_to_release also make the relationship after the insertion of number data. 
 	"""
-	def add_number(self, type = 'release', entity_id, number_type_id, number, number_release_id = None):
+	def add_number(self, entity_id, number_type_id, number, type = 'release', number_release_id = None):
 		if(number == ""):
 			raise ValueError("Number cannot be empty on add_edition_number method.")
 		
 		if(number_type_id == ""):
 			raise ValueError("Number type id cannot be empty on add_edition_number method.")
 			
-
+		where_values = []
 		#check if already there is this number registered on database
-		if(type = 'release'):
+		if(type == 'release'):
 			#check if entity_id really exists
 			self.check_id_exists('entity_release', entity_id)
 			if(number_release_id != None):
-				where = "number = '{number}' and number_release_id = {number_release_id} and entity_release_id = {entity_id} and number_type_id = {number_type_id}".format(number,number_release_id, entity_id, number_type_id)
+				where = "number = %s and number_release_id = %s and entity_release_id = %s and number_type_id = %s"
+				where_values.append(number)
+				where_values.append(number_release_id)
+				where_values.append(entity_id)
+				where_values.append(number_type_id)
 			else:
-				where = "number = '{number}' and number_release_id IS NULL and entity_release_id = {entity_id} and number_type_id = {number_type_id}".format(number, entity_id, number_type_id)
+				where = "number = %s and number_release_id IS NULL and entity_release_id = %s and number_type_id = %s"
+				where_values.append(number)
+				where_values.append(entity_id)
+				where_values.append(number_type_id)
 		else:
 			#check if entity_id really exists
 			self.check_id_exists('entity_edition', entity_id)
-			where = "number = '{number}' and entity_edition_id = {entity_id} and number_type_id = {number_type_id}".format(number, entity_id, number_type_id)
-		
+			where = "number = %s and entity_edition_id = %s and number_type_id = %s"
+			where_values.append(number)
+			where_values.append(entity_id)
+			where_values.append(number_type_id)
+			
 		table = 'number_' + type
-		id = self.get_var(table, ['id'], where)
+		
+		id = self.get_var(table, ['id'], where, where_values)
 		if(id == None):
 			#register
 			columns = ['entity_'+ type +'_id', 'number_type_id', 'number']
@@ -647,7 +716,7 @@ class Database:
 			
 			id = self.get_last_insert_id(table)
 			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_number(%s, %s, %s, %s, %s)." % (type, entity_id, number_type_id, number, number_release_id))
+				raise ValueError("There is no last insert id to return on add_number(%s, %s, %s, %s, %s)." % (entity_id, number_type_id, number, type, number_release_id))
 		return id
 	
 	"""
@@ -656,7 +725,7 @@ class Database:
 	"""
 	def check_id_exists(self, table, id):
 		#check if id really exists on table
-		id = self.get_var(table, ['id'], "id = {id}".format(id))
+		id = self.get_id_from_field(table, 'id', id)
 		if(id == None):
 			raise ValueError("Error on insert mod, entity_release don't exists.")
 		return True
@@ -675,7 +744,13 @@ class Database:
 		self.check_id_exists('entity', entity_id)
 		
 		table = alias_for + '_alias'
-		id = self.get_var(table, ['id'], "language_id = {language_id} and name = '{name}' and {alias_for}_id = {entity_id}".format(language_id, name, alias_for, entity_id))
+		
+		where_values = []
+		where_values.append(language_id)
+		where_values.append(name)
+		where_values.append(entity_id)
+		id = self.get_id_from_field(table, ['language_id','name',alias_for + '_id'], where_values)
+		
 		if(id == None):
 			columns = ['alias_type_id', alias_for + '_id', 'language_id', 'name']
 			value = []
@@ -707,7 +782,11 @@ class Database:
 		self.check_id_exists(launch_for, entity_id)
 		
 		table = launch_for + '_launch_country'
-		id = self.get_var(table, [launch_for + '_id'], "{launch_for}_id = {entity_id} and country_id = {country_id} and currency_id = {launch_currency_id}".format(launch_for, entity_id, country_id, launch_currency_id))
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(country_id)
+		where_values.append(launch_currency_id)
+		id = self.get_var(table, [launch_for + '_id'], "{launch_for}_id = %s and country_id = %s and currency_id = %s".format(launch_for=launch_for), where_values)
 		if(id == None):
 			columns = [launch_for + '_id', 'country_id' , 'launch_date', 'launch_price', 'currency_id']
 			value = []
@@ -787,8 +866,8 @@ class Database:
 			raise ValueError("Name cannot be empty on add_entity_wiki method.")
 		
 		table =	'entity_wiki'
-		id = self.get_var(table, ['id'], "url = '{url}'".format(url=url))
-		
+
+		id = self.get_id_from_field(table, 'url', url)
 		if(id == None):
 			columns = ['entity_id', 'name', 'url', 'language_id']
 			value = []
@@ -814,7 +893,10 @@ class Database:
 		self.check_id_exists('entity', entity_id)
 		
 		table = 'entity_synopsis'
-		id = self.get_var(table, ['entity_id'], "entity_id = {entity_id} and language_id = {language_id}".format(entity_id, language_id))
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(language_id)
+		id = self.get_var(table, ['entity_id'], "entity_id = %s and language_id = %s",where_values)
 		if(id == None):
 			columns = ['entity_id', 'language_id', 'content']
 			value = []
@@ -832,8 +914,8 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters titles must have elements that are dict. 
 	"""
-	def create_entity(self, romanized_title, romanize_subtitle = None, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], return_method = False):
+	def create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
+	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], romanize_subtitle = None, return_method = False):
 		if(romanized_title == ""):
 			raise ValueError("Romanized title cannot be empty on create_entity method.")
 		
@@ -869,7 +951,7 @@ class Database:
 				self.add_multi_relation(entity_id, tag['id'], 'entity', 'tag')
 	
 			for wiki in wikis:
-				self.add_entity_wiki(entity_id, wiki['name'], wiki['url'], wiki['language_id']):
+				self.add_entity_wiki(entity_id, wiki['name'], wiki['url'], wiki['language_id'])
 			
 			for persona in personas:
 				#persona first_appear is 0 or 1.
@@ -904,7 +986,7 @@ class Database:
 		
 		The parameter subtitle refers to subheading and not a caption.
 	"""
-	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None):
+	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None):
 		if(title == ""):
 			raise ValueError("Name cannot be empty on add_edition method.")
 		
@@ -914,12 +996,17 @@ class Database:
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
-		where = "entity_id = {entity_id} and title = {title}".format(entity_id, title)
+		where = ['entity_id','title']
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(title)
 		if(code != None):
-			where = where + " and code = {code}".format(code)
-		
+			where.append('code')
+			where_values.append(code)
+			
 		table = 'entity_edition'
-		id = self.get_var(table, ['id'], where)
+		
+		id = self.get_id_from_field(table, where, where_values)
 		if(id == None):
 			columns = ['edition_type_id', 'entity_id', 'title', 'free', 'censored']
 			value = []
@@ -975,7 +1062,7 @@ class Database:
 		if(edition_id == ""):
 			raise ValueError("Edition id cannot be empty on add_edition_number method.")
 			
-		return add_number('edition', edition_id, number_type_id, number)
+		return add_number(edition_id, number_type_id, number, 'edition')
 
 	
 	"""
@@ -989,7 +1076,7 @@ class Database:
 			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
 			
 		if(plataform_type_id == ""):
-			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")]
+			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")
 			
 		if(software_type_id == ""):
 			raise ValueError("software_type_id cannot be empty on add_software_edition method.")
@@ -1001,7 +1088,14 @@ class Database:
 		self.check_id_exists('entity_edition', entity_edition_id)
 		
 		table = 'software_edition'
-		id = self.get_var(table, ['entity_edition_id'], "entity_edition_id = {entity_edition_id} and plataform_type_id = {plataform_type_id} and software_type_id = {software_type_id} and media_type_id = {media_type_id}".format(language_id, name, entity_id))
+		
+		where_values = []
+		where_values.append(entity_edition_id)
+		where_values.append(plataform_type_id)
+		where_values.append(software_type_id)
+		where_values.append(media_type_id)
+		
+		id = self.get_var(table, ['entity_edition_id'], "entity_edition_id = %s and plataform_type_id = %s and software_type_id = %s and media_type_id = %s",where_values)
 		if(id == None):
 			columns = ['entity_edition_id', 'plataform_type_id', 'software_type_id', 'media_type_id']
 			value = []
@@ -1025,11 +1119,13 @@ class Database:
 			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
 			
 		if(pages_number == ""):
-			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")]
+			raise ValueError("pages_number cannot be empty on add_read_edition method.")
 		
 		table = 'read_edition'
 		
-		id = self.get_var(table, ['id'], "entity_edition_id = {entity_edition_id}".format(entity_edition_id))
+		where_values = []
+		where_values.append(entity_edition_id)
+		id = self.get_var(table, ['entity_edition_id'], 'entity_edition_id = %s', where_values)
 		if(id == None):
 			columns = ['entity_edition_id', 'print_type_id', 'pages_number']
 			value = []
@@ -1065,7 +1161,7 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters titles must have elements that are dict. 
 	"""
-	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id == None,
+	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None,
 	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = [], return_method = False):
 
 		#set commit to false.
@@ -1118,15 +1214,14 @@ class Database:
 		The method differ from create_edition on that it not request subtitles because subtitles, or captions, are for videos; game is a video based content.
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
-	def create_read_edition(self, print_type_id, pages_number, chapters_number = None,
-	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id == None,
+	def create_read_edition(self, print_type_id, pages_number, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, chapters_number = None, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id = None,
 	languages_id = [], launch_countries = [], companies = [], images = []):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 			
 		try:
-			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images, True):
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images, True)
 			self.add_read_edition(self, edition_id, print_type_id, pages_number, chapters_number)
 			
 			#commit changes
@@ -1145,14 +1240,14 @@ class Database:
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
 	def create_software_edition(self, plataform_type_id, software_type_id, media_type_id,	
-	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id == None,
+	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id = None,
 	languages_id = [], subtitles = [], launch_countries = [], companies = [], images = []):
 	
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images, True):
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images, True)
 			self.add_software_edition(edition_id, plataform_type_id, software_type_id, media_type_id)
 			#commit changes
 			self.commit()
@@ -1191,8 +1286,12 @@ class Database:
 		
 		table = 'entity_release'
 		
-		id = self.get_var(table, ['id'], "entity_id = {entity_id} and release_type_id = {release_type_id} and entity_edition_id = {entity_edition_id} and country_id = {country_id}".format(entity_id, release_type_id, entity_edition_id, country_id))
-		
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(release_type_id)
+		where_values.append(entity_edition_id)
+		where_values.append(country_id)
+		id = self.get_id_from_field(table, ['entity_id','release_type_id','entity_edition_id','country_id'], where_values)
 		if(id == None):
 			columns = ['entity_id','release_type_id','country_id','entity_edition_id','description','release_date']
 			value = []
@@ -1226,7 +1325,9 @@ class Database:
 			
 		table = 'game_release'
 		
-		id = get_var(table, ['entity_release_id'], "entity_release_id = {entity_release_id}".format(entity_release_id))
+		where_values = []
+		where_values.append(entity_release_id)
+		id = get_var(table, ['entity_release_id'], "entity_release_id = %s", where_values)
 		
 		if(id == None):
 			columns = ['entity_release_id']
@@ -1258,7 +1359,7 @@ class Database:
 			
 		table = 'mod_release'
 		#check if already is a mod fro this entity
-		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id}".format(entity_release_id)
+		id = self.get_id_from_field(table, 'entity_release_id', entity_release_id)
 		if(id == None):
 			columns = ['entity_release_id', 'mod_type_id', 'name', 'author']
 			value = []
@@ -1298,7 +1399,7 @@ class Database:
 		
 		table = 'video_release'
 		#check if already is a video release for this entity
-		id = self.get_var(table, ['id'], "entity_release_id = {entity_release_id}".format(entity_release_id))
+		id = self.get_id_from_field(table, 'entity_release_id', entity_release_id)
 		if(id == None):
 			columns = ['entity_release_id', 'video_codec_id', 'archive_container_id', 'duration', 'resolution','softsub']
 			value = []
@@ -1335,10 +1436,10 @@ class Database:
 				#register volume first.
 				volume_id = None
 				if(number['parent'] != ""):
-					volume_id = add_number('release', release_id, number['parent_type'], number['parent'])
+					volume_id = add_number(release_id, number['parent_type'], 'edition', number['parent'])
 		
 				for chapter in number['child']:
-					add_number('release', release_id, number['child_type'], chapter, volume_id)
+					add_number(release_id, number['child_type'], chapter, 'release', volume_id)
 					
 			return True
 		except ValueError as e:
@@ -1371,7 +1472,7 @@ class Database:
 		The parameters numbers,collaborators and collaborator_members must have elements that are dict.
 		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method. 
 	"""
-	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
+	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None,
 	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = [], return_method = False):
 		
 		#set commit to false.
@@ -1476,8 +1577,8 @@ class Database:
 		Method used to create a video release that is a specialization of entity_release.
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
-	def create_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution, audio_codecs = [],
-	entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None
+	def create_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution, 
+	entity_id, release_type_id, country_id, entity_edition_id, audio_codecs = [], release_date = None, description = None,
 	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
 		
 		#set commit to false.
@@ -1563,7 +1664,11 @@ class Database:
 		self.check_id_exists('persona', persona_id)
 		
 		table = 'persona_' + item_table
-		id = get_var(table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		where_values = []
+		where_values.append(name)
+		where_values.append(persona_id)
+		id = self.get_id_from_field(table, ['name','persona_id'], where_values)
+		
 		if(id == None):
 			columns = ['persona_id', 'name']
 			value = []
@@ -1591,7 +1696,10 @@ class Database:
 		
 		table = 'persona_alias'
 		
-		id = get_var(table, ['id'], "name = '{name}' and persona_id = {persona_id}".format(name, persona_id))
+		where_values = []
+		where_values.append(name)
+		where_values.append(persona_id)
+		id = self.get_id_from_field(table, ['name', 'persona_id'], where_values)
 		
 		if(id == None):
 			columns = ['persona_id', 'name', 'alias_type_id']
@@ -1636,7 +1744,10 @@ class Database:
 		
 		table = 'persona_appear_on_entity'
 		
-		id = self.get_var(table, ['persona_id'], "entity_id = {entity_id} and persona_id = {persona_id}".format(entity_id, persona_id))
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(persona_id)
+		id = self.get_var(table, ['persona_id'], "entity_id = %s and persona_id = %s",where_values)
 		
 		if(id == None):
 			columns = ['persona_id', 'entity_id', 'first_appear', 'alias_used_id']
@@ -1729,7 +1840,7 @@ class Database:
 		Countries must be already save on database prior to the usage of this method.
 		TODO: Use similarity instead equal on name.
 	"""
-	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
+	def add_company(self, name, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on add_company method.")
 	
@@ -1737,13 +1848,18 @@ class Database:
 		self.check_id_exists('country', country_origin_id)
 		
 		table = 'company'
-		id = self.get_var(table, ['id'], "name = '{name}' and country_id = {country_origin_id}".format(name, country_origin_id))
+		where_values = []
+		where_values.append(name)
+		where_values.append(country_origin_id)
+		id = self.get_id_from_field(table, ['name','country_id'], where_values)
 		if(id == None):
-			columns = ['country_id','name']
+			columns = ['name']
 			value = []
-			value.append(country_id)
 			value.append(name)
 			
+			if(country_origin_id != None):
+				columns.append('country_id')
+				value.append(country_origin_id)
 			if(description != None):
 				columns.append('description')
 				value.append(description)
@@ -1792,7 +1908,11 @@ class Database:
 		
 		table = relation_table + '_has_company'
 		
-		id = self.get_var(table, ['company_id'], "company_id = {company_id} and {relation_table}_id = {second_id} and company_function_type_id = {company_function_type_id}".format(people_id, relation_table, second_id, relation_type, company_function_type_id))
+		where_values = []
+		where_values.append(company_id)
+		where_values.append(second_id)
+		where_values.append(company_function_type_id)
+		id = self.get_var(table, ['company_id'], "company_id = %s and {relation_table}_id = %s and company_function_type_id = %s".format(relation_table),where_values)
 		if(id == None):
 			columns = ['company_id', relation_table + '_id', 'company_function_type_id']
 			value = []
@@ -1824,7 +1944,7 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters images, editions, entities must have elements that are dict. 
 	"""		
-	def create_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
+	def create_company(self, name, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
 	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = []):	
 		
 		self.set_auto_transaction(False)
@@ -1834,13 +1954,13 @@ class Database:
 		
 			#add events sponsored
 			for event_sponsored in events_sponsored:
-				self.add_multi_relation(company_id, event_sponsored, 'company', 'event', 'sponsors'):
+				self.add_multi_relation(company_id, event_sponsored, 'company', 'event', 'sponsors')
 			
 			for owned_collection in owned_collections:
-				self.add_multi_relation(company_id, owned_collection, 'company', 'collection', 'owner'):
+				self.add_multi_relation(company_id, owned_collection, 'company', 'collection', 'owner')
 				
 			for country in countries:
-				self.add_multi_relation(company_id, country, 'company', 'country'):
+				self.add_multi_relation(company_id, country, 'company', 'country')
 				
 			for edition in editions:
 				self.add_relation_company(company_id, edition['id'], edition['company_function_type_id'], 'entity_edition')
@@ -1926,7 +2046,11 @@ class Database:
 		
 		table = 'people_' + relation_type + '_' + relation_table
 		#check if already is a relation with the people_id, second_id and relation_type_id.
-		id = self.get_var(table, ['people_id'], "people_id = {people_id} and {relation_table}_id = {second_id} and {relation_type}_type_id = {relation_type_id}".format(people_id, relation_table, second_id, relation_type, relation_type_id))
+		where_values = []
+		where_values.append(people_id)
+		where_values.append(second_id)
+		where_values.append(relation_type_id)
+		id = self.get_var(table, ['people_id'], "people_id = %s and {relation_table}_id = %s and {relation_type}_type_id = %s".format(relation_table=relation_table, relation_type=relation_type),where_values)
 		if(id == None):
 			columns = ['people_id', relation_table + '_id', 'people_alias_id', relation_type + '_type_id']
 			value = []
@@ -1961,7 +2085,12 @@ class Database:
 		self.check_id_exists('people', people_id)
 		
 		table = 'people_alias'
-		id = self.get_var(table, ['id'], "name = '{name}' and lastname = '{lastname}' and people_id = {people_id}".format(name, lastname, people_id))
+		
+		where_values = []
+		where_values.append(name)
+		where_values.append(lastname)
+		where_values.append(people_id)
+		id = self.get_id_from_field(table, ['name','lastname','people_id'], where_values)
 		if(id == None):
 			columns = ['name', 'alias_type_id', 'people_id', 'lastname']
 			value = []
@@ -2007,7 +2136,12 @@ class Database:
 		self.check_id_exists('entity_edition', entity_edition_id)
 	
 		table = 'people_voice_persona'
-		id = self.get_var(table, ['persona_id'], " persona_id = {persona_id} and people_id = {people_id} and language_id = {language_id}".format(persona_id, people_id, language_id)) 
+		
+		where_values = []
+		where_values.append(persona_id)
+		where_values.append(people_id)
+		where_values.append(language_id)
+		id = self.get_var(table, ['persona_id'], " persona_id = %s and people_id = %s and language_id = %s", where_values) 
 		if(id == None):
 			columns = ['persona_id','people_id','language_id','entity_id','entity_edition_id']
 			value = []
@@ -2049,7 +2183,13 @@ class Database:
 		self.check_id_exists('language', language_id)
 		
 		table = 'people_voice_persona_on_number_edition'
-		id = self.get_var(table, ['persona_id'], " people_voice_persona_persona_id = {persona_id} and people_voice_persona_people_id = {people_id} and people_voice_persona_language_id = {language_id} and number_edition_id = {number_id}".format(persona_id, people_id, language_id, number_id)) 
+		
+		where_values = []
+		where_values.append(persona_id)
+		where_values.append(people_id)
+		where_values.append(language_id)
+		where_values.append(number_id)
+		id = self.get_var(table, ['persona_id'], " people_voice_persona_persona_id = %s and people_voice_persona_people_id = %s and people_voice_persona_language_id = %s and number_edition_id = %s", where_values) 
 		if(id == None):
 			columns = ['people_voice_persona_persona_id', 'people_voice_persona_people_id', 'people_voice_persona_language_id', 'number_edition_id']
 			value = []
@@ -2169,7 +2309,9 @@ class Database:
 		self.check_id_exists('version', version_id)
 		
 		table = 'requirements'
-		id = self.get_var(table, ['id'], "version_id = '{version_id}'".format(version_id))
+
+		id = self.get_id_from_field(table, 'version_id', version_id)
+		
 		if(id == None):
 			columns = ['version_id', 'video_board', 'processor', 'memory', 'hd_storage']
 			value = []
@@ -2195,7 +2337,9 @@ class Database:
 		
 		self.check_id_exists('requirements', requirements_id)
 		
-		id = self.get_var('driver', ['id'], "name = '{name}' and url_download = '{url_download}'".format(name, url_download))
+		where_values = []
+		where_values.append(name, url_download)
+		id = self.get_var('driver', ['id'], "name = %s and url_download = %s",where_values)
 		if(id == None):
 			columns = ['name', 'url_download']
 			value = []
@@ -2229,7 +2373,11 @@ class Database:
 		
 		table = 'archive'
 		
-		id = self.get_var(table, ['id'], "name = '{name}' and extension = '{extension}' and version_id= {version_id}".format(name, extension,version_id))
+		where_values = []
+		where_values.append(name)
+		where_values.append(extension)
+		where_values.append(version_id)
+		id = self.get_id_from_field(table, ['name', 'extension','version_id'], where_values)
 		if(id == None):
 			columns = ['name', 'version_id', 'size', 'extension']
 			value = []
@@ -2262,7 +2410,8 @@ class Database:
 		self.check_id_exists('archive', archive_id)
 		
 		table = 'archive_url'
-		id = self.get_var(table, ['id'], "url = '{url}'".format(url))
+		
+		id = self.get_id_from_field(table, 'url', url)
 		if(id == None):
 			columns = ['url_type_id', 'archive_id', 'url']
 			value = []
@@ -2296,7 +2445,9 @@ class Database:
 		
 		table = 'hash'
 		
-		id = self.get_var(table, ['id'], "archive_id = '{archive_id}' and hash_type_id = {hash_type_id}".format(archive_id, hash_type_id))
+		where_values = []
+		where_values.append(archive_id,hash_type_id)
+		id = self.get_id_from_field(table, ['archive_id','hash_type_id'], where_values)
 		if(id == None):
 			columns = ['hash_type_id', 'archive_id', 'code']
 			value = []
@@ -2440,8 +2591,8 @@ class Database:
 			raise ValueError("Name cannot be empty on add_collection method.")
 		
 		table = 'collection'
-		#register the collection if the collection is mentioned, if not is registered.				
-		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		#register the collection if the collection is mentioned, if not is registered.	
+		id = self.get_id_from_name(table, name)
 		if(id == None):
 			columns = ['name']
 			value = []
@@ -2473,7 +2624,7 @@ class Database:
 				self.add_multi_relation(id, soundtrack_id, 'soundtrack', 'collection', 'integrate')
 			
 			for owner in owners:
-				self.add_multi_relation(owner_id, id, 'company', 'collection', 'owner') == False):
+				self.add_multi_relation(owner_id, id, 'company', 'collection', 'owner')
 			
 			#commit changes
 			self.commit()
@@ -2504,7 +2655,11 @@ class Database:
 		self.check_id_exists('country', country_id)
 		
 		table = 'audio'
-		id = get_var(table, ['id'], "name = '{name}' and country_id = {country_id} and duration = '{duration}'".format(name, country_id, duration))
+		where_values = []
+		where_values.append(name)
+		where_values.append(country_id)
+		where_values.append(duration)
+		id = self.get_id_from_field(table, ['name','country_id','duration'], where_values)
 		if(id == None):
 			columns = ['country_id', 'audio_codec_id', 'name','duration','bitrate']
 			value = []
@@ -2541,7 +2696,10 @@ class Database:
 		self.check_id_exists('soundtrack', soundtrack_id)
 		
 		table = 'soundtrack_has_audio'
-		id = get_var(table, ['audio_id'], "audio_id = {audio_id} and soundtrack_id = {soundtrack_id}".format(audio_id, soundtrack_id))
+		where_values = []
+		where_values.append(audio_id)
+		where_values.append(soundtrack_id)
+		id = get_var(table, ['audio_id'], "audio_id = %s and soundtrack_id = %s", where_values)
 		if(id == None):
 			columns = ['soundtrack_id','audio_id','exclusive']
 			value = []
@@ -2578,13 +2736,24 @@ class Database:
 		self.check_id_exists('audio', audio_id)
 		self.check_id_exists('language', language_id)
 		
+		where_values = []
 		if(user_id != None):
-			where = "audio_id = {audio_id} and language_id = {language_id} and user_id = {user_id} and title = {title} and lyric_type_id = {lyric_type_id}".format(audio_id,language_id,user_id,title,lyric_type_id)
-		else
-			where = "audio_id = {audio_id} and language_id = {language_id} and title = {title} and lyric_type_id = {lyric_type_id}".format(audio_id,language_id,title,lyric_type_id)
-		
+			where = ['audio_id','language_id','user_id','title','lyric_type_id']
+			where_values.append(audio_id)
+			where_values.append(language_id)
+			where_values.append(user_id)
+			where_values.append(title)
+			where_values.append(lyric_type_id)
+		else:
+			where = ['audio_id','language_id','title','lyric_type_id']
+			where_values.append(audio_id)
+			where_values.append(language_id)
+			where_values.append(title)
+			where_values.append(lyric_type_id)
+			
 		table = 'lyric'
-		id = get_var(table, ['id'], where)
+		id = self.get_id_from_field(table, where, where_values)
+		
 		if(id == None):
 			columns = ['lyric_type_id', 'audio_id' ,'language_id', 'title', 'lyric']
 			value = []
@@ -2628,12 +2797,22 @@ class Database:
 		
 		table = 'soundtrack'
 		
+		where_values = []
 		if(code != None):
-			where = "soundtrack_type_id = {type_id} and name = '{name}' and launch_year = {launch_year} and country_id = {launch_country_id} and code = '{code}'".format(type_id,name,launch_year, launch_country_id, code)
+			where = ['soundtrack_type_id','name','launch_year','country_id','code']
+			where_values.append(type_id)
+			where_values.append(name)
+			where_values.append(launch_year)
+			where_values.append(launch_country_id)
+			where_values.append(code)
 		else:
-			where = "soundtrack_type_id = {type_id} and name = '{name}' and launch_year = {launch_year} and country_id = {launch_country_id}".format(type_id,name,launch_year, launch_country_id)
+			where = ['soundtrack_type_id','name','launch_year','country_id']
+			where_values.append(type_id)
+			where_values.append(name)
+			where_values.append(launch_year)
+			where_values.append(launch_country_id)
 		
-		id = get_var(table, ['id'], where)
+		id = self.get_id_from_field(table, where, where_values)
 		if(id == None):
 			columns = ['soundtrack_type_id', 'name' ,'launch_year', 'country_id', 'code']
 			value = []
@@ -2825,7 +3004,11 @@ class Database:
 		
 		table = 'goods_has_shops'
 		#if already is registered on database update the checked_last
-		id = self.get_var(table, ['social_id'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id, shop_id, product_url))
+		where_values = []
+		where_values.append(goods_id)
+		where_values.append(shop_id)
+		where_values.append(product_url)
+		id = self.get_var(table, ['social_id'], "goods_id = %s and shops_id = %s and product_url = %s", where_values)
 		if(id == None):
 			columns = ['goods_id', 'shops_id', 'product_url']
 			value = []
@@ -2838,7 +3021,7 @@ class Database:
 			return True
 		#else update last checked.
 		else:
-			if(self.update(table, ['now()'], ['checked_last'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id, shop_id, product_url)) == False):
+			if(self.update(table, ['now()'], ['checked_last'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id=goods_id, shop_id=shop_id, product_url=product_url)) == False):
 				raise ValueError("An error occurred while trying to update last_checked on add_goods_relation_shops(%s, %s, %s)." % (goods_id, shop_id, product_url))
 			return True
 	
@@ -2850,13 +3033,17 @@ class Database:
 		if(name == ""):
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 	
+		where_values = []
 		if(url != None):
-			where = "name = '{name}' and url = '{url}'".format(name, url)
+			where = ['name','url']
+			where_values.append(name)
+			where_values.append(url)
 		else:
-			where = "name = '{name}'".format(name)
+			where = ['name']
+			where_values.append(name)
 			
 		table = 'shops'
-		id = self.get_var(table, ['id'], where)
+		id = self.get_id_from_field(table, where, where_values)
 		if(id == None):
 			columns = ['name']
 			value = []
@@ -2901,7 +3088,9 @@ class Database:
 		
 		table = 'figure'
 		
-		id = self.get_var(table, ['goods_id'], "goods_id = {goods_id}".format(goods_id))
+		where_values = []
+		where_values.append(goods_id)
+		id = self.get_var(table, ['goods_id'], "goods_id = %s",where_values)
 		if(id == None):
 			columns = ['goods_id', 'figure_version_id', 'scale_id']
 			value = []
@@ -3072,7 +3261,10 @@ class Database:
 			raise ValueError("Date cannot be empty on add_event method.")	
 			
 		table = 'event'
-		id = get_var(table, ['id'], "name = {name} and edition = {edition}".format(name, edition))
+		where_values = []
+		where_values.append(name)
+		where_values.append(edition)
+		id = self.get_id_from_field(table, ['name', 'edition'], where_values)
 		if(id == None):
 			columns = ['name', 'edition', 'date', 'country_id', 'free']
 			value = []
@@ -3149,7 +3341,10 @@ class Database:
 	
 		table = 'collaborator'
 
-		id = self.get_var(table, ['id'], "name = '{name}' and country_id = {country_id}".format(code, country_id))
+		where_values = []
+		where_values.append(name)
+		where_values.append(country_id)
+		id = self.get_id_from_field(table, ['name', 'country_id'])
 		
 		if(id == None):
 			columns = ['name', 'country_id']
@@ -3185,7 +3380,8 @@ class Database:
 			raise ValueError("Name cannot be empty on add_collaborator method.")
 		
 		table = 'collaborator_member'
-		id = self.get_var(table, ['id'], "name = '{name}'".format(code))
+		
+		id = self.get_id_from_name(table, name)
 		if(id == None):
 			columns = ['name', 'active']
 			value = []
@@ -3211,7 +3407,7 @@ class Database:
 		
 		try:
 			member_id = add_member(name, active)
-			self.add_relation_collaborator_member(collaborator_id, id, founder))
+			self.add_relation_collaborator_member(collaborator_id, id, founder)
 			
 			#commit changes
 			self.commit()
@@ -3237,7 +3433,10 @@ class Database:
 			
 		table = 'collaborator_has_collaborator_member'
 		
-		id = self.get_var(table, ['collaborator_id'], "collaborator_id = {collaborator_id} and collaborator_member_id = {member_id}".format(collaborator_id, member_id))
+		where_values = []
+		where_values.append(collaborator_id)
+		where_values.append(member_id)
+		id = self.get_var(table, ['collaborator_id'], "collaborator_id = %s and collaborator_member_id = %s",where_values)
 		if(id == None):
 			columns = ['collaborator_id', 'collaborator_member_id', 'founder']
 			value = []
@@ -3270,7 +3469,10 @@ class Database:
 		
 		table = first_table + '_' + relation + '_entity_release'
 		
-		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = {collaborator_id} and entity_release_id = {release_id}".format(collaborator_id, release_id))
+		where_values = []
+		where_values.append(collaborator_id)
+		where_values.append(release_id)
+		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = %s and entity_release_id = %".format(first_table=first_table), where_values)
 		
 		if(id != None):
 			columns = [first_table + '_id', 'entity_release_id', first_table + '_type_id']
@@ -3296,7 +3498,10 @@ class Database:
 	
 		table = 'collaborator_website'
 		
-		id = self.get_var(table, ['collaborator_id'], "collaborator_id = {collaborator_id} and website = '{website}'".format(collaborator_id, website))
+		where_values = []
+		where_values.append(collaborator_id)
+		where_values.append(website)
+		id = self.get_var(table, ['collaborator_id'], "collaborator_id = %s and website = %s",where_values)
 		
 		if(id == None):
 			columns = ['collaborator_id', 'website']
@@ -3382,7 +3587,7 @@ class Database:
 		table = 'social_type'
 		
 		#insert on table if there isnt the name on table . 
-		id = self.get_var(table, ['id'], "name = '{name}'".format(name))
+		id = self.get_id_from_name(table, name)
 		if(id == None):
 			columns = ['name', 'website']
 			value = []
@@ -3412,7 +3617,7 @@ class Database:
 	
 		table = 'social'
 		
-		id = self.get_var(table, ['id'], "url = '{url}'".format(url))
+		id = self.get_id_from_field(table, 'url', url)
 		if(id == None):
 			columns = ['social_type_id', 'url']
 			value = []
@@ -3445,7 +3650,10 @@ class Database:
 		
 		table = relation_table + "_has_social"
 		
-		id = self.get_var(table, ['social_id'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id, relation_table, second_id))
+		where_values = []
+		where_values.append(social_id)
+		where_values.append(second_id)
+		id = self.get_var(table, ['social_id'], "social_id = %s and {relation_table}_id = %s".format(relation_table=relation_table),where_values)
 		if(id == None):
 			columns = ['social_id', relation_table + '_id']
 			value = []
@@ -3461,7 +3669,7 @@ class Database:
 			return True
 		#else update last checked.
 		else:
-			if(self.update(table, ['now()'], ['last_checked'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id, relation_table, second_id)) == False):
+			if(self.update(table, ['now()'], ['last_checked'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id=social_id, relation_table=relation_table, second_id=second_id)) == False):
 				raise ValueError("An error occurred while trying to update last_checked on add_relation_social(%s, %s, %s, %s)." % (relation_table, social_id, second_id, last_checked))
 			return True
 	
@@ -3519,7 +3727,7 @@ class Database:
 		if(type != 'country'):
 			type = 'language'
 			
-		id = self.get_var(type, ['id'], "name = '{name}'".format(name))
+		id = self.get_id_from_name(type, name)
 		if(id == None):
 			columns = ['name', 'code']
 			value = []
@@ -3546,7 +3754,11 @@ class Database:
 		self.check_id_exists('currency', currency_id)
 		
 		table = 'country_has_currency'
-		id = self.get_var(table, ['currency_id'], "currency_id = {currency_id} and country_id = {country_id}".format(currency_id, country_id))
+		
+		where_values = []
+		where_values.append(currency_id)
+		where_values.append(country_id)
+		id = self.get_var(table, ['currency_id'], "currency_id = %s and country_id = %s",where_values)
 		
 		if(id == None):
 			columns = ['currency_id','country_id','main']
@@ -3575,7 +3787,7 @@ class Database:
 			raise ValueError("symbol cannot be empty on create_entity method.")
 		
 		table = 'currency'
-		id = self.get_var(table, ['id'], "code = '{code}'".format(code))
+		id = self.get_id_from_field(table, 'code', code)
 		if(id == None):
 			columns = ['name', 'symbol', 'code']
 			value = []
@@ -3608,14 +3820,23 @@ class Database:
 		
 		self.check_id_exists('users', user_id)
 		
+		
+		where_values = []
 		#check if already is a lists with this name
 		if(type == 'goods'):
-			where =  "user_id = {user_id} and name = '{name}'".format(user_id,name)
+			field = ['user_id','name']
+			where_values.append(user_id)
+			where_values.append(name)
 		else:
-			where =  "user_id = {user_id} and name = '{name}' and entity_type_id = {entity_type_id}".format(user_id, name, entity_type_id)
+			where =  "user_id = {user_id} and name = '{name}' and entity_type_id = {entity_type_id}".format(user_id=user_id, name=name, entity_type_id=entity_type_id)
+			field = ['user_id','name','entity_type_id']
+			where_values.append(user_id)
+			where_values.append(name)
+			where_values.append(entity_type_id)
 			
 		table = 'lists_' + type
-		id = self.get_var(table, ['id'], where)
+		
+		id = self.get_id_from_field(table, field, where_values)
 		if(id == None):
 			columns = ['user_id', 'name']
 			value = []
@@ -3651,8 +3872,11 @@ class Database:
 		
 		self.check_id_exists('lists_release', list_id)
 		
+		where_values = []
+		where_values.append(list_id)
+		where_values.append(entity_id)
 		table = 'lists_release_list_entity_release'
-		id = self.get_var(table, ['lists_release_id'], "lists_release_id = {list_id} and entity_release_id = {entity_id}".format(list_id, entity_id))
+		id = self.get_var(table, ['lists_release_id'], "lists_release_id = %s and entity_release_id = %s",where_values)
 		if(id == None):
 			columns = ['lists_release_id', 'entity_release_id', 'release_edition_read_status_type_id', 'release_ownership_type_id', 'local_storage']
 			value = []
@@ -3693,7 +3917,10 @@ class Database:
 		
 		table = 'lists_goods_list_goods'
 		
-		id = self.get_var(table, ['lists_release_id'], "lists_release_id = {list_id} and entity_release_id = {entity_id}".format(list_id, entity_id))
+		where_values = []
+		where_values.append(list_id)
+		where_values.append(entity_id)
+		id = self.get_var(table, ['lists_release_id'], "lists_release_id = %s and entity_release_id = %s",where_values)
 		if(id == None):
 			columns = ['lists_goods_id', 'goods_id', 'ownership_status_id', 'box_condition_type_id', 'product_condition_type_id']
 			value = []
@@ -3741,7 +3968,10 @@ class Database:
 		
 		table = 'lists_edition_list_entity_edition'
 		
-		id = self.get_var(table, ['lists_release_id'], "lists_release_id = {list_id} and entity_release_id = {entity_id}".format(list_id, entity_id))
+		where_values = []
+		where_values.append(list_id)
+		where_values.append(entity_id)
+		id = self.get_var(table, ['lists_release_id'], "lists_release_id = %s and entity_release_id = %s",where_values)
 		if(id == None):
 			columns = ['lists_edition_id', 'entity_edition_id', 'ownership_status_id', 'condition_type_id', 'edition_read_status_type_id']
 			value = []
@@ -3782,7 +4012,7 @@ class Database:
 			raise ValueError("Birthday cannot be empty on add_user method.")
 			
 		table = 'users'
-		id = self.get_var(table, ['id'], "username = '{username}'".format(username))
+		id = self.get_id_from_field(table, 'username', username)
 		if(id == None):
 			columns = ['username', 'pass', 'gender', 'birthday']
 			value = []
@@ -3823,7 +4053,9 @@ class Database:
 	
 		table = 'user_email'
 		
-		id = self.get_var(table, ['email'], "email = '{email}'".format(email))
+		where_values = []
+		where_values.append(email)
+		id = self.get_var(table, ['email'], "email = %s", where_values)
 		if(id == None):
 			columns = ['user_id', 'email']
 			value = []
@@ -3854,7 +4086,12 @@ class Database:
 		self.check_id_exists('users', user_id)
 		
 		table = 'user_filter'
-		id = get_var(table, ['id'], "user_id = {user_id} and name = {name} and user_filter_type_id = {type_id}".format(user_id, name, type_id))
+		
+		where_values = []
+		where_values.append(user_id)
+		where_values.append(name)
+		where_values.append(type_id)
+		id = self.get_id_from_field(table, ['user_id', 'name', 'user_filter_type_id'], where_values)
 		if(id == None):
 			columns = ['name','user_id','user_filter_type_id']
 			value = []
@@ -3881,7 +4118,11 @@ class Database:
 			raise ValueError("attribute_id cannot be empty on add_element_to_user_filter method.")
 		
 		table = attribute + '_user_filter'
-		id = self.get_var(table, ['user_filter_id'], "user_filter_id = {user_filter_id} and {attribute}_id = {attribute_id}".format(user_filter_id, attribute, attribute_id))
+		
+		where_values = []
+		where_values.append(user_filter_id)
+		where_values.append(attribute_id)
+		id = self.get_var(table, ['user_filter_id'], "user_filter_id = %s and {attribute}_id = %s".format(attribute=attribute), where_values)
 		if(id == None):
 			columns = ['user_filter_id', attribute + '_id']
 			value = []
