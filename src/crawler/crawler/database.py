@@ -2,6 +2,7 @@ import psycopg2
 import warnings
 import types
 import collections
+from urlparse import urlparse
 
 """
 	Class for connection and manipulation of database.
@@ -46,15 +47,21 @@ class Database:
 	alias_type_main = 1 #Alias Main
 	alias_type_alias = 2 #Alias Alias
 	alias_type_nickname = 3 #Alias Nickname
-	alias_type_title = 4
-	alias_type_subtitle = 5
-	alias_type_romanized = 6 #Alias Romanized Title
-	alias_type_subromanized = 7 #Alias Romanized Subtitle
+	alias_type_nativename = 4
+	alias_type_title = 5
+	alias_type_subtitle = 6
+	alias_type_romanized = 7 #Alias Romanized Title
+	alias_type_subromanized = 8 #Alias Romanized Subtitle
 	
 	#Default image types registered
 	image_user_type_profile = 1
 	
 	classification_type_18 = 17
+	
+	country_us = 236
+	
+	language_jp = 74
+	language_en = 42
 	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
@@ -245,7 +252,11 @@ class Database:
 		Method used to insert data on any table on the database.
 	"""
 	def insert(self, table, values, columns = []):
-		length_columns = len(columns)
+		if columns is None:
+			columns = []
+			length_columns = 0
+		else:
+			length_columns = len(columns)
 		
 		if(table == ""):
 			self.set_error("Table name cannot be empty")
@@ -272,8 +283,9 @@ class Database:
 		
 	"""
 		Method used to update the columns data on table.
+		TODO: Change call of this method.
 	"""
-	def update(self, table, values, columns, where = None):
+	def update(self, table, values, columns, where = None, where_values = None):
 		if(table == ""):
 			self.set_error("Table cannot be empty")
 			return False
@@ -292,6 +304,8 @@ class Database:
 		
 		if(where != None):
 			sql = sql + " WHERE " + where
+			for element in where:
+				values.append(element)
 		
 		sql = sql + ";"
 		return self.change(sql, values)
@@ -301,7 +315,7 @@ class Database:
 		Case Where is not provide all row of the table will be delete, be aware of that.
 		Condition on where must have %s on instead of values and parameter values must contain the values used on where in the correct order.
 	"""
-	def delete(self, table, where = None, values = None):
+	def delete(self, table, where = None, where_values = None):
 		if(table == ""):
 			self.set_error("Table cannot be empty")
 			return False
@@ -310,18 +324,31 @@ class Database:
 			sql = "DELETE FROM {table};".format(table=table)
 		else:
 			sql = "DELETE FROM {table} WHERE {condition};".format(table=table, condition=where)
-		return self.change(sql, values)
+		return self.change(sql, where_values)
 	
 	"""
 		Method use to select the data from database.
 		If there is no data None is returned.
 	"""
-	def select(self, table, columns = ['*'], where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None, from_table = True):
+	def select(self, table, columns = None, where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None, from_table = True):
 		if(table == "" and from_table == True):
 			raise ValueError("Table name cannot be empty on select method.")
 		
-		limited = False
+		#Set parameter default.
+		if columns is None or columns == False:
+			columns = ['*']
 		
+		if joins is None:
+			joins = []
+		
+		if join_columns is None:
+			join_columns = []
+			
+		if join_type is None:
+			join_type = ["INNER"]
+			
+		limited = False
+
 		if(from_table == False):
 			sql = "SELECT {column};".format(column= ",".join(columns))
 		elif(where == None):
@@ -340,7 +367,9 @@ class Database:
 					else:
 						e = join_type[index]
 					join = join + " {join_type} JOIN {element} ON ({condition}) ".format(join_type=e, element=joins[index], condition=join_columns[index])
-				sql = "SELECT {column} FROM {table} {join} WHERE {condition}".format(column = ",".join(columns), table=table, condition=where, join=join)	
+				print columns
+				column = ",".join(columns)
+				sql = "SELECT {column} FROM {table} {join} WHERE {condition}".format(column = column, table=table, condition=where, join=join)	
 			else:
 				sql = "SELECT {column} FROM {table} WHERE {condition}".format(column = ",".join(columns), table=table, condition=where)
 			if(isinstance( limit, ( int, long ))):
@@ -359,20 +388,20 @@ class Database:
 		Method used to get only one row and one column from database.
 		This method is projection and selection with limit 1.
 	"""
-	def get_var(self, table, columns = ['*'], where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
+	def get_var(self, table, columns = ['*'], where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		return self.select(table, columns, where, where_values, joins, join_columns, join_type, 1)
 		
 	"""
 		Method used to get only one row from database.
 	"""
-	def get_row(self, table, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
+	def get_row(self, table, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, 1)
 				
 	"""
 		Method used to get only one column from database.
 		All rows within the column will be returned.
 	"""
-	def get_col(self, table, column, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"]):
+	def get_col(self, table, column, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		columns = []
 		columns.append(column)
 		return self.select(table, columns, where, where_values, joins, join_columns, join_type)
@@ -380,12 +409,35 @@ class Database:
 	"""
 		Method used to get all the data from a database query.
 	"""
-	def get_results(self, table, where = None, where_values = None, joins = [], join_columns = [], join_type = ["INNER"], limit = None):
+	def get_results(self, table, where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None):
 		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, limit)
 	
 	
 	############################### Begin of specified methods for the crawler ################################### 
 	##############################################################################################################
+	
+	######################### External Get Methods ###############################
+	
+	"""
+		Method used to get a country id from a given language code.
+	"""
+	def get_country_from_language(self, language_code, default_country = None):
+		if(language_code == None):
+			return default_country
+			
+		code = []
+		code.append(lang)
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language as c', 'c.country_id', "code = %s", code, ['language'], ['c.language_id = language.id'])
+		if(countries != None):
+			length_country = len(countries)
+			if(length_country > 1 or length_country < 1):
+				country_id = default_country
+			else:
+				country_id = countries[0]
+			return country_id
+		
+		return default_country
 	
 	################### Internal Methods Used by Other Methods #################### 
 	
@@ -420,13 +472,14 @@ class Database:
 			
 		return self.get_var(table, ['id'], where, sanitize_value)
 		
+	
 	"""
 		Method used to insert a item name on a table type.
 		This method can be use to insert name on the follow tables:
 		hash_type, release_read_status_type, release_type, software_type, edition_type, image_edition_type, image_goods_type,
 		produces_type, create_type, product_condition_type, figure_version, plataform_type, print_type, genre_type, related_type, 
 		release_ownership_type, entity_type, filter_type, edition_read_status_type, function_type,condition_type, classification_type,
-		collaborator_type, media_type, number_type, alias_type, mod_type, blood_type, box_condition_type, based_type, stage_developer_type,
+		collaborator_type, media_type, number_type, alias_type, mod_type, blood_type, blood_rh_type, box_condition_type, based_type, stage_developer_type,
 		company_function_type, soundtrack_type, compose_type, image_soundtrack_type, lyric_type, user_filter_type
 		
 		If the item name already exists on database a new one will not be created and the id from the existent one will be returned instead.
@@ -733,13 +786,13 @@ class Database:
 	"""
 		Method used to insert a alias or title to an item.
 		This method can be use to insert on the follow tables:
-		entity_alias, goods_alias.
+		entity_alias, goods_alias, company_alias.
 		
 	"""
 	def add_alias(self, name, entity_id, language_id, alias_for, alias_type_id):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on add_alias method.")
-		
+			
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -915,7 +968,7 @@ class Database:
 		The parameters titles must have elements that are dict. 
 	"""
 	def create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], romanize_subtitle = None, return_method = False):
+	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], romanize_subtitle = None):
 		if(romanized_title == ""):
 			raise ValueError("Romanized title cannot be empty on create_entity method.")
 		
@@ -960,21 +1013,17 @@ class Database:
 			for company in companies:
 				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
 			
+			for people in peoples:
+				self.add_relation_people(people['id'], people['alias_used_id'], entity_id, 'entity', people['relation_type_id'])
+				
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return entity_id
-				
-			return True
+			return entity_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_entity method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("Return id is equal to 0 on create_entity method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1162,7 +1211,7 @@ class Database:
 		The parameters titles must have elements that are dict. 
 	"""
 	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None,
-	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = [], return_method = False):
+	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = []):
 
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1194,18 +1243,12 @@ class Database:
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return edition_id
-				
-			return True
+			
+			return edition_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 		
@@ -1221,17 +1264,17 @@ class Database:
 		self.set_auto_transaction(False)
 			
 		try:
-			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images, True)
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images)
 			self.add_read_edition(self, edition_id, print_type_id, pages_number, chapters_number)
 			
 			#commit changes
 			self.commit()
 			
-			return True
+			return edition_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("Return id is equal to 0 on create_read_edition method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1247,16 +1290,16 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images, True)
+			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images)
 			self.add_software_edition(edition_id, plataform_type_id, software_type_id, media_type_id)
 			#commit changes
 			self.commit()
 			
-			return True
+			return edition_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("Return id is equal to 0 on create_software_edition method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1473,7 +1516,7 @@ class Database:
 		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method. 
 	"""
 	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None,
-	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = [], return_method = False):
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1503,18 +1546,12 @@ class Database:
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return release_id
-				
-			return True
+			
+			return release_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_release method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("return id is equal to 0 on create_release method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -1530,16 +1567,16 @@ class Database:
 			
 		try:
 			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
-			numbers, languages_id, collaborators, collaborator_members, images, True)
+			numbers, languages_id, collaborators, collaborator_members, images)
 			self.add_game_release(entity_release_id, installation_instructions, emulate)
 			
 			#commit changes
 			self.commit()
-			return True
+			return entity_release_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("Some error must have occurred on create_game_release method.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1558,18 +1595,18 @@ class Database:
 			
 		try:
 			entity_release_id = self.create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
-			numbers, languages_id, collaborators, collaborator_members, images, True)
+			numbers, languages_id, collaborators, collaborator_members, images)
 			
 			self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction)
 			
 			
 			#commit changes
 			self.commit()
-			return True
+			return entity_release_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("Some error must have occurred on create_mod_release method.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1586,19 +1623,19 @@ class Database:
 			
 		try:
 			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
-			numbers, languages_id, collaborators, collaborator_members, images, True)
-			video_release_id = self.add_video_release(entity_release_id, duration, video_codec_id, container_id, softsub, resolution)
+			numbers, languages_id, collaborators, collaborator_members, images)
+			self.add_video_release(entity_release_id, duration, video_codec_id, container_id, softsub, resolution)
 			
 			for audio_codec in audio_codecs:
 				self.add_relation_with_type('video_release', 'audio_codec', video_release_id, audio_codec['id'], 'has', audio_codec['language_id'], False)
 
 			#commit changes
 			self.commit()
-			return True
+			return entity_release_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_video_release method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1609,7 +1646,7 @@ class Database:
 		This method don't insert any related item to persona like voice actors or names.
 		This method can be use to insert on entity_release table.
 	"""
-	def add_persona(self, gender, birthday = None, blood_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None):
+	def add_persona(self, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None):
 		if(gender == ""):
 			raise ValueError("Gender cannot be empty on add_persona method.")	
 		
@@ -1623,7 +1660,10 @@ class Database:
 			
 		if(blood_type_id != None):
 			columns.append('blood_type_id')
-			value.append(blood_type_id)
+			value.append(blood_type_id)	
+		if(blood_rh_type_id != None):
+			columns.append('blood_rh_type_id')
+			value.append(blood_rh_type_id)
 		if(birthday != None):
 			columns.append('birthday')
 			value.append(birthday)
@@ -1772,7 +1812,7 @@ class Database:
 		
 		To add a relationship the other persona id on relationship must be already registered on database.
 	"""
-	def create_persona(self, name, gender, birthday = None, blood_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
+	def create_persona(self, name, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
 	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
 	relationship = [], images = []):
 		if(name == ""):
@@ -1782,7 +1822,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			persona_id = self.add_persona(self, gender, birthday, blood_type_id, height, weight, eyes_color, hair_color)
+			persona_id = self.add_persona(self, gender, birthday, blood_type_id, blood_rh_type_id, height, weight, eyes_color, hair_color)
 			
 			#register main name
 			self.add_persona_alias(name, persona_id, self.alias_type_main)
@@ -1822,11 +1862,11 @@ class Database:
 				self.add_image_to_persona(image['url'], image['extension'], image['name'], persona_id)
 				
 			self.commit()
-			return True
+			return persona_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_persona method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1936,7 +1976,7 @@ class Database:
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			raise ValueError(e.strerror)
-			
+
 	"""
 		Method used to register all items related with company.
 		This method must be used instead other specified methos related with company.
@@ -1944,14 +1984,16 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters images, editions, entities must have elements that are dict. 
 	"""		
-	def create_company(self, name, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
-	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = []):	
+	def create_company(self, name, language_id, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
+	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = []):	
 		
 		self.set_auto_transaction(False)
 		
 		try:
 			company_id = self.add_company(name, country_origin_id, description, social_name, start_year, website, foundation_date)
-		
+			
+			self.add_alias(name, company_id, language_id, 'company', self.alias_type_romanized)
+			
 			#add events sponsored
 			for event_sponsored in events_sponsored:
 				self.add_multi_relation(company_id, event_sponsored, 'company', 'event', 'sponsors')
@@ -1969,17 +2011,20 @@ class Database:
 				self.add_relation_company(company_id, entity['id'], entity['company_function_type_id'], 'entity')
 				
 			for social in socials:
-				self.create_social(social['type_id'], social['url'], 'company', company_id, social['last_checked'], True)
+				self.create_social(social['type_id'], social['url'], 'company', company_id, social['last_checked'])
 				
 			for image in images:
 				self.add_image_to_company(image['url'], image['extension'], image['name'], company_id, image['type_id'])
-				
+			
+			for alias in alternate_names:
+				self.add_alias(alias['name'], company_id, alias['language_id'], 'company', self.alias_type_alias)
+			
 			self.commit()
-			return True
+			return company_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_company method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -1993,7 +2038,7 @@ class Database:
 		
 		Countries must be already save on database prior to the usage of this method.
 	"""
-	def add_people(self, country_id, blood_type_id = None, website = None, description = None):
+	def add_people(self, country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None, blood_rh_type_id = None, website = None, description = None):
 		if(country == ""):
 			raise ValueError("Country id cannot be empty on add_people method.")
 		
@@ -2008,18 +2053,40 @@ class Database:
 			columns.append('blood_type_id')
 			value.append(blood_type_id)
 			
+		if(blood_rh_type_id != None):
+			columns.append('blood_rh_type_id')
+			value.append(blood_rh_type_id)
+			
 		if(website != None):
 			columns.append('website')
-			value.append('website')
+			value.append(website)
 			
 		if(description != None):
 			columns.append('description')
 			value.append(description)
 			
+		if(gender != None):
+			if(gender == 'Male' or gender == 'Female'):
+				columns.append('gender')
+				value.append(gender)
+			elif(gender == 'N/A'):
+				print "Null gender"
+			else:
+				columns.append('gender')
+				value.append('Undefined')
+				
+		if(birth_place != None):
+			columns.append('birth_place')
+			value.append(birth_place)	
+			
+		if(birth_date != None):
+			columns.append('birth_date')
+			value.append(birth_date)
+			
 		self.insert('people', value, columns)
 		id = self.get_last_insert_id(table)
 		if(id == 0):
-			raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s)." % (country_id, blood_type_id, website, description))
+			raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description))
 		return id
 	
 	
@@ -2245,8 +2312,8 @@ class Database:
 		The parameters alias, nicknames, goods,entities_produced and audios_composed must have elements that are dictionary. 
 	"""
 	def create_people(self, name, lastname,
-	country_id, blood_type_id = None, website = None, description = None,
-	aliases = [], nicknames = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
+	country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None,blood_rh_type_id = None, website = None, description = None,
+	aliases = [], nicknames = [], native_names = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
 		if(name == ""):
 			raise ValueError("Name cannot be empty on create_people method.")
 			
@@ -2256,8 +2323,8 @@ class Database:
 		self.set_auto_transaction(False)
 		try:
 			#add_people
-			people_id = self.add_people(self, country_id, blood_type_id, website, description)
-			
+			people_id = self.add_people(self, country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description)
+
 			#add_people_alias
 			self.add_people_alias(name, lastname, people_id, self.alias_type_main)
 			
@@ -2266,6 +2333,9 @@ class Database:
 			
 			for nick in nicknames:
 				self.add_people_alias(nick['name'], nick['lastname'], people_id, self.alias_type_nickname)
+			
+			for native in native_names:
+				self.add_people_alias(native['name'], native['lastname'], people_id, self.alias_type_nativename)
 			
 			for good in goods:
 				self.add_relation_people(people_id, good['people_alias_used_id'], good['id'], 'goods', good['people_relation_type_id'], 'create')
@@ -2283,15 +2353,15 @@ class Database:
 				self.add_image_to_people(self, image['url'], image['extension'], image['name'], people_id)
 			
 			for social in socials:
-				self.create_social(social['type_id'], social['url'], 'people', people_id, social['last_checked'], True)
+				self.create_social(social['type_id'], social['url'], 'people', people_id, social['last_checked'])
 			
 			#commit changes
 			self.commit()
-			return True
+			return people_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_people method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 		
@@ -2511,11 +2581,11 @@ class Database:
 				
 			#commit changes
 			self.commit()
-			return True
+			return archive_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_archive method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -2537,11 +2607,11 @@ class Database:
 			
 			#commit changes
 			self.commit()
-			return True
+			return requirement_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_requirements method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 		 
@@ -2568,11 +2638,11 @@ class Database:
 			
 			#commit changes
 			self.commit()
-			return True
+			return version_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_version method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -2605,7 +2675,7 @@ class Database:
 			id = self.get_last_insert_id(table)
 			if(id == 0):
 				raise ValueError("An error occurred when trying to insert on add_collection(%s, %s)." % (name, description))
-		return True
+		return id
 	
 	"""
 		Method used to register all items related with collection.
@@ -2628,11 +2698,11 @@ class Database:
 			
 			#commit changes
 			self.commit()
-			return True
+			return collection_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_collection method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -2882,11 +2952,11 @@ class Database:
 				
 			#commit changes
 			self.commit()
-			return True
+			return audio_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_audio method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -2912,11 +2982,11 @@ class Database:
 				
 			#commit changes
 			self.commit()
-			return True
+			return soundtrack_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_soundtrack method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)	
 				
@@ -3021,7 +3091,11 @@ class Database:
 			return True
 		#else update last checked.
 		else:
-			if(self.update(table, ['now()'], ['checked_last'], "goods_id = {goods_id} and shops_id = {shop_id} and product_url = {product_url}".format(goods_id=goods_id, shop_id=shop_id, product_url=product_url)) == False):
+			where_value = []
+			where_value.append(goods_id)
+			where_value.append(shop_id)
+			where_value.append(product_url)
+			if(self.update(table, ['now()'], ['checked_last'], "goods_id = %s and shops_id = %s and product_url = %s", where_value) == False):
 				raise ValueError("An error occurred while trying to update last_checked on add_goods_relation_shops(%s, %s, %s)." % (goods_id, shop_id, product_url))
 			return True
 	
@@ -3124,11 +3198,11 @@ class Database:
 			
 			#commit changes
 			self.commit()
-			return True
+			return shop_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_shops method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -3140,7 +3214,7 @@ class Database:
 		The parameters goods must have elements that are dictionary. 
 	"""
 	def create_goods(self, romanize_title, language_id, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], return_method = False):
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = []):
 		if(romanize_title == ""):
 			raise ValueError("romanize_title cannot be empty on create_goods method.")
 		
@@ -3204,18 +3278,11 @@ class Database:
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return entity_id
-				
-			return True
+			return goods_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_entity method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("return id is equal to 0 on create_goods method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -3231,16 +3298,16 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images, True)
+			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images)
 			self.add_figure(goods_id, figure_version_id, scale_id)
 			
 			#commit changes
 			self.commit()
-			return True
+			return goods_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_figure method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -3311,11 +3378,11 @@ class Database:
 			
 			#commit changes
 			self.commit()
-			return True
+			return event_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("return id is equal to 0 on create_event method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -3554,18 +3621,18 @@ class Database:
 				self.add_image_to_collaborator(image['url'], image['extension'], image['name'], collaborator_id, image['type_id'])
 				
 			for social in socials:
-				self.create_social(social['type_id'], social['url'], 'collaborator', collaborator_id, social['last_checked'], True)
+				self.create_social(social['type_id'], social['url'], 'collaborator', collaborator_id, social['last_checked'])
 				
 			for website in websites:
 				self.add_collaborator_website(collaborator_id, website)
 			
 			#commit changes
 			self.commit()
-			return True
+			return collaborator_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("An error occurred while trying to save a collaborator on create_collaborator.")
 		finally:
 			self.set_auto_transaction(True)
 
@@ -3605,6 +3672,29 @@ class Database:
 				raise ValueError("There is no last insert id to return on add_social_type(%s, %s, %s)." % (name, website, website_secure))
 		return id	
 	
+	
+	"""
+		Method used to create a social type from a given url.
+	"""
+	def create_social_type_from_url(self, website):
+		url = urlparse.urlparse(website)
+		#Get name from domain
+		domain = re.sub(r'^ww[w0-9]{1,}.', '', url.netlock) 
+		domain = domain.split('.')
+		name = domain[0].capitalize()
+		#Get url from social link
+		url[2], url[3], url[4], url[5] = "", "", "", ""
+		link = urlparse.urlunparse(url)
+		#Get url secure
+		url[0] = 'https'
+		link_secure = urlparse.urlunparse(url)
+		try:
+			return self.add_social_type(name, link, link_secure)
+		except ValueError as e:
+			print e.message
+			raise ValueError(e.message)
+			
+				
 	"""
 		Method used to insert a social.
 		This method don't insert any related data like relation between a people and a social. To insert a social and a relation use create_social.
@@ -3669,7 +3759,10 @@ class Database:
 			return True
 		#else update last checked.
 		else:
-			if(self.update(table, ['now()'], ['last_checked'], "social_id = {social_id} and {relation_table}_id = {second_id}".format(social_id=social_id, relation_table=relation_table, second_id=second_id)) == False):
+			where_value = []
+			where_value.append(social_id)
+			where_value.append(second_id)
+			if(self.update(table, ['now()'], ['last_checked'], "social_id = %s and {relation_table}_id = %s".format(relation_table=relation_table), where_value) == False):
 				raise ValueError("An error occurred while trying to update last_checked on add_relation_social(%s, %s, %s, %s)." % (relation_table, social_id, second_id, last_checked))
 			return True
 	
@@ -3679,7 +3772,7 @@ class Database:
 		
 		To use this method the types must be already registered on database. 
 	"""
-	def create_social(self, social_type_id, url, relation_table, second_id, last_checked = None, return_method = False):	
+	def create_social(self, social_type_id, url, relation_table, second_id, last_checked = None):	
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -3691,18 +3784,12 @@ class Database:
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return social_id
+			return social_id
 	
-			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
 		finally:
 			self.set_auto_transaction(True)
 		
@@ -3778,13 +3865,13 @@ class Database:
 	"""
 	def add_currency(self, name, symbol, code):
 		if(name == ""):
-			raise ValueError("Name cannot be empty on create_entity method.")
+			raise ValueError("Name cannot be empty on add_currency method.")
 			
 		if(code == ""):
-			raise ValueError("code cannot be empty on create_entity method.")
+			raise ValueError("code cannot be empty on add_currency method.")
 			
 		if(symbol == ""):
-			raise ValueError("symbol cannot be empty on create_entity method.")
+			raise ValueError("symbol cannot be empty on add_currency method.")
 		
 		table = 'currency'
 		id = self.get_id_from_field(table, 'code', code)
@@ -4140,7 +4227,7 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters elements must have elements that are dictionary. 
 	"""
-	def create_user_filter(self, name, user_id, type_id, elements = [], return_method = False):
+	def create_user_filter(self, name, user_id, type_id, elements = []):
 
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -4154,18 +4241,13 @@ class Database:
 			#commit changes
 			self.commit()
 			
-			if(return_method):
-				return user_filter_id
+			return user_filter_id
 				
-			return True
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
 			
-			if(return_method):
-				raise ValueError("return id is equal to 0 on create_user_filter method. Some error must have occurred.")
-				
-			return False
+			raise ValueError("return id is equal to 0 on create_user_filter method. Some error must have occurred.")		
 		finally:
 			self.set_auto_transaction(True)
 			
@@ -4207,18 +4289,18 @@ class Database:
 				self.add_image_to_user(image['url'], image['extension'], image['name'], user_id, image['type_id'])
 			
 			for user_filter in user_filters:
-				self.create_user_filter(user_filter['name'], user_id, user_filter['type_id'], user_filter['elements'], True)
+				self.create_user_filter(user_filter['name'], user_id, user_filter['type_id'], user_filter['elements'])
 			
 			if(photo_profile != None):
 				self.add_image_to_user(photo_profile['url'], photo_profile['extension'], photo_profile['name'], user_id, self.image_user_type_profile)
 			
 			#commit changes
 			self.commit()
-			return True
+			return user_id
 		except ValueError as e:
 			print "ValueError({0}): {1}".format(e.errno, e.strerror)
 			self.rollback()
-			return False
+			raise ValueError("An error occurred while trying to save a user on create_user.")
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -4231,7 +4313,7 @@ class Database:
 		This method can be used to insert on the follow tables:
 		soundtrack_comments, audio_comments, company_comments, people_comments, 
 		goods_comments, entity_edition_comments, entity_release_comments, collection_comments
-	
+		collaborator_comments
 	"""
 	def add_comment(self, title, content, user_id, entity_id, type = 'release'):
 		if(title == ""):
@@ -4256,5 +4338,41 @@ class Database:
 		id = self.get_last_insert_id(table)
 		if(id == 0):
 			raise ValueError("There is no last insert id to return on add_comment(%s, %s, %s, %s, %s)." % (title, content, user_id, entity_id, type))
-		return True
+		return id
 	
+	################################## Crawler Methods ############################
+	
+	def add_spider_item(self, table, id, url, complete_crawled = False):
+		if(table == ""):
+			raise ValueError("Table cannot be empty on add_spider_item method.")
+			
+		if(id == ""):
+			raise ValueError("id cannot be empty on add_spider_item method.")
+			
+		if(url == ""):
+			raise ValueError("URL cannot be empty on add_spider_item method.")
+		
+		table = 'spider_item'
+		
+		where_values = []
+		where_values.append(id)
+		where_values.append(url)
+		where_values.append(table)
+		where = "id = %s and url = %s and table_name = %s"
+		id = self.get_var(table, ['complete_crawled'], where, where_values)
+		if(id == None):
+			columns = ['id','table_name', 'url','complete_crawled']
+			value = []
+			value.append(id)
+			value.append(table)
+			value.append(url)
+			value.append(complete_crawled)
+			
+			#insert
+			self.insert(table, value, columns)
+		elif(complete_crawled and id == 'False'):
+			#Update to full crawled
+			if(not self.update(table, ['True'],['complete_crawled'], where, where_values)):
+				raise ValueError("An error occurred while trying to update complete_crawled on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
+		return True
+		
