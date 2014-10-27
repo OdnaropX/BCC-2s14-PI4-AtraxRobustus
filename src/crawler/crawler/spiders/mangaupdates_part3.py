@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import re
+import urlparse
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.http import Request, FormRequest
 from scrapy.contrib.linkextractors import LinkExtractor
 from scrapy.selector import Selector
 from scrapy.utils.project import get_project_settings as Settings
 from .. import database
-import re
-import urlparse
 
 class MangaUpdatesSpider(CrawlSpider):
 		name = "mangaupdates_part3"
@@ -147,7 +147,8 @@ class MangaUpdatesSpider(CrawlSpider):
 				print self.dbase.last_error
 				print self.dbase.status_message
 				print self.dbase.last_query
-		
+			except:
+				print "Error on Parse Genre", sys.exc_info()[0]
 
 		"""
 			Method to parse the series.html that have genre.
@@ -186,20 +187,21 @@ class MangaUpdatesSpider(CrawlSpider):
 					values.append(series[index])
 					series_id = self.dbase.get_var('entity_alias', ['entity_id'], "name = %s", values)
 					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'genre')
-					print "try"
 					if(adult_content):
 						#if genre is Hentai, Doujinshi or Adult change classification for 18+ on Series.
-						self.dbase.update('entity',value,['classification_type_id'], "id = {id}".format(id=series_id))
-					
-					#Get next url for the crawler
-					next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
-					Request(url=next_url[0],callback=self.parse_genres_series)
-			
+						where_value = []
+						where_value.append(series_id)
+						self.dbase.update('entity',value,['classification_type_id'], "id = %s", where_value)
+
 			except ValueError as e:
 				print e.message
 			except:
-				print "Unknown exception"
-			print "Genre internal"
+				print "Error on parse series genre", sys.exc_info()[0]
+			
+			#Get next url for the crawler
+			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
+			if(next_url):
+				Request(url=next_url[0],callback=self.parse_genres_series)
 				
 			
 		"""
@@ -225,7 +227,8 @@ class MangaUpdatesSpider(CrawlSpider):
 					
 					#Get next url for the crawler
 					next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
-					Request(url=next_url[0],callback=self.parse_categories_series)
+					if(next_url):
+						Request(url=next_url[0],callback=self.parse_categories_series)
 			
 			except ValueError as e:
 				print e.message
