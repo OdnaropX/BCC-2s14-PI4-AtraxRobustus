@@ -949,7 +949,7 @@ class Database:
 		This method can be use to insert on entity table.
 		
 	"""
-	def add_entity(self, entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started = 0):
+	def add_entity(self, entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started = 0, update_id = None):
 		table = 'entity'
 		#cannot warranty uniqueness
 		columns = ['entity_type_id', 'classification_type_id', 'collection_id','language_id','country_id', 'launch_year', 'collection_started', 'gender_id']
@@ -963,11 +963,18 @@ class Database:
 		value.append(collection_started)
 		value.append(gender_id)
 		
-		self.insert(table, value, columns)
+		if not update_id:
+			where_values = []
+			where_values.append(update_id)
+			if not self.update(table, value, columns, "id = %s", where_values):
+				raise ValueError("An error occurred while trying to update on add_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
+			id = update_id	
+		else:
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
 		
-		id = self.get_last_insert_id(table)
-		if(id == 0):
-			raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started))
 		return id
 	
 	
@@ -1056,7 +1063,7 @@ class Database:
 		The parameters titles must have elements that are dict. 
 	"""
 	def create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], romanize_subtitle = None):
+	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], romanize_subtitle = None, update_id = None):
 		if(not romanized_title):
 			raise ValueError("Romanized title cannot be empty on create_entity method.")
 		
@@ -1064,7 +1071,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started)
+			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id)
 		
 			#register main name (Romanize title and Romanized Subtitle)
 			self.add_alias(romanized_title, entity_id, language_id, 'entity', self.alias_type_romanized)
@@ -1123,7 +1130,7 @@ class Database:
 		
 		The parameter subtitle refers to subheading and not a caption.
 	"""
-	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None):
+	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None, update_id = None):
 		if(not title):
 			raise ValueError("Name cannot be empty on add_edition method.")
 		
@@ -1145,7 +1152,7 @@ class Database:
 		table = 'entity_edition'
 		
 		id = self.get_id_from_field(table, where, where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['edition_type_id', 'entity_id', 'title', 'free', 'censored']
 			value = []
 			value.append(edition_type_id)
@@ -1182,10 +1189,17 @@ class Database:
 				columns.append('subtitle')
 				value.append(subtitle)
 			
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_edition(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (edition_type_id, entity_id, title, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, event_id))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_edition(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (edition_type_id, entity_id, title, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, event_id, update_id))
+				id = update_id	
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_edition(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (edition_type_id, entity_id, title, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, event_id, update_id))
 		return id
 	
 	"""
@@ -1255,7 +1269,7 @@ class Database:
 		This method require a entity_edition_id to register, if you would like to add a entity_edition and a read edition with
 		the same method use create_read_edition method instead.
 	"""
-	def add_read_edition(self, entity_edition_id, print_type_id, pages_number, chapters_number = None):
+	def add_read_edition(self, entity_edition_id, print_type_id, pages_number, chapters_number = None, update_id = None):
 		if(not entity_edition_id):
 			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
 			
@@ -1267,7 +1281,7 @@ class Database:
 		where_values = []
 		where_values.append(entity_edition_id)
 		id = self.get_var(table, ['entity_edition_id'], 'entity_edition_id = %s', where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['entity_edition_id', 'print_type_id', 'pages_number']
 			value = []
 			value.append(entity_edition_id)
@@ -1278,8 +1292,15 @@ class Database:
 				columns.append('chapters_number')
 				value.append(chapters_number)
 
-			if(self.insert(table, value, columns) == False):
-				raise ValueError("An error occurred when trying to insert on add_read_edition(%s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_read_edition(%s, %s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number, update_id)))
+				id = update_id	
+			else:
+				if(self.insert(table, value, columns) == False):
+					raise ValueError("An error occurred when trying to insert on add_read_edition(%s, %s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number, update_id))
 		return id
 	
 	"""
@@ -1303,7 +1324,7 @@ class Database:
 		The parameters titles must have elements that are dict. 
 	"""
 	def create_edition(self, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None,
-	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = []):
+	languages_id = [], subtitles_id = [], launch_countries = [], companies = [], images = [], update_id = None):
 
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1311,7 +1332,7 @@ class Database:
 		try:
 			table = 'entity_edition'
 			
-			edition_id = self.add_edition(edition_type_id, entity_id, title, free, censored, subtitle, code , complement_code, release_description,height,width, depth, weight, event_id )
+			edition_id = self.add_edition(edition_type_id, entity_id, title, free, censored, subtitle, code , complement_code, release_description,height,width, depth, weight, event_id, update_id)
 		
 			#Add number
 			self.add_edition_number(edition_id, number, number_type_id)
@@ -1350,14 +1371,14 @@ class Database:
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
 	def create_read_edition(self, print_type_id, pages_number, edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, chapters_number = None, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id = None,
-	languages_id = [], launch_countries = [], companies = [], images = []):
+	languages_id = [], launch_countries = [], companies = [], images = [], update_id = None):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 			
 		try:
 			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, [], launch_countries, companies, images)
-			self.add_read_edition(self, edition_id, print_type_id, pages_number, chapters_number)
+			self.add_read_edition(self, edition_id, print_type_id, pages_number, chapters_number, update_id)
 			
 			#commit changes
 			self.commit()
@@ -1443,10 +1464,10 @@ class Database:
 				value.append(release_date) 
 				
 			self.insert(table, value, columns)
-			
+				
 			id = self.get_last_insert_id(table)
 			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_release(%s, %s, %s, %s, %s, %s)." % (entity_id, release_type_id, country_id, entity_edition_id, release_date, description))
+				raise ValueError("There is no last insert id to return on add_release(%s, %s, %s, %s, %s, %s, %s)." % (entity_id, release_type_id, country_id, entity_edition_id, release_date, description, update_id))
 		return id
 		
 	"""
@@ -1475,7 +1496,7 @@ class Database:
 			if(installation_instructions != None):
 				columns.append('installation_instructions')
 				value.append(installation_instructions)
-				
+			
 			if(self.insert(table, value, columns) == False):
 				raise ValueError("An error occurred when trying to insert on add_game_release(%s, %s, %s)." % (entity_release_id, installation_instructions, emulate ))
 		return True
@@ -1486,7 +1507,7 @@ class Database:
 		This method require a entity_release_id to register, if you would like to add a entity_release and a mod release with
 		the same method use create_mod_release method instead.
 	"""
-	def add_mod_release(self, name, type_id, entity_release_id, author_name, launch_date = None, description = None, installation_instruction = None):
+	def add_mod_release(self, name, type_id, entity_release_id, author_name, launch_date = None, description = None, installation_instruction = None, update_id = None):
 		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
 			
@@ -1496,7 +1517,7 @@ class Database:
 		table = 'mod_release'
 		#check if already is a mod fro this entity
 		id = self.get_id_from_field(table, 'entity_release_id', entity_release_id)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['entity_release_id', 'mod_type_id', 'name', 'author']
 			value = []
 			value.append(entity_release_id)
@@ -1514,10 +1535,17 @@ class Database:
 				columns.append('installation_instruction')
 				value.append(installation_instruction)
 			
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_mod_release(%s, %s, %s, %s, %s, %s, %s)." % (name, type_id, entity_release_id, author_name, launch_date, description, installation_instruction ))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_mod_release(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, type_id, entity_release_id, author_name, launch_date, description, installation_instruction, update_id ))
+				id = update_id	
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_mod_release(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, type_id, entity_release_id, author_name, launch_date, description, installation_instruction, update_id ))
 		return id
 	
 	"""
@@ -1526,7 +1554,7 @@ class Database:
 		This method require a entity_release_id to register, if you would like to add a entity_release and a video edition with
 		the same method use create_video_release method instead.
 	"""
-	def add_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution):
+	def add_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution, update_id = None):
 		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
 			
@@ -1536,7 +1564,7 @@ class Database:
 		table = 'video_release'
 		#check if already is a video release for this entity
 		id = self.get_id_from_field(table, 'entity_release_id', entity_release_id)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['entity_release_id', 'video_codec_id', 'archive_container_id', 'duration', 'resolution','softsub']
 			value = []
 			value.append(entity_release_id)
@@ -1544,15 +1572,22 @@ class Database:
 			value.append(container_id)
 			value.append(duration)
 			value.append(resolution)
-			if(resolution):
+			if(softsub):
 				value.append(1)
 			else:
 				value.append(0)
-				
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_video_release(%s, %s, %s, %s, %s, %s)." % ( entity_release_id, duration, video_codec_id, container_id, softsub, resolution ))
+			
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_video_release(%s, %s, %s, %s, %s, %s, %s)." % ( entity_release_id, duration, video_codec_id, container_id, softsub, resolution, update_id ))
+				id = update_id	
+			else:			
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_video_release(%s, %s, %s, %s, %s, %s, %s)." % ( entity_release_id, duration, video_codec_id, container_id, softsub, resolution, update_id ))
 		return id
 		
 	"""
@@ -1678,7 +1713,7 @@ class Database:
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
 	def create_mod_release(self, name, mod_type_id, author_name, entity_id, release_type_id, country_id, entity_edition_id,
-	launch_date = None, description = None, installation_instruction = None, images = []):
+	launch_date = None, description = None, installation_instruction = None, images = [], update_id = None):
 		
 		if(not name):
 			raise ValueError("Name cannot be empty on create_mod_release method.")
@@ -1690,7 +1725,7 @@ class Database:
 			entity_release_id = self.create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
 			numbers, languages_id, collaborators, collaborator_members, images)
 			
-			self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction)
+			self.add_mod_release(name, mod_type_id, entity_release_id, author_name, launch_date, description, installation_instruction, update_id)
 			
 			
 			#commit changes
@@ -1709,7 +1744,7 @@ class Database:
 	"""
 	def create_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution, 
 	entity_id, release_type_id, country_id, entity_edition_id, audio_codecs = [], release_date = None, description = None,
-	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
+	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = [], update_id = None):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1717,7 +1752,7 @@ class Database:
 		try:
 			entity_release_id = self.create_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description,
 			numbers, languages_id, collaborators, collaborator_members, images)
-			self.add_video_release(entity_release_id, duration, video_codec_id, container_id, softsub, resolution)
+			self.add_video_release(entity_release_id, duration, video_codec_id, container_id, softsub, resolution, update_id)
 			
 			for audio_codec in audio_codecs:
 				self.add_relation_with_type('video_release', 'audio_codec', video_release_id, audio_codec['id'], 'has', audio_codec['language_id'], False)
@@ -1739,7 +1774,7 @@ class Database:
 		This method don't insert any related item to persona like voice actors or names.
 		This method can be use to insert on entity_release table.
 	"""
-	def add_persona(self, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None):
+	def add_persona(self, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None, update_id = None):
 		if(not gender):
 			raise ValueError("Gender cannot be empty on add_persona method.")	
 		
@@ -1773,10 +1808,17 @@ class Database:
 			columns.append('hair_color')
 			value.append(hair_color)
 		
-		self.insert(table, value,columns)
-		id = self.get_last_insert_id(table)
-		if(id == 0):
-			raise ValueError("There is no last insert id to return on add_persona(%s, %s, %s, %s, %s, %s, %s)." % (gender, birthday, blood_type_id, height, weight, eyes_color, hair_color))
+		if not update_id:
+			where_values = []
+			where_values.append(update_id)
+			if not self.update(table, value, columns, "id = %s", where_values):
+				raise ValueError("An error occurred while trying to update on add_persona(%s, %s, %s, %s, %s, %s, %s, %s)." % (gender, birthday, blood_type_id, height, weight, eyes_color, hair_color, update_id))
+			id = update_id	
+		else:
+			self.insert(table, value,columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_persona(%s, %s, %s, %s, %s, %s, %s, %s)." % (gender, birthday, blood_type_id, height, weight, eyes_color, hair_color, update_id))
 		return id
 	
 	"""
@@ -1908,7 +1950,7 @@ class Database:
 	"""
 	def create_persona(self, name, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
 	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
-	relationship = [], images = []):
+	relationship = [], images = [], update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on create_persona method.")
 	
@@ -1916,7 +1958,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			persona_id = self.add_persona(self, gender, birthday, blood_type_id, blood_rh_type_id, height, weight, eyes_color, hair_color)
+			persona_id = self.add_persona(self, gender, birthday, blood_type_id, blood_rh_type_id, height, weight, eyes_color, hair_color, update_id)
 			
 			#register main name
 			self.add_persona_alias(name, persona_id, self.alias_type_main)
@@ -1974,7 +2016,7 @@ class Database:
 		Countries must be already save on database prior to the usage of this method.
 		TODO: Use similarity instead equal on name.
 	"""
-	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
+	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None, update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on add_company method.")
 		
@@ -1988,7 +2030,7 @@ class Database:
 		where_values.append(name)
 		where_values.append(country_origin_id)
 		id = self.get_id_from_field(table, ['name','country_id'], where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['name']
 			value = []
 			value.append(name)
@@ -2012,11 +2054,18 @@ class Database:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 				
-			self.insert('company', value, columns)
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_company(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id))
+				id = update_id	
+			else:
+				self.insert('company', value, columns)
 			
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_company(%s, %s, %s, %s, %s, %s, %s)." % (name, country_origin_id, description, social_name, start_year, website, foundation_date))
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_company(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id))
 		return id
 	
 	
@@ -2081,12 +2130,12 @@ class Database:
 		The parameters images, editions, entities must have elements that are dict. 
 	"""		
 	def create_company(self, name, language_id, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
-	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = []):	
+	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = [], update_id = None):	
 		
 		self.set_auto_transaction(False)
 		
 		try:
-			company_id = self.add_company(name, country_origin_id, description, social_name, start_year, website, foundation_date)
+			company_id = self.add_company(name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id)
 			
 			self.add_alias(name, company_id, language_id, 'company', self.alias_type_romanized)
 			
@@ -2134,7 +2183,7 @@ class Database:
 		
 		Countries must be already save on database prior to the usage of this method.
 	"""
-	def add_people(self, country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None, blood_rh_type_id = None, website = None, description = None):
+	def add_people(self, country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None, blood_rh_type_id = None, website = None, description = None, update_id = None):
 		if(not country_id):
 			raise ValueError("Country id cannot be empty on add_people method.")
 		
@@ -2181,10 +2230,17 @@ class Database:
 			columns.append('birth_date')
 			value.append(birth_date)
 			
-		self.insert(table, value, columns)
-		id = self.get_last_insert_id(table)
-		if(id == 0):
-			raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description))
+		if not update_id:
+			where_values = []
+			where_values.append(update_id)
+			if not self.update(table, value, columns, "id = %s", where_values):
+				raise ValueError("An error occurred while trying to update on add_people(%s, %s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description, update_id))
+			id = update_id	
+		else:
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description, update_id))
 		return id
 	
 	
@@ -2414,7 +2470,7 @@ class Database:
 	"""
 	def create_people(self, name, lastname,
 	country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None,blood_rh_type_id = None, website = None, description = None,
-	aliases = [], nicknames = [], native_names = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
+	aliases = [], nicknames = [], native_names = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = [], update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on create_people method.")
 			
@@ -2424,7 +2480,7 @@ class Database:
 		self.set_auto_transaction(False)
 		try:
 			#add_people
-			people_id = self.add_people(country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description)
+			people_id = self.add_people(country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description, update_id)
 			
 			#add_people_alias
 			self.add_people_alias(name, lastname, people_id, self.alias_type_main)
@@ -2816,7 +2872,7 @@ class Database:
 		This method can be used to insert on audio table.
 		
 	"""
-	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate):
+	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate, update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on add_audio method.")
 		
@@ -2831,7 +2887,7 @@ class Database:
 		where_values.append(country_id)
 		where_values.append(duration)
 		id = self.get_id_from_field(table, ['name','country_id','duration'], where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['country_id', 'audio_codec_id', 'name','duration','bitrate']
 			value = []
 			value.append(country_id)
@@ -2840,11 +2896,18 @@ class Database:
 			value.append(duration)
 			value.append(bitrate)
 			
-			self.insert(table, value, columns)
-			
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_audio(%s, %s, %s, %s, %s)." % (country_id, audio_codec_id, name, duration, bitrate))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_audio(%s, %s, %s, %s, %s, %s)." % (country_id, audio_codec_id, name, duration, bitrate, update_id))
+				id = update_id	
+			else:			
+				self.insert(table, value, columns)
+				
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_audio(%s, %s, %s, %s, %s, %s)." % (country_id, audio_codec_id, name, duration, bitrate, update_id))
 		return id
 	
 	"""
@@ -2888,7 +2951,7 @@ class Database:
 		
 		The lyric_type_id must be previously registered on database.
 	"""
-	def add_lyric(self, lyric_type_id, audio_id, language_id, title, content, user_id = None):
+	def add_lyric(self, lyric_type_id, audio_id, language_id, title, content, user_id = None, update_id = None):
 		if(not soundtrack_id):
 			raise ValueError("soundtrack_id cannot be empty on add_lyric method.")
 		
@@ -2925,7 +2988,7 @@ class Database:
 		table = 'lyric'
 		id = self.get_id_from_field(table, where, where_values)
 		
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['lyric_type_id', 'audio_id' ,'language_id', 'title', 'lyric']
 			value = []
 			value.append(lyric_type_id)
@@ -2938,11 +3001,18 @@ class Database:
 				columns.append('user_id')
 				value.append(user_id)
 			
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_lyric(%s, %s, %s, %s, %s, %s)." % (lyric_type_id, audio_id, language_id, title, content, user_id))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_lyric(%s, %s, %s, %s, %s, %s, %s)." % (lyric_type_id, audio_id, language_id, title, content, user_id, update_id))
+				id = update_id	
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_lyric(%s, %s, %s, %s, %s, %s, %s)." % (lyric_type_id, audio_id, language_id, title, content, user_id, update_id))
 		return id
 	
 	
@@ -2953,7 +3023,7 @@ class Database:
 		The lyric_type_id must be previously registered on database.
 		
 	"""
-	def add_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None):
+	def add_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None, update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on add_soundtrack method.")
 			
@@ -2986,7 +3056,7 @@ class Database:
 			where_values.append(launch_country_id)
 		
 		id = self.get_id_from_field(table, where, where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['soundtrack_type_id', 'name' ,'launch_year', 'country_id', 'code']
 			value = []
 			value.append(type_id)
@@ -2995,11 +3065,18 @@ class Database:
 			value.append(launch_country_id)
 			value.append(code)
 
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_soundtrack(%s, %s, %s, %s, %s)." % (url, name, type_id, launch_year, launch_country_id, code))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_soundtrack(%s, %s, %s, %s, %s, %s)." % (url, name, type_id, launch_year, launch_country_id, code, update_id))
+				id = update_id	
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_soundtrack(%s, %s, %s, %s, %s, %s)." % (url, name, type_id, launch_year, launch_country_id, code, update_id))
 		return id
 	
 	"""
@@ -3037,12 +3114,12 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters titles must have elements that are dict. 
 	"""		
-	def create_audio(self, country_id, audio_codec_id, name, duration, bitrate,	soundtracks = [], lyrics = [], images = [], user_id = None):
+	def create_audio(self, country_id, audio_codec_id, name, duration, bitrate,	soundtracks = [], lyrics = [], images = [], user_id = None, update_id = None):
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			audio_id = self.add_audio(country_id, audio_codec_id, name, duration, bitrate)
+			audio_id = self.add_audio(country_id, audio_codec_id, name, duration, bitrate, update_id)
 			
 			for soundtrack in soundtracks:
 				self.add_relation_soundtrack_audio(audio_id, soundtrack['id'], soundtrack['exclusive'])
@@ -3070,12 +3147,12 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters titles must have elements that are dict. 
 	"""	
-	def create_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None,	collections = [], audios = [], images = []):
+	def create_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None,	collections = [], audios = [], images = [], update_id = None):
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			soundtrack_id = self.add_soundtrack(name, type_id, launch_year, launch_country_id, code)
+			soundtrack_id = self.add_soundtrack(name, type_id, launch_year, launch_country_id, code, update_id)
 			
 			for collection in collections:
 				self.add_multi_relation(soundtrack_id, collection, 'soundtrack', 'collection', 'integrate')
@@ -3103,7 +3180,7 @@ class Database:
 		This method can be used to insert on goods table. Figure is specialization from Goods.
 		
 	"""
-	def add_goods(self, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0):
+	def add_goods(self, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0, update_id = None):
 		if(not goods_type_id):
 			raise ValueError("goods_type_id cannot be empty on add_goods method.")
 			
@@ -3131,11 +3208,18 @@ class Database:
 		if(observation != None):
 			columns.append('observation')
 			value.append(observation)
-
-		self.insert(table, value, columns)			
-		id = self.get_last_insert_id(table)
-		if(id == 0):
-			raise ValueError("There is no last insert id to return on add_goods(%s, %s, %s, %s, %s, %s, %s, %s)." % (goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started))
+		
+		if not update_id:
+			where_values = []
+			where_values.append(update_id)
+			if not self.update(table, value, columns, "id = %s", where_values):
+				raise ValueError("An error occurred while trying to update on add_goods(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, update_id))
+			id = update_id	
+		else:
+			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
+			if(id == 0):
+				raise ValueError("There is no last insert id to return on add_goods(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, update_id))
 		return id
 	
 	"""
@@ -3257,8 +3341,14 @@ class Database:
 		the same method use create_figure method instead.
 	"""
 	def add_figure(self, goods_id, figure_version_id, scale_id):
-		if(not entity_release_id):
-			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
+		if(not goods_id):
+			raise ValueError("goods id cannot be empty on add_figure method.")
+		
+		if(not figure_version_id):
+			raise ValueError("figure_version_id cannot be empty on add_figure method.")
+		
+		if(not scale_id):
+			raise ValueError("scale_id cannot be empty on add_figure method.")
 			
 		#check if entity_release really exists
 		self.check_id_exists('goods', goods_id)
@@ -3272,8 +3362,8 @@ class Database:
 			columns = ['goods_id', 'figure_version_id', 'scale_id']
 			value = []
 			value.append(goods_id)
-			value.append(figure_version_id)
 			value.append(scale_id)
+			value.append(figure_version_id)
 				
 			self.insert(table, value, columns)
 			id = self.get_last_insert_id(table)
@@ -3317,7 +3407,7 @@ class Database:
 		The parameters goods must have elements that are dictionary. 
 	"""
 	def create_goods(self, romanize_title, language_id, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = []):
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], update_id = None):
 		if(not romanize_title):
 			raise ValueError("romanize_title cannot be empty on create_goods method.")
 		
@@ -3328,7 +3418,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			goods_id = self.add_goods(goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started)
+			goods_id = self.add_goods(goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, update_id)
 			
 			#romanized name
 			self.add_alias(romanize_title, goods_id, language_id, 'goods', self.alias_type_romanized)
@@ -3420,7 +3510,7 @@ class Database:
 		Method used to insert a event on database.
 		This method don't insert anything related with the event like edition launches or goods launch.
 	"""
-	def add_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0):
+	def add_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0, update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on add_event methsod.")	
 		
@@ -3435,7 +3525,7 @@ class Database:
 		where_values.append(name)
 		where_values.append(edition)
 		id = self.get_id_from_field(table, ['name', 'edition'], where_values)
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['name', 'edition', 'date', 'country_id', 'free']
 			value = []
 			value.append(name)
@@ -3456,11 +3546,18 @@ class Database:
 				columns.append('duration')
 				value.append(duration)
 				
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_event(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, edition, date, country_id, location, website, duration, free))
+			if not update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_event(%s, %s, %s, %s, %s, %s, %s, %s, $s)." % (name, edition, date, country_id, location, website, duration, free, update_id))
+				id = update_id	
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_event(%s, %s, %s, %s, %s, %s, %s, %s, $s)." % (name, edition, date, country_id, location, website, duration, free, update_id))
 		return id
 	
 	"""
@@ -3469,12 +3566,12 @@ class Database:
 		
 		Event has sponsor, country and entity_edition, but entity_edition and host_country is already related on create_edition and add_event 
 	"""
-	def create_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0, sponsors = []):
+	def create_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0, sponsors = [], update_id = None):
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			event_id = self.add_event(name, edition, date, location, website, duration, free)
+			event_id = self.add_event(name, edition, date, location, website, duration, free, update_id)
 			
 			for sponsor_id in sponsors:
 				self.add_multi_relation(self, sponsor_id, event_id, 'company', 'event', 'sponsors')
@@ -3493,32 +3590,71 @@ class Database:
 	
 	############################## Collaborator methods ###########################
 	
+	"""
+		Method used to update a collaborator on database given a id.
 	
+	"""
+	def update_collaborator(self, update_id, name, country_id, description = None, irc = None, foundation_date = None):
+		if not update_id:
+			raise ValueError("Update id cannot be empty on update_collaborator method.")
+			
+		if(not name):
+			raise ValueError("Name cannot be empty on update_collaborator method.")
+		
+		if(not country_id):
+			raise ValueError("Country id cannot be empty on update_collaborator method.")
+		
+		table = 'collaborator'
+		
+		columns = ['name', 'country_id']
+		value = []
+		value.append(name)
+		value.append(country_id)
+		
+		if(irc):
+			columns.append('irc')
+			value.append(irc)
+			
+		if(description != None):
+			columns.append('description')
+			value.append(description)
+		
+		if(foundation_date != None):
+			columns.append('foundation_date')
+			value.append(foundation_date)
+				
+		where_values = []
+		where_values.append(update_id)
+		
+		if(not self.update(table, value, columns, "id = %s", where_values)):
+			raise ValueError("An error occurred while trying to update on update_collaborator(%s, %s, %s, %s, %s, %s)." % (update_id, name, country_id, description, irc, foundation_date))
+		return update_id
+		
 	"""
 		Method used to insert a collaborator on database. This method don't insert any related item to a collaborator.
 		This method can be used to insert on collaborator table.
 		
 		Country must be already registered before use this method.
 	"""
-	def add_collaborator(self, name, country_id, description = None, irc = None, foundation_date = None):
+	def add_collaborator(self, name, country_id, description = None, irc = None, foundation_date = None, update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on add_collaborator method.")
 		
 		if(not country_id):
 			raise ValueError("Country id cannot be empty on add_collaborator method.")
 		
-		print "Country id", country_id
 		#check_id not working correct in this method.
-		#self.check_id_exists('country', country_id)
+		self.check_id_exists('country', country_id)
 	
 		table = 'collaborator'
 
 		where_values = []
 		where_values.append(name)
 		where_values.append(country_id)
+		
 		id = self.get_id_from_field(table, ['name', 'country_id'], where_values)
 		
-		if(id == None):
+		if(id == None or update_id):
 			columns = ['name', 'country_id']
 			value = []
 			value.append(name)
@@ -3536,12 +3672,17 @@ class Database:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 			
-			#self.insert('collaborator', value, columns)
-			print value, columns, self.insert('collaborator', value, columns)
-			
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_collaborator(%s, %s, %s, %s, %s)." % (name, country_id, description, irc, foundation_date))
+			if update_id:
+				where_values = []
+				where_values.append(update_id)
+				if not self.update(table, value, columns, "id = %s", where_values):
+					raise ValueError("An error occurred while trying to update on add_collaborator(%s, %s, %s, %s, %s, %s)." % (name, country_id, description, irc, foundation_date, update_id))
+				id = update_id
+			else:
+				self.insert(table, value, columns)
+				id = self.get_last_insert_id(table)
+				if(id == 0):
+					raise ValueError("There is no last insert id to return on add_collaborator(%s, %s, %s, %s, %s, %s)." % (name, country_id, description, irc, foundation_date, update_id))
 		return id
 	
 	"""
@@ -3709,11 +3850,11 @@ class Database:
 		The parameters members, releases, images, socials must have elements that are dictionary. 
 	"""
 	def create_collaborator(self, name, country_id, description = None, irc = None, foundation_date = None,
-	members = [], releases = [], images = [], socials = [], websites = []
+	members = [], releases = [], images = [], socials = [], websites = [], update_id = None
 	):
 		self.set_auto_transaction(False)
 		try:
-			collaborator_id = self.add_collaborator(name, country_id, description, irc, foundation_date)
+			collaborator_id = self.add_collaborator(name, country_id, description, irc, foundation_date, update_id)
 			
 			for member in members:
 				self.add_collaborator_member(collaborator_id, member['name'], member['active'], member['founder'])
