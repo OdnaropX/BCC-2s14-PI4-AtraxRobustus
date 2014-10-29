@@ -217,13 +217,16 @@ class MangaUpdatesSpider(CrawlSpider):
 			series = response.css('td.text.col1 a::text').extract()
 			series_url = response.css('td.text.col1 a::attr(href)').extract()
 			
+				
 			try:
 				for index in range(len(series)):
 					values = []
 					values.append(series[index])
 					series_id = self.dbase.get_var('entity_alias', ['entity_id'], "name = %s", values)
 					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'tag')
-					print "try"
+					
+					#Change type to Web Novel if there category is Web Novel
+					#if 'Web Novel' in category:
 					
 					#Get next url for the crawler
 					next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
