@@ -2,7 +2,9 @@ import psycopg2
 import warnings
 import types
 import collections
-from urlparse import urlparse
+import urlparse
+import re
+import sys
 
 """
 	Class for connection and manipulation of database.
@@ -56,13 +58,31 @@ class Database:
 	#Default image types registered
 	image_user_type_profile = 1
 	
+	classification_type_12 = 11
 	classification_type_18 = 17
 	
 	country_us = 236
+	country_jp = 112
+	country_kr = 211
+	country_cn = 47
 	
-	language_jp = 74
+	language_ja = 74
 	language_en = 42
+	language_ko = 87
+	language_zh = 31
 	
+	entity_type_manga = 3
+	entity_type_manhaw = 4
+	entity_type_manhua = 5
+	entity_type_webtoon = 6
+	entity_type_lightnovel = 9
+	entity_type_webnovel = 10
+	
+	company_function_type_publisher = 1
+	
+	people_relation_type_writer = 2 #author 
+	people_relation_type_illustrator = 1 #artist
+ 
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
 		self.dbuser = dbuser
@@ -166,29 +186,38 @@ class Database:
 		Method used to execute all queries on database.
 		Please don't use this method, use the others available method instead.
 	"""
-	def query(self,sql, parameters = None):		
-		print sql
-		if(sql == "" or sql == None):
+	def query(self,sql, parameters = None):	
+		if(not sql):
 			#error returning
 			self.set_error("No SQL query to execute")
 			self.last_query = ""
 			return False
+
+		#print sql, parameters
 			
 		try:
 			if(parameters == None):
 				self.cursor.execute(sql)
 			else:
 				self.cursor.execute(sql, parameters)
-			
-			self.last_query = self.cursor.query
-			self.status_message = self.cursor.statusmessage
-			print self.last_query
 			return True
 		except psycopg2 as e:
+			print "Error on query: ", self.cursor.query
 			print e.pgerror
 			return False
-		except:
+		except psycopg2.InternalError as e:
+			print "Error on query: ", self.cursor.query
+			print "############################################################################\nPermission error!! Please change the user that access the table and sequence on schema.\n###########################################################################"
+			print e.message
 			return False
+		except:
+			print "Error on query", sys.exc_info()[0]
+			print self.cursor.query
+			return False
+		finally:
+			self.last_query = self.cursor.query
+			self.status_message = self.cursor.statusmessage
+			#print self.last_query
 
 	"""
 		This method verify if an error occurred when the query was run.
@@ -221,19 +250,23 @@ class Database:
 		This method only work with table that have a sequence on schema.
 	"""
 	def _fetch_last_inserted_id(self, table, column):
-		if(table == ""):
+		if(not table):
 			raise ValueError("Table name cannot be empty on _fetch_last_inserted_id method.")
 			
-		if(column == ""):
+		if(not column):
 			raise ValueError("Column name cannot be empty on _fetch_last_inserted_id method.")
 			
 		columns = []
 		columns.append("currval('{table}_{column}_seq')".format(table=table, column=column))
+		print columns, "colunas"
 		row = self.select("", columns, None, None, [], [], ["INNER"], None, False)
 		
-		if(row != None):
-			return row[0]
-		return 0
+		if(row):
+			#gimmick to return only the number.
+			while not isinstance(row, (int, long)) or not row:
+				row = row[0]
+			#print "row: ", row
+		return row
 	
 	"""
 		Method used to set insert_id variable and return last_insert_id
@@ -241,11 +274,11 @@ class Database:
 	def get_last_insert_id(self, table):
 		try:
 			self.insert_id = self._fetch_last_inserted_id(table, 'id')
-			print self.insert_id
 		except ValueError as e:
 			self.insert_id = 0
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)	
+			print "ValueError:{0}".format(e.message)	
 		finally:
+			#print self.insert_id
 			return self.insert_id
 	
 	"""
@@ -258,7 +291,7 @@ class Database:
 		else:
 			length_columns = len(columns)
 		
-		if(table == ""):
+		if(not table):
 			self.set_error("Table name cannot be empty")
 			return False
 		elif(length_columns > 0 and length_columns != len(values)):
@@ -286,7 +319,7 @@ class Database:
 		TODO: Change call of this method.
 	"""
 	def update(self, table, values, columns, where = None, where_values = None):
-		if(table == ""):
+		if(not table):
 			self.set_error("Table cannot be empty")
 			return False
 		elif(len(columns) == 0 or len(values) == 0):
@@ -316,7 +349,7 @@ class Database:
 		Condition on where must have %s on instead of values and parameter values must contain the values used on where in the correct order.
 	"""
 	def delete(self, table, where = None, where_values = None):
-		if(table == ""):
+		if(not table):
 			self.set_error("Table cannot be empty")
 			return False
 		
@@ -331,7 +364,7 @@ class Database:
 		If there is no data None is returned.
 	"""
 	def select(self, table, columns = None, where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None, from_table = True):
-		if(table == "" and from_table == True):
+		if(not table and from_table == True):
 			raise ValueError("Table name cannot be empty on select method.")
 		
 		#Set parameter default.
@@ -389,13 +422,21 @@ class Database:
 		This method is projection and selection with limit 1.
 	"""
 	def get_var(self, table, columns = ['*'], where = None, where_values = None, joins = None, join_columns = None, join_type = None):
-		return self.select(table, columns, where, where_values, joins, join_columns, join_type, 1)
+		result = self.select(table, columns, where, where_values, joins, join_columns, join_type, 1)
+		if result == None:
+			return None
+		else:
+			return result[0]
 		
 	"""
 		Method used to get only one row from database.
 	"""
 	def get_row(self, table, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
-		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, 1)
+		result = self.select(table, ['*'], where, where_values, joins, join_columns, join_type, 1)
+		if result == None:
+			return None
+		else:
+			return result[0]
 				
 	"""
 		Method used to get only one column from database.
@@ -404,7 +445,7 @@ class Database:
 	def get_col(self, table, column, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		columns = []
 		columns.append(column)
-		return self.select(table, columns, where, where_values, joins, join_columns, join_type)
+		return self.select(table, columns, where, where_values, joins, join_columns, join_type)[0]
 	
 	"""
 		Method used to get all the data from a database query.
@@ -422,13 +463,14 @@ class Database:
 		Method used to get a country id from a given language code.
 	"""
 	def get_country_from_language(self, language_code, default_country = None):
-		if(language_code == None):
+		if(not language_code):
 			return default_country
 			
 		code = []
-		code.append(lang)
+		code.append(language_code)
+		print "Language code", language_code
 		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
-		countries = self.get_col('country_has_language as c', 'c.country_id', "code = %s", code, ['language'], ['c.language_id = language.id'])
+		countries = self.get_col('country_has_language as c', 'c.country_id', "language.code = %s", code, ['language'], ['c.language_id = language.id'])
 		if(countries != None):
 			length_country = len(countries)
 			if(length_country > 1 or length_country < 1):
@@ -439,6 +481,41 @@ class Database:
 		
 		return default_country
 	
+	"""
+		Method used to get a language id from a given country id.
+		This method return default language if none is found or the first language found on database.
+		TODO: Change database to return only the official and main language from country.
+	"""
+	def get_language_from_country_id(self, country_id, default_language = None):
+		if(not country_id):
+			return default_language
+			
+		code = []
+		code.append(country_id)
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language', 'language_id', "country_id = %s", code)
+		if(countries != None):
+			return countries[0]
+					
+		return default_country
+
+	"""
+		Method used to get a language id from a given country id.
+		This method return default language if none is found or the first language found on database.
+		TODO: Change database to return only the official and main language from country.
+	"""
+	def get_country_from_language_id(self, language_id, default_country = None):
+		if(not language_id):
+			return default_country
+			
+		code = []
+		code.append(language_id)
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language', 'country_id', "language_id = %s", code)
+		if(countries != None):
+			return countries[0]
+					
+		return default_country
 	################### Internal Methods Used by Other Methods #################### 
 	
 	"""
@@ -453,13 +530,13 @@ class Database:
 		given a field and value for where condition.
 	"""
 	def get_id_from_field(self, table, field, value):
-		print table, field, value
-		if(isinstance(field, types.StringTypes) and isinstance(value, types.StringTypes)):
-			print "here"
+		numeric_value = isinstance(value, types.StringTypes) or isinstance(value, (int, long))
+		
+		if(isinstance(field, types.StringTypes) and numeric_value):
 			where = "{field} = %s".format(field=field)
 			sanitize_value = []
 			sanitize_value.append(value)
-		elif(isinstance(field, collections.Iterable) and isinstance(value, collections.Iterable)):
+		elif(not isinstance(field, types.StringTypes) and isinstance(field, collections.Iterable) and isinstance(value, collections.Iterable)):
 			print "here2"
 			where = []
 			for element in field:
@@ -467,9 +544,7 @@ class Database:
 			where = " and ".join(where)
 			sanitize_value = value
 		else:
-			print "here3"
 			raise ValueError("Invalid field name input on get_id_from_field(%s, %s, %s)" % (table, field, value))
-			
 		return self.get_var(table, ['id'], where, sanitize_value)
 		
 	
@@ -486,7 +561,7 @@ class Database:
 		
 	"""
 	def add_type(self, name, type_name):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_type method.")
 		
 		table = type_name + '_type'
@@ -509,10 +584,10 @@ class Database:
 		shop_location, scale, material, ownership_status, tag, category, genre, archive_container
 	"""
 	def add_name_to_table(self, name, table):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 			
-		if(table == ""):
+		if(not table):
 			raise ValueError("Table cannot be empty on add_name_to_table method.")
 			
 		#create name on table if there isnt none. 
@@ -533,7 +608,7 @@ class Database:
 		audio_codec, video_codec
 	"""
 	def add_codec(self, name, type ='audio', lossless = False):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 		
 		table = type + '_codec'
@@ -562,10 +637,10 @@ class Database:
 		To insert and make a relationship between a image and an entity use the methods add_image_to_ 
 	"""
 	def add_image(self, url, extension, name):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_image method.")
 		
-		if(url == ""):
+		if(not url):
 			raise ValueError("Url cannot be empty on add_image method.")
 			
 		table = 'image'
@@ -592,9 +667,9 @@ class Database:
 		The methods add_image_to_ already uses the appropriate relation method 
 	"""
 	def add_relation_image(self, relation_table, image_id, second_id, type_id):
-		if(relation_table == ""):
+		if(not relation_table):
 			raise ValueError("relation_table cannot be empty on add_relation_image method.")
-		if(image_id == "" or second_id == ""):
+		if(not image_id or not second_id):
 			raise ValueError("image_id and second_id cannot be empty on add_relation_image method.")
 		
 		table = relation_table + "_has_image"
@@ -629,7 +704,7 @@ class Database:
 		By default relation_type is equal to has, but can be overwrite.
 	"""
 	def add_multi_relation(self, first_id, second_id, first_table, second_table, relation_type = 'has'):
-		if(first_table == "" or sencod_table == ""):
+		if(not first_table or not sencod_table):
 			raise ValueError("Table names cannot be empty on add_multi_relation method.")
 	
 		#check if there is already a compost key with the given ids.
@@ -673,10 +748,10 @@ class Database:
 		relation_type parameter is the middle name for the table, current can be 'has', 'related' or 'based'
 	"""
 	def add_relation_with_type(self, first_table, second_table, first_id, second_id, relation_type, relation_type_id, use_type_id = True):
-		if(first_table == "" or sencod_table == ""):
+		if(not first_table or not sencod_table):
 			raise ValueError("Table names cannot be empty on add_relation_with_type method")
 		
-		if(relation_type == ""):
+		if(not relation_type):
 			raise ValueError("Relation type cannot be empty on add_relation_with_type method")
 		
 		#check if there is already a compost key with the given ids.
@@ -720,10 +795,10 @@ class Database:
 		add_number_to_release also make the relationship after the insertion of number data. 
 	"""
 	def add_number(self, entity_id, number_type_id, number, type = 'release', number_release_id = None):
-		if(number == ""):
+		if(not number):
 			raise ValueError("Number cannot be empty on add_edition_number method.")
 		
-		if(number_type_id == ""):
+		if(not number_type_id):
 			raise ValueError("Number type id cannot be empty on add_edition_number method.")
 			
 		where_values = []
@@ -780,9 +855,20 @@ class Database:
 		#check if id really exists on table
 		id = self.get_id_from_field(table, 'id', id)
 		if(id == None):
-			raise ValueError("Error on insert mod, entity_release don't exists.")
+			raise ValueError("Error on getting id. Id don't exists for check_id_exists(%s, %s)." % (table, id))
 		return True
 		
+	"""
+		Method used to check if all input fields are not empty.
+	"""
+	def check_field(self, fields = [], message = None):
+		if not message:
+			message = "The field %s cannot be empty."
+		for field in fields:
+			if not field:
+				raise ValueError(message % (field))
+	
+	
 	"""
 		Method used to insert a alias or title to an item.
 		This method can be use to insert on the follow tables:
@@ -790,11 +876,12 @@ class Database:
 		
 	"""
 	def add_alias(self, name, entity_id, language_id, alias_for, alias_type_id):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_alias method.")
 			
-		#check if entity_id really exists
-		self.check_id_exists('entity', entity_id)
+		print "Alias"
+		#check if entity_id really exists on correct table
+		self.check_id_exists(alias_for, entity_id)
 		
 		table = alias_for + '_alias'
 		
@@ -825,10 +912,10 @@ class Database:
 		
 	"""
 	def add_to_launch_country(self, entity_id, country_id, launch_date, launch_price, launch_currency_id, launch_for = 'entity_edition'):
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_to_launch_country method.")
 		
-		if(country_id == ""):
+		if(not country_id):
 			raise ValueError("Country id cannot be empty on add_to_launch_country method.")
 		
 		#check if entity_edition_id really exists
@@ -891,7 +978,7 @@ class Database:
 		TODO: Change method and table entity_description to register user who send the description. Allow multiples descriptions.
 	"""
 	def add_entity_description(self, entity_id, language_id, description):
-		if(description == ""):
+		if(not description):
 			raise ValueError("Description cannot be empty on add_entity_description method.")
 			
 		table = 'entity_description'
@@ -912,10 +999,10 @@ class Database:
 		
 	"""
 	def add_entity_wiki(self, entity_id, name, url, language_id):
-		if(url == ""):
+		if(not url):
 			raise ValueError("Url cannot be empty on add_entity_wiki method.")
 
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_entity_wiki method.")
 		
 		table =	'entity_wiki'
@@ -939,9 +1026,10 @@ class Database:
 		
 	"""
 	def add_entity_synopsis(self, entity_id, language_id, description):
-		if(description == ""):
+		if(not description):
 			raise ValueError("Description cannot be empty on add_entity_synopse method.")
 		
+		print "Entity_synopsis"
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -969,7 +1057,7 @@ class Database:
 	"""
 	def create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
 	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], romanize_subtitle = None):
-		if(romanized_title == ""):
+		if(not romanized_title):
 			raise ValueError("Romanized title cannot be empty on create_entity method.")
 		
 		#set commit to false.
@@ -1021,7 +1109,7 @@ class Database:
 			
 			return entity_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print "ValueError: {0}".format(e.message)
 			self.rollback()
 			raise ValueError("Return id is equal to 0 on create_entity method. Some error must have occurred.")
 		finally:
@@ -1036,12 +1124,13 @@ class Database:
 		The parameter subtitle refers to subheading and not a caption.
 	"""
 	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None):
-		if(title == ""):
+		if(not title):
 			raise ValueError("Name cannot be empty on add_edition method.")
 		
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_edition method.")
 		
+		print "Edition"
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -1108,7 +1197,7 @@ class Database:
 	"""
 	#Method above that use this method need to call try except. add_number() raise exception that need to be catch.
 	def add_edition_number(self, edition_id, number, number_type_id):
-		if(edition_id == ""):
+		if(not edition_id):
 			raise ValueError("Edition id cannot be empty on add_edition_number method.")
 			
 		return add_number(edition_id, number_type_id, number, 'edition')
@@ -1120,18 +1209,21 @@ class Database:
 		This method require a entity_edition_id to register, if you would like to add a entity_edition and a software edition with
 		the same method use create_software_edition method instead.
 	"""
-	def add_software_edition(self, entity_edition_id, plataform_type_id, software_type_id, media_type_id):
-		if(entity_edition_id == ""):
+	def add_software_edition(self, entity_edition_id, plataform_type_id, software_type_id, media_type_id, visual_type_id):
+		if(not entity_edition_id):
 			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
 			
-		if(plataform_type_id == ""):
+		if(not plataform_type_id):
 			raise ValueError("plataform_type_id cannot be empty on add_software_edition method.")
 			
-		if(software_type_id == ""):
+		if(not software_type_id):
 			raise ValueError("software_type_id cannot be empty on add_software_edition method.")
 		
-		if(media_type_id == ""):
+		if(not media_type_id):
 			raise ValueError("media_type_id cannot be empty on add_software_edition method.")
+			
+		if(not visual_type_id):
+			raise ValueError("visual_type_id cannot be empty on add_software_edition method.")
 	
 		#check if entity_edition_id really exists
 		self.check_id_exists('entity_edition', entity_edition_id)
@@ -1164,10 +1256,10 @@ class Database:
 		the same method use create_read_edition method instead.
 	"""
 	def add_read_edition(self, entity_edition_id, print_type_id, pages_number, chapters_number = None):
-		if(entity_edition_id == ""):
+		if(not entity_edition_id):
 			raise ValueError("entity_edition_id cannot be empty on add_software_edition method.")
 			
-		if(pages_number == ""):
+		if(not pages_number):
 			raise ValueError("pages_number cannot be empty on add_read_edition method.")
 		
 		table = 'read_edition'
@@ -1200,7 +1292,7 @@ class Database:
 			image_id = add_image(url, extension, name)
 			return add_relation_image('entity_edition', image_id, edition_id, image_type_id)
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	"""
@@ -1246,7 +1338,7 @@ class Database:
 			
 			return edition_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
 		finally:
@@ -1272,7 +1364,7 @@ class Database:
 			
 			return edition_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("Return id is equal to 0 on create_read_edition method. Some error must have occurred.")
 		finally:
@@ -1282,7 +1374,7 @@ class Database:
 		Method used to create a entity edition that is a software_edition specialization.
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
-	def create_software_edition(self, plataform_type_id, software_type_id, media_type_id,	
+	def create_software_edition(self, plataform_type_id, software_type_id, media_type_id, visual_type_id,
 	edition_type_id, entity_id, title, number, number_type_id, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, launch_event_id = None,
 	languages_id = [], subtitles = [], launch_countries = [], companies = [], images = []):
 	
@@ -1291,13 +1383,13 @@ class Database:
 		
 		try:
 			edition_id = self.create_edition(edition_type_id, entity_id, title, number, number_type_id, free, censored, subtitle, code, complement_code, release_description, height, width, depth, weight, launch_event_id, languages_id, subtitles, launch_countries, companies, images)
-			self.add_software_edition(edition_id, plataform_type_id, software_type_id, media_type_id)
+			self.add_software_edition(edition_id, plataform_type_id, software_type_id, media_type_id, visual_type_id)
 			#commit changes
 			self.commit()
 			
 			return edition_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("Return id is equal to 0 on create_software_edition method. Some error must have occurred.")
 		finally:
@@ -1312,18 +1404,19 @@ class Database:
 		This method can be use to insert on entity_release table.
 	"""
 	def add_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None):
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("entity_id cannot be empty on add_release method.")	
 		
-		if(release_type_id == ""):
+		if(not release_type_id):
 			raise ValueError("release_type_id cannot be empty on add_release method.")	
 		
-		if(country_id == ""):
+		if(not country_id):
 			raise ValueError("country_id cannot be empty on add_release method.")	
 			
-		if(entity_edition_id == ""):
+		if(not entity_edition_id):
 			raise ValueError("entity_edition_id cannot be empty on add_release method.")
 		
+		print "Release"
 		#check if entity really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -1363,7 +1456,7 @@ class Database:
 		the same method use create_game_release method instead.
 	"""
 	def add_game_release(self, entity_release_id, installation_instructions = None, emulate = 0):
-		if(entity_release_id == ""):
+		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_game_release method.")
 			
 		table = 'game_release'
@@ -1394,7 +1487,7 @@ class Database:
 		the same method use create_mod_release method instead.
 	"""
 	def add_mod_release(self, name, type_id, entity_release_id, author_name, launch_date = None, description = None, installation_instruction = None):
-		if(entity_release_id == ""):
+		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
 			
 		#check if entity_release really exists
@@ -1434,7 +1527,7 @@ class Database:
 		the same method use create_video_release method instead.
 	"""
 	def add_video_release(self, entity_release_id, duration, video_codec_id, container_id, softsub, resolution):
-		if(entity_release_id == ""):
+		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
 			
 		#check if entity_release really exists
@@ -1468,7 +1561,7 @@ class Database:
 		e.g. Volume 1 Chapter 1-4 or Season 4 Episode 89-102. 
 	"""
 	def add_release_number(self, release_id, numbers):
-		if(release_id == ""):
+		if(not release_id):
 			raise ValueError("Edition id cannot be empty on add_edition_number method.")
 			
 		#set commit to false.
@@ -1486,7 +1579,7 @@ class Database:
 					
 			return True
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("An error occurred when trying to run add_release_number(%s, %s)." % (release_id, numbers ))
 		finally:
@@ -1503,7 +1596,7 @@ class Database:
 			image_id = add_image(url, extension, name)
 			return add_relation_image('entity_release', image_id, release_id, image_type_id)
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 	
 
@@ -1549,7 +1642,7 @@ class Database:
 			
 			return release_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_release method. Some error must have occurred.")
 		finally:
@@ -1574,7 +1667,7 @@ class Database:
 			self.commit()
 			return entity_release_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("Some error must have occurred on create_game_release method.")
 		finally:
@@ -1587,7 +1680,7 @@ class Database:
 	def create_mod_release(self, name, mod_type_id, author_name, entity_id, release_type_id, country_id, entity_edition_id,
 	launch_date = None, description = None, installation_instruction = None, images = []):
 		
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on create_mod_release method.")
 			
 		#set commit to false.
@@ -1604,7 +1697,7 @@ class Database:
 			self.commit()
 			return entity_release_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("Some error must have occurred on create_mod_release method.")
 		finally:
@@ -1633,7 +1726,7 @@ class Database:
 			self.commit()
 			return entity_release_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_video_release method. Some error must have occurred.")
 		finally:
@@ -1647,7 +1740,7 @@ class Database:
 		This method can be use to insert on entity_release table.
 	"""
 	def add_persona(self, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None):
-		if(gender == ""):
+		if(not gender):
 			raise ValueError("Gender cannot be empty on add_persona method.")	
 		
 		table = 'persona'
@@ -1692,13 +1785,13 @@ class Database:
 		persona_occupation, persona_unusual_features, persona_affiliation, persona_race
 	"""
 	def add_persona_items(self, name, persona_id, item_table):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_persona_items method.")
 		
-		if(item_table == ""):
+		if(not item_table):
 			raise ValueError("Item table cannot be empty on add_persona_items method.")
 			
-		if(persona_id == ""):
+		if(not persona_id):
 			raise ValueError("Persona id cannot be empty on add_persona_items method.")
 			
 		self.check_id_exists('persona', persona_id)
@@ -1726,10 +1819,10 @@ class Database:
 		This method can be use to insert data on persona_alias table.
 	"""
 	def add_persona_alias(self, name, persona_id, alias_type_id):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_persona_items method.")
 		
-		if(alias_type_id == ""):
+		if(not alias_type_id):
 			raise ValueError("Alias type cannot be empty on add_persona_items method.")
 			
 		self.check_id_exists('persona', persona_id)
@@ -1765,7 +1858,7 @@ class Database:
 			image_id = add_image(url, extension, name)
 			return add_multi_relation(persona_id, image_id, 'persona', 'image')
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 
 	"""
@@ -1774,12 +1867,13 @@ class Database:
 		
 	"""
 	def add_persona_to_entity(self, entity_id, persona_id, alias_used_id, first_appear = 0):
-		if(persona_id == ""):
+		if(not persona_id):
 			raise ValueError("Persona id cannot be empty on add_persona_items method.")
 			
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_persona_items method.")
 			
+		print "persona to entity"
 		self.check_id_exists('entity', entity_id)
 		
 		table = 'persona_appear_on_entity'
@@ -1815,7 +1909,7 @@ class Database:
 	def create_persona(self, name, gender, birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_color = None,
 	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
 	relationship = [], images = []):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on create_persona method.")
 	
 		#set commit to false.
@@ -1864,7 +1958,7 @@ class Database:
 			self.commit()
 			return persona_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_persona method. Some error must have occurred.")
 		finally:
@@ -1880,11 +1974,13 @@ class Database:
 		Countries must be already save on database prior to the usage of this method.
 		TODO: Use similarity instead equal on name.
 	"""
-	def add_company(self, name, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
-		if(name == ""):
+	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_company method.")
-	
 		
+		if(not country_origin_id):
+			raise ValueError("country_origin_id cannot be empty on add_company method.")
+	
 		self.check_id_exists('country', country_origin_id)
 		
 		table = 'company'
@@ -1932,16 +2028,16 @@ class Database:
 		The parameter relation_table is used as the first part of table name that have _has_company
 	"""
 	def add_relation_company(self, company_id, second_id, company_function_type_id, relation_table):
-		if(company_id == ""):
+		if(not company_id):
 			raise ValueError("company_id cannot be empty on add_relation_company method.")
 		
-		if(second_id == ""):
+		if(not second_id):
 			raise ValueError("second_id cannot be empty on add_relation_company method.")
 		
-		if(company_function_type_id == ""):
+		if(not company_function_type_id):
 			raise ValueError("company_function_type_id cannot be empty on add_relation_company method.")
 			
-		if(relation_table == ""):
+		if(not relation_table):
 			raise ValueError("relation_table cannot be empty on add_relation_company method.")
 			
 		self.check_id_exists('company', company_id)
@@ -1974,7 +2070,7 @@ class Database:
 			image_id = add_image(url, extension, name)
 			return add_relation_image('entity_edition', image_id, company_id, image_type_id)
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 
 	"""
@@ -1984,7 +2080,7 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters images, editions, entities must have elements that are dict. 
 	"""		
-	def create_company(self, name, language_id, country_origin_id = None, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
+	def create_company(self, name, language_id, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
 	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = []):	
 		
 		self.set_auto_transaction(False)
@@ -2022,7 +2118,7 @@ class Database:
 			self.commit()
 			return company_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_company method. Some error must have occurred.")
 		finally:
@@ -2039,11 +2135,13 @@ class Database:
 		Countries must be already save on database prior to the usage of this method.
 	"""
 	def add_people(self, country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None, blood_rh_type_id = None, website = None, description = None):
-		if(country == ""):
+		if(not country_id):
 			raise ValueError("Country id cannot be empty on add_people method.")
+		
 		
 		self.check_id_exists('country', country_id)
 		
+		table = 'people'
 		#cannot check uniqueness
 		columns = ['country_id']
 		value = []
@@ -2083,7 +2181,7 @@ class Database:
 			columns.append('birth_date')
 			value.append(birth_date)
 			
-		self.insert('people', value, columns)
+		self.insert(table, value, columns)
 		id = self.get_last_insert_id(table)
 		if(id == 0):
 			raise ValueError("There is no last insert id to return on add_people(%s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description))
@@ -2097,16 +2195,16 @@ class Database:
 	
 	"""
 	def add_relation_people(self, people_id, people_alias_used_id, second_id, relation_table, relation_type_id, relation_type = 'produces'):
-		if(people_id == ""):
+		if(not people_id):
 			raise ValueError("People id cannot be empty on add_relation_people method.")
 		
-		if(relation_table == ""):
+		if(not relation_table):
 			raise ValueError("relation_table cannot be empty on add_relation_people method.")
 			
-		if(second_id == ""):
+		if(not second_id):
 			raise ValueError("Second id cannot be empty on add_relation_people method.")	
 			
-		if(relation_type_id == ""):
+		if(not relation_type_id):
 			raise ValueError("relation_type id cannot be empty on relation_type_id method.")	
 			
 		self.check_id_exists('people', people_id)
@@ -2135,16 +2233,16 @@ class Database:
 		This method can be use to insert on people_alias.
 	"""
 	def add_people_alias(self, name, lastname, people_id, alias_type_id):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_people_alias method.")
 		
-		if(lastname == ""):
+		if(not lastname):
 			raise ValueError("Last name id cannot be empty on add_people_alias method.")
 			
-		if(people_id == ""):
+		if(not people_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		if(alias_type_id == ""):
+		if(not alias_type_id):
 			raise ValueError("alias_type_id id cannot be empty on add_people_alias method.")
 			
 			
@@ -2166,7 +2264,8 @@ class Database:
 			value.append(people_id)
 			value.append(lastname)
 			self.insert(table, value, columns)
-			id = insert_id
+			
+			id = self.get_last_insert_id(table)
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_people_alias(%s, %s, %s, %s)." % (name, lastname, people_id, alias_type_id))
 		return id
@@ -2181,21 +2280,23 @@ class Database:
 
 	"""		
 	def add_relation_people_persona(self, people_id, persona_id, language_id, entity_id, entity_edition_id, observation = None):
-		if(people_id == ""):
+		if(not people_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		if(persona_id == ""):
+		if(not persona_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		if(language_id == ""):
+		if(not language_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		if(entity_edition_id == ""):
+		if(not entity_edition_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
+		print "relation people persona"
+		
 		self.check_id_exists('people', people_id)
 		self.check_id_exists('persona', persona_id)
 		self.check_id_exists('entity', entity_id)
@@ -2232,17 +2333,17 @@ class Database:
 		
 	"""
 	def add_relation_people_persona_on_entity_edition_number(self, people_id, persona_id, language_id, number_id):
-		if(people_id == ""):
-			raise ValueError("People id cannot be empty on add_people_alias method.")
+		if(not people_id):
+			raise ValueError("People id cannot be empty on add_relation_people_persona_on_entity_edition_number method.")
 			
-		if(persona_id == ""):
-			raise ValueError("People id cannot be empty on add_people_alias method.")
+		if(not persona_id):
+			raise ValueError("People id cannot be empty on add_relation_people_persona_on_entity_edition_number method.")
 			
-		if(language_id == ""):
-			raise ValueError("People id cannot be empty on add_people_alias method.")
+		if(not language_id):
+			raise ValueError("People id cannot be empty on add_relation_people_persona_on_entity_edition_number method.")
 			
-		if(number_id == ""):
-			raise ValueError("Number id cannot be empty on add_people_alias method.")
+		if(not number_id):
+			raise ValueError("Number id cannot be empty on add_relation_people_persona_on_entity_edition_number method.")
 		
 		self.check_id_exists('people', people_id)
 		self.check_id_exists('persona', persona_id)
@@ -2284,7 +2385,7 @@ class Database:
 			self.commit()
 			return True
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError(e.strerror)
 		finally:
@@ -2300,7 +2401,7 @@ class Database:
 			return self.add_multi_relation(people_id, image_id, 'people', 'image')
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	
@@ -2314,17 +2415,17 @@ class Database:
 	def create_people(self, name, lastname,
 	country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None,blood_rh_type_id = None, website = None, description = None,
 	aliases = [], nicknames = [], native_names = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = []):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on create_people method.")
 			
-		if(lastname == ""):
+		if(not lastname):
 			raise ValueError("Last name cannot be empty on create_people method.")
 		
 		self.set_auto_transaction(False)
 		try:
 			#add_people
-			people_id = self.add_people(self, country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description)
-
+			people_id = self.add_people(country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description)
+			
 			#add_people_alias
 			self.add_people_alias(name, lastname, people_id, self.alias_type_main)
 			
@@ -2359,7 +2460,7 @@ class Database:
 			self.commit()
 			return people_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_people method. Some error must have occurred.")
 		finally:
@@ -2373,7 +2474,7 @@ class Database:
 		This method check if version_id really exists prior to insert on table.
 	"""
 	def add_requirements(self, version_id, video_board, processor, memory, hd_storage):
-		if(version_id == ""):
+		if(not version_id):
 			raise ValueError("version_id cannot be empty on add_requirements method.")
 		
 		self.check_id_exists('version', version_id)
@@ -2402,7 +2503,7 @@ class Database:
 		This method check if requirements_id really exists prior to insert on table.
 	"""
 	def add_driver(self, name, url_download):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_requirements method.")
 		
 		self.check_id_exists('requirements', requirements_id)
@@ -2427,16 +2528,16 @@ class Database:
 		This method check if version_id really exists prior to insert on table.
 	"""
 	def add_archive(self, name, version_id, size, extension):
-		if(version_id == ""):
+		if(not version_id):
 			raise ValueError("version_id cannot be empty on add_archive method.")
 			
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_archive method.")
 			
-		if(size == ""):
+		if(not size):
 			raise ValueError("size cannot be empty on add_archive method.")
 			
-		if(extension == ""):
+		if(not extension):
 			raise ValueError("extension cannot be empty on add_archive method.")
 			
 		self.check_id_exists('version', version_id)
@@ -2468,13 +2569,13 @@ class Database:
 		This method check if archive_id really exists prior to insert on table.
 	"""
 	def add_url_archive(self, archive_id, url, url_type_id):
-		if(archive_id == ""):
+		if(not archive_id):
 			raise ValueError("archive_id cannot be empty on add_archive method.")
 			
-		if(url == ""):
+		if(not url):
 			raise ValueError("URL cannot be empty on add_archive method.")
 			
-		if(url_type_id == ""):
+		if(not url_type_id):
 			raise ValueError("url_type_id cannot be empty on add_archive method.")
 			
 		self.check_id_exists('archive', archive_id)
@@ -2502,13 +2603,13 @@ class Database:
 		This method check if archive_id really exists prior to insert on table.
 	"""
 	def add_hash(self, hash_type_id, archive_id, code):
-		if(hash_type_id == ""):
+		if(not hash_type_id):
 			raise ValueError("hash_type_id cannot be empty on add_hash method.")
 			
-		if(archive_id == ""):
+		if(not archive_id):
 			raise ValueError("archive_id cannot be empty on add_hash method.")
 			
-		if(code == ""):
+		if(not code):
 			raise ValueError("code cannot be empty on add_hash method.")
 
 		self.check_id_exists('archive', archive_id)
@@ -2538,10 +2639,10 @@ class Database:
 		This method don't insert any relationship to version like release version or software edition version.
 	"""
 	def add_version(self, stage_developer_type_id, number, changelog = None):
-		if(stage_developer_type_id == ""):
+		if(not stage_developer_type_id):
 			raise ValueError("stage_developer_type_id cannot be empty on add_version method.")
 			
-		if(number == ""):
+		if(not number):
 			raise ValueError("Number cannot be empty on add_version method.")
 			
 		table = 'version'
@@ -2583,7 +2684,7 @@ class Database:
 			self.commit()
 			return archive_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_archive method. Some error must have occurred.")
 		finally:
@@ -2609,7 +2710,7 @@ class Database:
 			self.commit()
 			return requirement_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_requirements method. Some error must have occurred.")
 		finally:
@@ -2640,7 +2741,7 @@ class Database:
 			self.commit()
 			return version_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_version method. Some error must have occurred.")
 		finally:
@@ -2657,7 +2758,7 @@ class Database:
 		TODO: check with full text search a collection that have the a entity with similar name
 	"""
 	def add_collection(self, name, description = None):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_collection method.")
 		
 		table = 'collection'
@@ -2700,7 +2801,7 @@ class Database:
 			self.commit()
 			return collection_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_collection method. Some error must have occurred.")
 		finally:
@@ -2716,10 +2817,10 @@ class Database:
 		
 	"""
 	def add_audio(self, country_id, audio_codec_id, name, duration, bitrate):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_audio method.")
 		
-		if(country_id == ""):
+		if(not country_id):
 			raise ValueError("country_id cannot be empty on add_audio method.")
 		
 		self.check_id_exists('country', country_id)
@@ -2753,13 +2854,13 @@ class Database:
 		
 	"""
 	def add_relation_soundtrack_audio(self, audio_id, soundtrack_id, exclusive):
-		if(soundtrack_id == ""):
+		if(not soundtrack_id):
 			raise ValueError("Name cannot be empty on add_relation_soundtrack_audio method.")
 		
-		if(audio_id == ""):
+		if(not audio_id):
 			raise ValueError("country_id cannot be empty on add_relation_soundtrack_audio method.")
 
-		if(exclusive == ""):
+		if(not exclusive):
 			raise ValueError("exclusive cannot be empty on add_relation_soundtrack_audio method.")
 	
 		self.check_id_exists('audio', audio_id)
@@ -2788,19 +2889,19 @@ class Database:
 		The lyric_type_id must be previously registered on database.
 	"""
 	def add_lyric(self, lyric_type_id, audio_id, language_id, title, content, user_id = None):
-		if(soundtrack_id == ""):
+		if(not soundtrack_id):
 			raise ValueError("soundtrack_id cannot be empty on add_lyric method.")
 		
-		if(audio_id == ""):
+		if(not audio_id):
 			raise ValueError("audio_id cannot be empty on add_lyric method.")
 
-		if(language_id == ""):
+		if(not language_id):
 			raise ValueError("Language id cannot be empty on add_lyric method.")
 			
-		if(title == ""):
+		if(not title):
 			raise ValueError("Title cannot be empty on add_lyric method.")
 			
-		if(content == ""):
+		if(not content):
 			raise ValueError("Content cannot be empty on add_lyric method.")
 	
 		self.check_id_exists('audio', audio_id)
@@ -2853,14 +2954,16 @@ class Database:
 		
 	"""
 	def add_soundtrack(self, name, type_id, launch_year, launch_country_id, code = None):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_soundtrack method.")
-		if(type_id == ""):
+			
+		if(not type_id):
 			raise ValueError("type_id cannot be empty on add_soundtrack method.")
-		if(launch_year == ""):
+			
+		if(not launch_year):
 			raise ValueError("launch_year cannot be empty on add_soundtrack method.")
 		
-		if(launch_country_id == ""):
+		if(not launch_country_id):
 			raise ValueError("launch_country_id cannot be empty on add_soundtrack method.")
 		
 		self.check_id_exists('country', launch_country_id)
@@ -2910,7 +3013,7 @@ class Database:
 			return add_relation_image('audio', image_id, audio_id, image_type_id)
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	"""
@@ -2924,7 +3027,7 @@ class Database:
 			return add_relation_image('soundtrack', image_id, soundtrack_id, image_type_id)
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	"""
@@ -2954,7 +3057,7 @@ class Database:
 			self.commit()
 			return audio_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_audio method. Some error must have occurred.")
 		finally:
@@ -2984,7 +3087,7 @@ class Database:
 			self.commit()
 			return soundtrack_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_soundtrack method. Some error must have occurred.")
 		finally:
@@ -3001,10 +3104,10 @@ class Database:
 		
 	"""
 	def add_goods(self, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0):
-		if(goods_type_id == ""):
+		if(not goods_type_id):
 			raise ValueError("goods_type_id cannot be empty on add_goods method.")
 			
-		if(height == ""):
+		if(not height):
 			raise ValueError("Height cannot be empty on add_goods method.")
 		
 		table = 'goods'
@@ -3042,7 +3145,7 @@ class Database:
 		TODO: Change method and table goods_description to register user who send the description. Allow multiples descriptions.
 	"""
 	def add_goods_description(self, goods_id, language_id, description):
-		if(description == ""):
+		if(not description):
 			raise ValueError("Description cannot be empty on add_goods_description method.")
 			
 		table = 'goods_description'
@@ -3064,10 +3167,10 @@ class Database:
 
 	"""
 	def add_goods_relation_shops(self, goods_id, shop_id, product_url):
-		if(goods_id == ""):
+		if(not goods_id):
 			raise ValueError("goods_id cannot be empty on add_goods method.")
 		
-		if(shop_id == ""):
+		if(not shop_id):
 			raise ValueError("shop_id cannot be empty on add_goods method.")
 		
 		self.check_id_exists('goods', goods_id)
@@ -3104,7 +3207,7 @@ class Database:
 		This method not insert anything related with the shop like goodss associated.
 	"""
 	def add_shops(self, name, url = None):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 	
 		where_values = []
@@ -3144,7 +3247,7 @@ class Database:
 			return add_relation_image('goods', image_id, goods_id, image_type_id)
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	"""
@@ -3154,7 +3257,7 @@ class Database:
 		the same method use create_figure method instead.
 	"""
 	def add_figure(self, goods_id, figure_version_id, scale_id):
-		if(entity_release_id == ""):
+		if(not entity_release_id):
 			raise ValueError("entity_release_id cannot be empty on add_mod_release method.")
 			
 		#check if entity_release really exists
@@ -3200,7 +3303,7 @@ class Database:
 			self.commit()
 			return shop_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_shops method. Some error must have occurred.")
 		finally:
@@ -3215,10 +3318,10 @@ class Database:
 	"""
 	def create_goods(self, romanize_title, language_id, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
 	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = []):
-		if(romanize_title == ""):
+		if(not romanize_title):
 			raise ValueError("romanize_title cannot be empty on create_goods method.")
 		
-		if(language_id == ""):
+		if(not language_id):
 			raise ValueError("Language id cannot be empty on create_goods method.")
 		
 		#set commit to false.
@@ -3280,7 +3383,7 @@ class Database:
 			
 			return goods_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_goods method. Some error must have occurred.")
 		finally:
@@ -3305,7 +3408,7 @@ class Database:
 			self.commit()
 			return goods_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_figure method. Some error must have occurred.")
 		finally:
@@ -3318,13 +3421,13 @@ class Database:
 		This method don't insert anything related with the event like edition launches or goods launch.
 	"""
 	def add_event(self, name, edition, date, country_id, location = None, website = None, duration = None, free = 0):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_event methsod.")	
 		
-		if(edition == ""):
+		if(not edition):
 			raise ValueError("Edition cannot be empty on add_event method.")	
 		
-		if(date == ""):
+		if(not date):
 			raise ValueError("Date cannot be empty on add_event method.")	
 			
 		table = 'event'
@@ -3380,7 +3483,7 @@ class Database:
 			self.commit()
 			return event_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_event method. Some error must have occurred.")
 		finally:
@@ -3397,21 +3500,23 @@ class Database:
 		
 		Country must be already registered before use this method.
 	"""
-	def add_collaborator(name, country_id, description = None, irc = None, foundation_date = None):
-		if(name == ""):
+	def add_collaborator(self, name, country_id, description = None, irc = None, foundation_date = None):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_collaborator method.")
 		
-		if(country_id == ""):
+		if(not country_id):
 			raise ValueError("Country id cannot be empty on add_collaborator method.")
-	
-		self.check_id_exists('country', country_id)
+		
+		print "Country id", country_id
+		#check_id not working correct in this method.
+		#self.check_id_exists('country', country_id)
 	
 		table = 'collaborator'
 
 		where_values = []
 		where_values.append(name)
 		where_values.append(country_id)
-		id = self.get_id_from_field(table, ['name', 'country_id'])
+		id = self.get_id_from_field(table, ['name', 'country_id'], where_values)
 		
 		if(id == None):
 			columns = ['name', 'country_id']
@@ -3419,7 +3524,7 @@ class Database:
 			value.append(name)
 			value.append(country_id)
 			
-			if(irc != None):
+			if(irc):
 				columns.append('irc')
 				value.append(irc)
 			
@@ -3431,7 +3536,9 @@ class Database:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 			
-			self.insert('collaborator', value, columns)
+			#self.insert('collaborator', value, columns)
+			print value, columns, self.insert('collaborator', value, columns)
+			
 			id = self.get_last_insert_id(table)
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_collaborator(%s, %s, %s, %s, %s)." % (name, country_id, description, irc, foundation_date))
@@ -3443,7 +3550,7 @@ class Database:
 		This method only add a new member, to add and associate a member to a collaborator use add_collaborator_member.
 	"""
 	def add_member(self, name, active = 1):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_collaborator method.")
 		
 		table = 'collaborator_member'
@@ -3480,7 +3587,7 @@ class Database:
 			self.commit()
 			return True
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			return False
 		finally:
@@ -3492,10 +3599,10 @@ class Database:
 		collaborator_has_collaborator_member
 	"""
 	def add_relation_collaborator_member(self, collaborator_id, member_id, founder = 0):
-		if(collaborator_id == ""):
+		if(not collaborator_id):
 			raise ValueError("Collaborator id cannot be empty on add_relation_collaborator_member method.")
 			
-		if(member_id == ""):
+		if(not member_id):
 			raise ValueError("Member id cannot be empty on add_relation_collaborator_member method.")
 			
 		table = 'collaborator_has_collaborator_member'
@@ -3521,16 +3628,16 @@ class Database:
 		collaborator_provides_entity_release, collaborator_member_produces_entity_release
 	"""
 	def add_relation_collaborator_release(self, collaborator_id, release_id, function_type_id, first_table, relation = 'provides'):
-		if(collaborator_id == ""):
+		if(not collaborator_id):
 			raise ValueError("collaborator_id cannot be empty on add_name_to_table method.")
 	
-		if(release_id == ""):
+		if(not release_id):
 			raise ValueError("release_id cannot be empty on add_name_to_table method.")
 			
-		if(function_type_id == ""):
+		if(not function_type_id):
 			raise ValueError("function_type_id cannot be empty on add_name_to_table method.")
 	
-		if(first_table == ""):
+		if(not first_table):
 			raise ValueError("first_table cannot be empty on add_name_to_table method.")
 	
 		
@@ -3557,10 +3664,10 @@ class Database:
 	
 	"""
 	def add_collaborator_website(self, collaborator_id, website):
-		if(collaborator_id == ""):
+		if(not collaborator_id):
 			raise ValueError("collaborator_id cannot be empty on add_collaborator_website method.")
 	
-		if(website == ""):
+		if(not website):
 			raise ValueError("website cannot be empty on add_collaborator_website method.")
 	
 		table = 'collaborator_website'
@@ -3591,7 +3698,7 @@ class Database:
 			return add_relation_image('collaborator', image_id, collaborator_id, image_type_id)
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 			
 	"""
@@ -3630,7 +3737,7 @@ class Database:
 			self.commit()
 			return collaborator_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("An error occurred while trying to save a collaborator on create_collaborator.")
 		finally:
@@ -3645,10 +3752,10 @@ class Database:
 		
 	"""
 	def add_social_type(self, name, website, website_secure = None):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_social_type method.")
 	
-		if(website == ""):
+		if(not website):
 			raise ValueError("Website cannot be empty on add_social_type method.")
 	
 		table = 'social_type'
@@ -3662,12 +3769,12 @@ class Database:
 			value.append(website)
 			
 			if(website_secure != None):
-				columns.append(website_secure)
+				columns.append('website_secure')
 				value.append(website_secure)
 			
-			self.insert(table, value, columns)
+			insert = self.insert(table, value, columns)
 			id = self.get_last_insert_id(table)
-			
+			print insert
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_social_type(%s, %s, %s)." % (name, website, website_secure))
 		return id	
@@ -3678,16 +3785,24 @@ class Database:
 	"""
 	def create_social_type_from_url(self, website):
 		url = urlparse.urlparse(website)
+		new_url = []
+		print url
 		#Get name from domain
-		domain = re.sub(r'^ww[w0-9]{1,}.', '', url.netlock) 
+		domain = re.sub(r'^ww[w0-9]{1,}.', '', url.netloc) 
 		domain = domain.split('.')
 		name = domain[0].capitalize()
 		#Get url from social link
-		url[2], url[3], url[4], url[5] = "", "", "", ""
-		link = urlparse.urlunparse(url)
+		new_url.append(url[0])
+		new_url.append(url[1])
+		new_url.append("")
+		new_url.append("")
+		new_url.append("")
+		new_url.append("")
+
+		link = urlparse.urlunparse(new_url)
 		#Get url secure
-		url[0] = 'https'
-		link_secure = urlparse.urlunparse(url)
+		new_url[0] = 'https'
+		link_secure = urlparse.urlunparse(new_url)
 		try:
 			return self.add_social_type(name, link, link_secure)
 		except ValueError as e:
@@ -3702,7 +3817,7 @@ class Database:
 		
 	"""
 	def add_social(self, social_type_id, url):
-		if(url == ""):
+		if(not url):
 			raise ValueError("URL cannot be empty on add_social method.")
 	
 		table = 'social'
@@ -3727,13 +3842,13 @@ class Database:
 		
 	"""
 	def add_relation_social(self, relation_table, social_id, second_id, last_checked = None):
-		if(relation_table == ""):
+		if(not relation_table):
 			raise ValueError("relation_table cannot be empty on add_relation_social method.")
 		
-		if(social_id == ""):
+		if(not social_id):
 			raise ValueError("social_id cannot be empty on add_relation_social method.")
 		
-		if(second_id == ""):
+		if(not second_id):
 			raise ValueError("second_id cannot be empty on add_relation_social method.")
 		
 		self.check_id_exists('social', social_id)
@@ -3778,7 +3893,8 @@ class Database:
 		self.set_auto_transaction(False)
 			
 		try:
-			social_id = self.add_social(self, social_type_id, url)
+			social_id = self.add_social(social_type_id, url)
+			print "SSSSSSSocial ID", social_id
 			self.add_relation_social(relation_table, social_id, second_id, last_checked)
 			
 			#commit changes
@@ -3787,7 +3903,7 @@ class Database:
 			return social_id
 	
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("return id is equal to 0 on create_edition method. Some error must have occurred.")
 		finally:
@@ -3805,10 +3921,10 @@ class Database:
 		
 	"""
 	def add_localization(self, name, code, type = 'country'):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_localization method.")
 		
-		if(code == ""):
+		if(not code):
 			raise ValueError("Code cannot be empty on add_localization method.")
 		
 		if(type != 'country'):
@@ -3831,10 +3947,10 @@ class Database:
 		Method used to insert a relation between country and currency.
 	"""
 	def add_relation_country_currency(self, country_id, currency_id, main_currency = 1):
-		if(country_id == ""):
+		if(not country_id):
 			raise ValueError("country_id cannot be empty on add_name_to_table method.")
 	
-		if(currency_id == ""):
+		if(not currency_id):
 			raise ValueError("currency_id cannot be empty on add_name_to_table method.")
 	
 		self.check_id_exists('country', country_id)
@@ -3864,13 +3980,13 @@ class Database:
 	
 	"""
 	def add_currency(self, name, symbol, code):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_currency method.")
 			
-		if(code == ""):
+		if(not code):
 			raise ValueError("code cannot be empty on add_currency method.")
 			
-		if(symbol == ""):
+		if(not symbol):
 			raise ValueError("symbol cannot be empty on add_currency method.")
 		
 		table = 'currency'
@@ -3899,10 +4015,10 @@ class Database:
 	
 	"""
 	def add_list(self, name, user_id, type = 'edition', entity_type_id = 0):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_list method.")
 		
-		if(user_id == ""):
+		if(not user_id):
 			raise ValueError("user_id cannot be empty on add_list method.")
 		
 		self.check_id_exists('users', user_id)
@@ -3945,16 +4061,16 @@ class Database:
 		This method can be used to insert on lists_release_list_entity_release table.
 	"""
 	def add_release_to_list(self, list_id, entity_id, read_status_type_id, ownership_type_id, local_storage = None):
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("entity_id cannot be empty on add_release_to_list method.")
 		
-		if(list_id == ""):
+		if(not list_id):
 			raise ValueError("list_id cannot be empty on add_release_to_list method.")
 		
-		if(read_status_type_id == ""):
+		if(not read_status_type_id):
 			raise ValueError("read_status_type_id cannot be empty on add_release_to_list method.")
 		
-		if(ownership_type_id == ""):
+		if(not ownership_type_id):
 			raise ValueError("ownership_type_id cannot be empty on add_release_to_list method.")
 		
 		self.check_id_exists('lists_release', list_id)
@@ -3985,19 +4101,19 @@ class Database:
 		This method can be used to insert on lists_goods_list_goods table.
 	"""
 	def add_goods_to_list(self, list_id, goods_id, ownership_status_id, box_condition_type_id, product_condition_type_id, observation = None):
-		if(goods_id == ""):
+		if(not goods_id):
 			raise ValueError("goods_id cannot be empty on add_release_to_list method.")
 		
-		if(list_id == ""):
+		if(not list_id):
 			raise ValueError("list_id cannot be empty on add_release_to_list method.")
 		
-		if(ownership_status_id == ""):
+		if(not ownership_status_id):
 			raise ValueError("ownership_status_id cannot be empty on add_release_to_list method.")
 		
-		if(box_condition_type_id == ""):
+		if(not box_condition_type_id):
 			raise ValueError("box_condition_type_id cannot be empty on add_release_to_list method.")
 			
-		if(product_condition_type_id == ""):
+		if(not product_condition_type_id):
 			raise ValueError("product_condition_type_id cannot be empty on add_release_to_list method.")
 		
 		self.check_id_exists('lists_release', list_id)
@@ -4030,25 +4146,25 @@ class Database:
 		This method can be used to insert on lists_edition_list_entity_edition table.
 	"""
 	def add_edition_to_list(self, list_id, entity_id, read_status_type_id, ownership_status_id, condition_type_id, edition_read_status_type_id, observation = None):
-		if(entity_id == ""):
+		if(not entity_id):
 			raise ValueError("entity_id cannot be empty on add_release_to_list method.")
 		
-		if(list_id == ""):
+		if(not list_id):
 			raise ValueError("list_id cannot be empty on add_release_to_list method.")
 		
-		if(read_status_type_id == ""):
+		if(not read_status_type_id):
 			raise ValueError("read_status_type_id cannot be empty on add_release_to_list method.")
 			
-		if(ownership_status_id == ""):
+		if(not ownership_status_id):
 			raise ValueError("ownership_status_id cannot be empty on add_release_to_list method.")
 		
-		if(condition_type_id == ""):
+		if(not condition_type_id):
 			raise ValueError("condition_type_id cannot be empty on add_release_to_list method.")
 			
-		if(edition_read_status_type_id == ""):
+		if(not edition_read_status_type_id):
 			raise ValueError("edition_read_status_type_id cannot be empty on add_release_to_list method.")
 			
-		if(observation == ""):
+		if(not observation):
 			raise ValueError("observation cannot be empty on add_release_to_list method.")
 		
 		self.check_id_exists('lists_release', list_id)
@@ -4068,7 +4184,7 @@ class Database:
 			value.append(condition_type_id)
 			value.append(edition_read_status_type_id)
 				
-			if(observation != None):
+			if(observation):
 				columns.append('observation')
 				value.append(observation)
 			
@@ -4086,16 +4202,16 @@ class Database:
 		
 	"""
 	def add_user(self, username, password, gender, birthday, location = None, signup_date = None, activated = 1):
-		if(username == ""):
+		if(not username):
 			raise ValueError("User name cannot be empty on add_user method.")
 		
-		if(password == ""):
+		if(not password):
 			raise ValueError("Password cannot be empty on add_user method.")
 		
-		if(gender == ""):
+		if(not gender):
 			raise ValueError("Gender cannot be empty on add_user method.")
 		
-		if(birthday == ""):
+		if(not birthday):
 			raise ValueError("Birthday cannot be empty on add_user method.")
 			
 		table = 'users'
@@ -4108,11 +4224,11 @@ class Database:
 			value.append(gender)
 			value.append(birthday)
 			
-			if(location != None):
+			if(location):
 				columns.append('location')
 				value.append(location)
 			
-			if(signup_date != None):
+			if(signup_date):
 				columns.append('signup_date')
 				value.append(signup_date)
 			
@@ -4132,10 +4248,10 @@ class Database:
 	
 	"""
 	def add_user_email(self, user_id, email):
-		if(email == ""):
+		if(not email):
 			raise ValueError("Email cannot be empty on add_user_email method.")
 		
-		if(user_id == ""):
+		if(not user_id):
 			raise ValueError("User id cannot be empty on add_user_email method.")
 	
 		table = 'user_email'
@@ -4161,13 +4277,13 @@ class Database:
 		use create_user_filter instead.
 	"""
 	def add_user_filter(self, name, user_id, type_id):
-		if(name == ""):
+		if(not name):
 			raise ValueError("Name cannot be empty on add_user_filter method.")
 	
-		if(user_id == ""):
+		if(not user_id):
 			raise ValueError("user_id cannot be empty on add_user_filter method.")
 	
-		if(type_id == ""):
+		if(not type_id):
 			raise ValueError("type_id cannot be empty on add_user_filter method.")
 	
 		self.check_id_exists('users', user_id)
@@ -4198,10 +4314,10 @@ class Database:
 		Elements can be tag, classification and category.
 	"""
 	def add_element_to_user_filter(self, user_filter_id, attribute_id, attribute = 'tag'):
-		if(user_filter_id == ""):
+		if(not user_filter_id):
 			raise ValueError("user_filter_id cannot be empty on add_element_to_user_filter method.")
 		
-		if(attribute_id == ""):
+		if(not attribute_id):
 			raise ValueError("attribute_id cannot be empty on add_element_to_user_filter method.")
 		
 		table = attribute + '_user_filter'
@@ -4244,7 +4360,7 @@ class Database:
 			return user_filter_id
 				
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			
 			raise ValueError("return id is equal to 0 on create_user_filter method. Some error must have occurred.")		
@@ -4262,7 +4378,7 @@ class Database:
 			return add_relation_image('user', image_id, user_id, image_type_id)
 			
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			raise ValueError(e.strerror)
 		
 	"""
@@ -4298,7 +4414,7 @@ class Database:
 			self.commit()
 			return user_id
 		except ValueError as e:
-			print "ValueError({0}): {1}".format(e.errno, e.strerror)
+			print e.message
 			self.rollback()
 			raise ValueError("An error occurred while trying to save a user on create_user.")
 		finally:
@@ -4316,11 +4432,11 @@ class Database:
 		collaborator_comments
 	"""
 	def add_comment(self, title, content, user_id, entity_id, type = 'release'):
-		if(title == ""):
-			raise ValueError("Title cannot be empty on add_name_to_table method.")
+		if(not title):
+			raise ValueError("Title cannot be empty on add_comment method.")
 		
-		if(content == ""):
-			raise ValueError("Content cannot be empty on add_name_to_table method.")
+		if(not content):
+			raise ValueError("Content cannot be empty on add_comment method.")
 	
 		self.check_id_exists('users', user_id)
 		
@@ -4343,24 +4459,25 @@ class Database:
 	################################## Crawler Methods ############################
 	
 	def add_spider_item(self, table, id, url, complete_crawled = False):
-		if(table == ""):
+		if(not table):
 			raise ValueError("Table cannot be empty on add_spider_item method.")
 			
-		if(id == ""):
+		if(not id):
 			raise ValueError("id cannot be empty on add_spider_item method.")
 			
-		if(url == ""):
+		if(not url):
 			raise ValueError("URL cannot be empty on add_spider_item method.")
 		
-		table = 'spider_item'
+		table_base = 'spider_item'
 		
 		where_values = []
 		where_values.append(id)
 		where_values.append(url)
 		where_values.append(table)
 		where = "id = %s and url = %s and table_name = %s"
-		id = self.get_var(table, ['complete_crawled'], where, where_values)
-		if(id == None):
+		id_base = self.get_var(table_base, ['complete_crawled'], where, where_values)
+		print "Id base", id_base
+		if(id_base == None):
 			columns = ['id','table_name', 'url','complete_crawled']
 			value = []
 			value.append(id)
@@ -4369,10 +4486,16 @@ class Database:
 			value.append(complete_crawled)
 			
 			#insert
-			self.insert(table, value, columns)
-		elif(complete_crawled and id == 'False'):
+			self.insert(table_base, value, columns)
+		elif(complete_crawled and id_base == 'False'):
 			#Update to full crawled
-			if(not self.update(table, ['True'],['complete_crawled'], where, where_values)):
+			if(not self.update(table_base, ['True'],['complete_crawled'], where, where_values)):
 				raise ValueError("An error occurred while trying to update complete_crawled on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
 		return True
+		
+	def get_spider_item_id(self, url, table):
+		where_values = []
+		where_values.append(url)
+		where_values.append(table)
+		return self.dbase.get_var('spider_item', ['id'], "url = %s and table_name = %s", where_values)
 		

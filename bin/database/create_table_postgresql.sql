@@ -255,6 +255,12 @@ CREATE TABLE IF NOT EXISTS blood_type (
   PRIMARY KEY(id)
 );
 
+CREATE TABLE IF NOT EXISTS blood_rh_type (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+);
+
 CREATE TABLE IF NOT EXISTS box_condition_type (
   id SERIAL,
   name VARCHAR UNIQUE NOT NULL,
@@ -305,6 +311,13 @@ CREATE TABLE IF NOT EXISTS image_soundtrack_type (
 ;
 
 CREATE TABLE IF NOT EXISTS image_user_type (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+;
+
+CREATE TABLE IF NOT EXISTS visual_type (
   id SERIAL,
   name VARCHAR UNIQUE NOT NULL,
   PRIMARY KEY(id)
@@ -403,11 +416,13 @@ CREATE TABLE IF NOT EXISTS shops (
 
 /* Currency */
 
+/* Update database */ 
 CREATE TABLE IF NOT EXISTS currency (
   id SERIAL,
   name VARCHAR NOT NULL,
-  symbol VARCHAR NOT NULL,
+  symbol VARCHAR NULL,
   code VARCHAR UNIQUE NOT NULL,
+  number VARCHAR(3) UNIQUE NOT NULL,
   PRIMARY KEY(id)
 )
 ;
@@ -453,13 +468,12 @@ CREATE TABLE IF NOT EXISTS users (
 ;
 
 CREATE TABLE IF NOT EXISTS spider_item (
-  id SERIAL,
-  identify VARCHAR NOT NULL,
+  id BIGINT NOT NULL,
+  table_name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
-  complete_crawled BOOLEAN NOT NULL,
+  complete_crawled BOOLEAN NOT NULL DEFAULT False,
   PRIMARY KEY(id)
-)
-;
+);
 
 CREATE TABLE IF NOT EXISTS tag (
   id SERIAL,
@@ -513,9 +527,10 @@ CREATE TABLE IF NOT EXISTS user_email (
 )
 ;
 
+/* change table on postgreSQL contry_id to null*/
 CREATE TABLE IF NOT EXISTS company (
   id SERIAL,
-  country_id INTEGER  NOT NULL,
+  country_id INTEGER NULL,
   name VARCHAR NOT NULL,
   social_name VARCHAR NULL,
   start_year CHAR(4) NULL,
@@ -640,8 +655,12 @@ CREATE TABLE IF NOT EXISTS people (
   id BIGSERIAL,
   country_id INTEGER  NOT NULL,
   blood_type_id INTEGER  NULL,
+  blood_rh_type_id INTEGER  NULL,
+  gender gender NULL,
   website VARCHAR NULL,
   description TEXT NULL,
+  birth_place VARCHAR NULL,
+  birth_date VARCHAR NULL,
   PRIMARY KEY(id),
   FOREIGN KEY(blood_type_id)
     REFERENCES blood_type(id)
@@ -649,6 +668,10 @@ CREATE TABLE IF NOT EXISTS people (
       ON UPDATE NO ACTION,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+FOREIGN KEY(blood_rh_type_id)
+    REFERENCES blood_rh_type(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -1112,6 +1135,29 @@ CREATE TABLE IF NOT EXISTS entity_description (
 )
 ;
 
+
+CREATE TABLE IF NOT EXISTS goods (
+  id BIGSERIAL,
+  collection_id INTEGER  NULL,
+  goods_type_id INTEGER  NOT NULL,
+  height SMALLINT  NOT NULL,
+  width SMALLINT  NULL,
+  weight DECIMAL NULL,
+  observation TEXT NULL,
+  has_counterfeit BOOL NOT NULL,
+  collection_started BOOL NOT NULL,
+  PRIMARY KEY(id),
+  FOREIGN KEY(goods_type_id)
+    REFERENCES goods_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collection_id)
+    REFERENCES collection(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+;
+
 CREATE TABLE IF NOT EXISTS entity_wiki (
   id SERIAL,
   language_id INTEGER  NOT NULL,
@@ -1180,7 +1226,8 @@ CREATE TABLE IF NOT EXISTS people_alias(
 
 CREATE TABLE IF NOT EXISTS persona (
   id SERIAL,
-  blood_type_id INTEGER  NULL,
+  blood_type_id INTEGER NULL,
+  blood_rh_type_id INTEGER NULL,
   gender gender NOT NULL,
   birthday DATE NULL,
   height INTEGER  NULL,
@@ -1190,6 +1237,10 @@ CREATE TABLE IF NOT EXISTS persona (
   PRIMARY KEY(id),
   FOREIGN KEY(blood_type_id)
     REFERENCES blood_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(blood_rh_type_id)
+    REFERENCES blood_rh_type(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -1399,6 +1450,7 @@ CREATE TABLE IF NOT EXISTS software_edition (
   plataform_type_id INTEGER  NOT NULL,
   software_type_id INTEGER  NOT NULL,
   media_type_id INTEGER  NOT NULL,
+  visual_type_id INTEGER  NOT NULL,
   PRIMARY KEY(entity_edition_id),
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
@@ -1414,6 +1466,10 @@ CREATE TABLE IF NOT EXISTS software_edition (
       ON UPDATE NO ACTION,
   FOREIGN KEY(plataform_type_id)
     REFERENCES plataform_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(visual_type_id)
+    REFERENCES visual_type(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
@@ -1466,43 +1522,6 @@ CREATE TABLE IF NOT EXISTS people_produces_entity (
     REFERENCES people_alias(id)
       ON DELETE SET NULL
       ON UPDATE NO ACTION
-)
-;
-
-CREATE TABLE IF NOT EXISTS goods (
-  id BIGSERIAL,
-  entity_id BIGINT  NOT NULL,
-  figure_version_id INTEGER  NOT NULL,
-  currency_id INTEGER  NOT NULL,
-  scale_id INTEGER  NOT NULL,
-  country_id INTEGER  NOT NULL,
-  height SMALLINT  NOT NULL,
-  width SMALLINT  NULL,
-  weight DECIMAL NULL,
-  launch_price DECIMAL NOT NULL,
-  release_date DATE NOT NULL,
-  observation TEXT NULL,
-  PRIMARY KEY(id),
-  FOREIGN KEY(country_id)
-    REFERENCES country(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(scale_id)
-    REFERENCES scale(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(currency_id)
-    REFERENCES currency(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(figure_version_id)
-    REFERENCES figure_version(id)
-      ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(entity_id)
-    REFERENCES entity(id)
-      ON DELETE SET NULL
-      ON UPDATE SET NULL
 )
 ;
 
@@ -2076,6 +2095,26 @@ CREATE TABLE IF NOT EXISTS goods_comments (
 )
 ;
 
+CREATE TABLE IF NOT EXISTS collaborator_comments (
+  id SERIAL,
+  collaborator_id INTEGER  NOT NULL,
+  user_id INTEGER  NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  PRIMARY KEY(id),
+  FOREIGN KEY(user_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collaborator_id)
+    REFERENCES collaborator(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+;
+
 CREATE TABLE IF NOT EXISTS entity_edition_comments (
   id SERIAL,
   entity_edition_id INTEGER  NOT NULL,
@@ -2419,27 +2458,6 @@ CREATE TABLE IF NOT EXISTS video_release_has_audio_codec (
 )
 ;
 
-CREATE TABLE IF NOT EXISTS goods (
-  id BIGSERIAL,
-  collection_id INTEGER  NULL,
-  goods_type_id INTEGER  NOT NULL,
-  height SMALLINT  NOT NULL,
-  width SMALLINT  NULL,
-  weight DECIMAL NULL,
-  observation TEXT NULL,
-  has_counterfeit BOOL NOT NULL,
-  collection_started BOOL NOT NULL,
-  PRIMARY KEY(id),
-  FOREIGN KEY(goods_type_id)
-    REFERENCES goods_type(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION,
-  FOREIGN KEY(collection_id)
-    REFERENCES collection(id)
-      ON DELETE SET NULL
-      ON UPDATE NO ACTION
-)
-;
 
 CREATE TABLE IF NOT EXISTS goods_alias (
   id SERIAL,
@@ -2675,6 +2693,28 @@ CREATE TABLE IF NOT EXISTS goods_has_company (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+;
+
+CREATE TABLE IF NOT EXISTS company_alias (
+  id SERIAL,
+  language_id INTEGER  NOT NULL,
+  alias_type_id INTEGER  NOT NULL,
+  company_id BIGINT  NOT NULL,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id),
+  FOREIGN KEY(company_id)
+    REFERENCES company(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(alias_type_id)
+    REFERENCES alias_type(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
+      ON DELETE SET NULL
       ON UPDATE NO ACTION
 )
 ;

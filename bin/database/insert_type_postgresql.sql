@@ -1,6 +1,6 @@
-INSERT INTO shop_location ( id, name) VALUES();
-
-INSERT INTO image_audio_type ( id, name ) VALUES ();
+INSERT INTO shop_location ( id, name) VALUES(1,'Web Shop');
+INSERT INTO shop_location ( id, name) VALUES(2, 'Local Shop');
+INSERT INTO shop_location ( id, name) VALUES(3, 'Proxy');
 
 INSERT INTO audio_channels ( id, name ) VALUES (1, '2');
 INSERT INTO audio_channels ( id, name ) VALUES (2, '4');
@@ -36,6 +36,8 @@ INSERT INTO material ( id, name ) VALUES(12, 'Acrylic');
 INSERT INTO material ( id, name ) VALUES(13, 'Stainless Steel');
 INSERT INTO material ( id, name ) VALUES(14, 'Steel');
 INSERT INTO material ( id, name ) VALUES(15, 'Clay');
+INSERT INTO material ( id, name ) VALUES(16, 'POM');
+INSERT INTO material ( id, name ) VALUES(17, 'PP');
 
 INSERT INTO audio_codec ( id, name, lossless  ) VALUES(1, 'AAC', False);
 INSERT INTO audio_codec ( id, name, lossless  ) VALUES(2, 'AC3', False);
@@ -198,40 +200,29 @@ INSERT INTO classification_type ( id, name ) VALUES(15, '16+');
 INSERT INTO classification_type ( id, name ) VALUES(16, '17+');
 INSERT INTO classification_type ( id, name ) VALUES(17, '18+');
 
-INSERT INTO ownership_status (
-  id
-  name 
-);
-VALUES();
+INSERT INTO ownership_status ( id, name ) VALUES(1, 'Have');
+INSERT INTO ownership_status ( id, name ) VALUES(2, 'Will Have');
+INSERT INTO ownership_status ( id, name ) VALUES(3, 'Lent');
+INSERT INTO ownership_status ( id, name ) VALUES(4, 'Sold');
+INSERT INTO ownership_status ( id, name ) VALUES(5, 'Discarded');
 
-INSERT INTO release_edition_read_status_type (
-  id
-  name 
-);
-VALUES();
+INSERT INTO release_edition_read_status_type ( id, name) VALUES(1, 'Readed');
+INSERT INTO release_edition_read_status_type ( id, name) VALUES(2, 'Reading');
+INSERT INTO release_edition_read_status_type ( id, name) VALUES(3, 'Will Read');
+INSERT INTO release_edition_read_status_type ( id, name) VALUES(4, 'Rereading');
+INSERT INTO release_edition_read_status_type ( id, name) VALUES(5, 'Discarded');
+
+INSERT INTO edition_read_status_type ( id, name) VALUES(1, 'Readed');
+INSERT INTO edition_read_status_type ( id, name) VALUES(2, 'Reading');
+INSERT INTO edition_read_status_type ( id, name) VALUES(3, 'Will Read');
+INSERT INTO edition_read_status_type ( id, name) VALUES(4, 'Rereading');
+INSERT INTO edition_read_status_type ( id, name) VALUES(5, 'Discarded');
 
 INSERT INTO release_type ( id, name ) VALUES(1, 'Mod');
 INSERT INTO release_type ( id, name ) VALUES(2, 'Game');
 INSERT INTO release_type ( id, name ) VALUES(3, 'Chapter');
 INSERT INTO release_type ( id, name ) VALUES(4, 'Volume');
 INSERT INTO release_type ( id, name ) VALUES(5, 'Episode');
-
-
-INSERT INTO software_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO edition_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO image_entity_edition_type (
-  id
-  name 
-);
-VALUES();
 
 INSERT INTO image_company_type (id, name) VALUES(1, 'Logo');
 INSERT INTO image_company_type (id, name) VALUES(2, 'Front');
@@ -240,89 +231,42 @@ INSERT INTO image_company_type (id, name) VALUES(4, 'Above');
 INSERT INTO image_company_type (id, name) VALUES(5, 'Within');
 INSERT INTO image_company_type (id, name) VALUES(6, 'Google Map');
 
+INSERT INTO image_goods_type ( id, name) VALUES(1,'Counterfeit Box');
+INSERT INTO image_goods_type ( id, name) VALUES(2,'Counterfeit Figure');
+INSERT INTO image_goods_type ( id, name) VALUES(3,'Front box');
+INSERT INTO image_goods_type ( id, name) VALUES(4,'Back box');
+INSERT INTO image_goods_type ( id, name) VALUES(5,'Side box');
+INSERT INTO image_goods_type ( id, name) VALUES(6,'Figure Base');
+INSERT INTO image_goods_type ( id, name) VALUES(7,'Figure Posed');
+INSERT INTO image_goods_type ( id, name) VALUES(8,'Figure Exposed');
+INSERT INTO image_goods_type ( id, name) VALUES(9,'Figure Cast-Off');
+
+INSERT INTO image_audio_type ( id, name ) VALUES (1,'Thumbnail');
+INSERT INTO image_audio_type ( id, name ) VALUES (2, 'Scene');
+
+INSERT INTO entity_type ( id, name) VALUES(1, 'Animated Series');
+INSERT INTO entity_type ( id, name) VALUES(2, 'Comic Book');
+INSERT INTO entity_type ( id, name) VALUES(3, 'Manga');
+INSERT INTO entity_type ( id, name) VALUES(4, 'Manhwa');
+INSERT INTO entity_type ( id, name) VALUES(5, 'Manhua');
+INSERT INTO entity_type ( id, name) VALUES(6, 'Webtoon');
+INSERT INTO entity_type ( id, name) VALUES(7, 'Webcomic');
+INSERT INTO entity_type ( id, name) VALUES(8, 'Book');
+INSERT INTO entity_type ( id, name) VALUES(9, 'Light Novel');
+INSERT INTO entity_type ( id, name) VALUES(10, 'Web Novel');
+INSERT INTO entity_type ( id, name) VALUES(11, 'Visual Novel');
+INSERT INTO entity_type ( id, name) VALUES(12, 'Artbook');
+INSERT INTO entity_type ( id, name) VALUES(13, 'Software');
+INSERT INTO entity_type ( id, name) VALUES(14, 'Card Game');
+INSERT INTO entity_type ( id, name) VALUES(15, 'Fan Art');
+INSERT INTO entity_type ( id, name) VALUES(16, 'Doujinshi');
 
 
-INSERT INTO image_goods_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO create_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO produces_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO product_condition_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO figure_version (
-  id
-  name 
-);
-VALUES();
-INSERT INTO plataform_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO print_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO related_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO release_ownership_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO entity_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO filter_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO user_filter_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO edition_read_status_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO function_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO condition_type (
-  id
-  name 
-);
-VALUES();
-
-
-INSERT INTO collaborator_type (
-  id
-  name 
-);
+INSERT INTO collaborator_type ( id, name) VALUES (1, 'Scanlator');
+INSERT INTO collaborator_type ( id, name) VALUES (2, 'Fansub');
+INSERT INTO collaborator_type ( id, name) VALUES (3, 'Translator');
+INSERT INTO collaborator_type ( id, name) VALUES (4, 'Game Modder');
+INSERT INTO collaborator_type ( id, name) VALUES (5, 'Game Releaser');
 
 INSERT INTO media_type ( id, name ) VALUES(1,'Disk Floppy');
 INSERT INTO media_type ( id, name ) VALUES(2,'CD');
@@ -338,48 +282,1726 @@ INSERT INTO media_type ( id, name ) VALUES(9,'PDTV');
 /* Volume oneshot must have Oneshot on number field */
 INSERT INTO number_type ( id, name) VALUES(1,'Volume');
 INSERT INTO number_type ( id, name) VALUES(2,'Chapter');
-INSERT INTO number_type ( id, name) VALUES(2,'Edition');
-INSERT INTO number_type ( id, name) VALUES(2,'Season');
-INSERT INTO number_type ( id, name) VALUES(2,'Episode');
+INSERT INTO number_type ( id, name) VALUES(3,'Edition');
+INSERT INTO number_type ( id, name) VALUES(4,'Season');
+INSERT INTO number_type ( id, name) VALUES(5,'Episode');
 
 INSERT INTO alias_type ( id, name ) VALUES(1, 'Main');
 INSERT INTO alias_type ( id, name ) VALUES(2, 'Alias');
 INSERT INTO alias_type ( id, name ) VALUES(3, 'Nickname');
-INSERT INTO alias_type ( id, name ) VALUES(4, 'Title');
-INSERT INTO alias_type ( id, name ) VALUES(5, 'Subtitle');
-INSERT INTO alias_type ( id, name ) VALUES(6, 'Romanized Title');
-INSERT INTO alias_type ( id, name ) VALUES(7, 'Romanized Subtitle');
+INSERT INTO alias_type ( id, name ) VALUES(4, 'Native Name');
+INSERT INTO alias_type ( id, name ) VALUES(5, 'Title');
+INSERT INTO alias_type ( id, name ) VALUES(6, 'Subtitle');
+INSERT INTO alias_type ( id, name ) VALUES(7, 'Romanized Title');
+INSERT INTO alias_type ( id, name ) VALUES(8, 'Romanized Subtitle');
 
 
-INSERT INTO mod_type (
-  id
-  name 
+INSERT INTO mod_type ( id, name ) VALUES(1, 'Abodes - Player homes');
+INSERT INTO mod_type ( id, name ) VALUES(2, 'Animals, creatures, mounts & horses');
+INSERT INTO mod_type ( id, name ) VALUES(3, 'Animation');
+INSERT INTO mod_type ( id, name ) VALUES(4, 'Armour');
+INSERT INTO mod_type ( id, name ) VALUES(5, 'Audio, sounds and music');
+INSERT INTO mod_type ( id, name ) VALUES(6, 'Bug fixes');
+INSERT INTO mod_type ( id, name ) VALUES(7, 'Castles, palaces, manshions and estates');
+INSERT INTO mod_type ( id, name ) VALUES(8, 'Cheats and god items');
+INSERT INTO mod_type ( id, name ) VALUES(9, 'Cites, towns, villages and hamlets');
+INSERT INTO mod_type ( id, name ) VALUES(10, 'Clothing');
+INSERT INTO mod_type ( id, name ) VALUES(11, 'Collectables, treasure hunts and puzzles');
+INSERT INTO mod_type ( id, name ) VALUES(12, 'Combat');
+INSERT INTO mod_type ( id, name ) VALUES(13, 'Companion creatures');
+INSERT INTO mod_type ( id, name ) VALUES(14, 'Companions');
+INSERT INTO mod_type ( id, name ) VALUES(15, 'Dungeons');
+INSERT INTO mod_type ( id, name ) VALUES(16, 'Environmental');
+INSERT INTO mod_type ( id, name ) VALUES(17, 'Followers');
+INSERT INTO mod_type ( id, name ) VALUES(18, 'Gameplay effects and changes');
+INSERT INTO mod_type ( id, name ) VALUES(19, 'Guilds and Factions');
+INSERT INTO mod_type ( id, name ) VALUES(20, 'Hair and face models');
+INSERT INTO mod_type ( id, name ) VALUES(21, 'Immersion');
+INSERT INTO mod_type ( id, name ) VALUES(22, 'Items and Objects - Player');
+INSERT INTO mod_type ( id, name ) VALUES(23, 'Items and Objects - World');
+INSERT INTO mod_type ( id, name ) VALUES(24, 'Landscape changes');
+INSERT INTO mod_type ( id, name ) VALUES(25, 'Locations');
+INSERT INTO mod_type ( id, name ) VALUES(26, 'Magic - Alchemy, potions, poisons and ingredients');
+INSERT INTO mod_type ( id, name ) VALUES(27, 'Magic - Gameplay');
+INSERT INTO mod_type ( id, name ) VALUES(28, 'Magic - Spells and enchantments');
+INSERT INTO mod_type ( id, name ) VALUES(29, 'Mercantiles (Shops, stores, inns, taverns');
+INSERT INTO mod_type ( id, name ) VALUES(30, 'Miscellaneous');
+INSERT INTO mod_type ( id, name ) VALUES(31, 'Modders resources and tutorials');
+INSERT INTO mod_type ( id, name ) VALUES(32, 'Models and textures');
+INSERT INTO mod_type ( id, name ) VALUES(33, 'New lands');
+INSERT INTO mod_type ( id, name ) VALUES(34, 'New structures - Buildings');
+INSERT INTO mod_type ( id, name ) VALUES(35, 'NPC');
+INSERT INTO mod_type ( id, name ) VALUES(36, 'Overhauls');
+INSERT INTO mod_type ( id, name ) VALUES(37, 'Patches');
+INSERT INTO mod_type ( id, name ) VALUES(38, 'Quests and adventures');
+INSERT INTO mod_type ( id, name ) VALUES(39, 'Races, classes and birthsigns');
+INSERT INTO mod_type ( id, name ) VALUES(40, 'Ruins, forts and abandoned structures');
+INSERT INTO mod_type ( id, name ) VALUES(41, 'Saved games');
+INSERT INTO mod_type ( id, name ) VALUES(42, 'Skills and leveling');
+INSERT INTO mod_type ( id, name ) VALUES(43, 'Stealth');
+INSERT INTO mod_type ( id, name ) VALUES(44, 'Unassigned');
+INSERT INTO mod_type ( id, name ) VALUES(45, 'User interfaces');
+INSERT INTO mod_type ( id, name ) VALUES(46, 'Utilities');
+INSERT INTO mod_type ( id, name ) VALUES(47, 'Visuals and graphics');
+INSERT INTO mod_type ( id, name ) VALUES(48, 'Weapons');
+INSERT INTO mod_type ( id, name ) VALUES(49, 'Weapons and armour sets');
+
+INSERT INTO blood_type ( id, name) VALUES(1,'O');
+INSERT INTO blood_type ( id, name) VALUES(2,'A');
+INSERT INTO blood_type ( id, name) VALUES(3,'B');
+INSERT INTO blood_type ( id, name) VALUES(4,'AB');
+
+INSERT INTO blood_rh_type (id, name) VALUES (1, '-');
+INSERT INTO blood_rh_type (id, name) VALUES (2, '+');
+
+INSERT INTO country ( id, name, code) VALUES(1,'Afghanistan','AF');
+INSERT INTO country ( id, name, code) VALUES(2,'Åland Islands','AX');
+INSERT INTO country ( id, name, code) VALUES(3,'Albania','AL');
+INSERT INTO country ( id, name, code) VALUES(4,'Algeria','DZ');
+INSERT INTO country ( id, name, code) VALUES(5,'American Samoa','AS');
+INSERT INTO country ( id, name, code) VALUES(6,'Andorra','AD');
+INSERT INTO country ( id, name, code) VALUES(7,'Angola','AO');
+INSERT INTO country ( id, name, code) VALUES(8,'Anguilla','AI');
+INSERT INTO country ( id, name, code) VALUES(9,'Antarctica','AQ');
+INSERT INTO country ( id, name, code) VALUES(10,'Antigua and Barbuda','AG');
+INSERT INTO country ( id, name, code) VALUES(11,'Argentina','AR');
+INSERT INTO country ( id, name, code) VALUES(12,'Armenia','AM');
+INSERT INTO country ( id, name, code) VALUES(13,'Aruba','AW');
+INSERT INTO country ( id, name, code) VALUES(14,'Australia','AU');
+INSERT INTO country ( id, name, code) VALUES(15,'Austria','AT');
+INSERT INTO country ( id, name, code) VALUES(16,'Azerbaijan','AZ');
+INSERT INTO country ( id, name, code) VALUES(17,'Bahamas','BS');
+INSERT INTO country ( id, name, code) VALUES(18,'Bahrain','BH');
+INSERT INTO country ( id, name, code) VALUES(19,'Bangladesh','BD');
+INSERT INTO country ( id, name, code) VALUES(20,'Barbados','BB');
+INSERT INTO country ( id, name, code) VALUES(21,'Belarus','BY');
+INSERT INTO country ( id, name, code) VALUES(22,'Belgium','BE');
+INSERT INTO country ( id, name, code) VALUES(23,'Belize','BZ');
+INSERT INTO country ( id, name, code) VALUES(24,'Benin','BJ');
+INSERT INTO country ( id, name, code) VALUES(25,'Bermuda','BM');
+INSERT INTO country ( id, name, code) VALUES(26,'Bhutan','BT');
+INSERT INTO country ( id, name, code) VALUES(27,'Bolivia, Plurinational State of','BO');
+INSERT INTO country ( id, name, code) VALUES(28,'Bonaire, Sint Eustatius and Saba','BQ');
+INSERT INTO country ( id, name, code) VALUES(29,'Bosnia and Herzegovina','BA');
+INSERT INTO country ( id, name, code) VALUES(30,'Botswana','BW');
+INSERT INTO country ( id, name, code) VALUES(31,'Bouvet Island','BV');
+INSERT INTO country ( id, name, code) VALUES(32,'Brazil','BR');
+INSERT INTO country ( id, name, code) VALUES(33,'British Indian Ocean Territory','IO');
+INSERT INTO country ( id, name, code) VALUES(34,'British Virgin Islands','VG');
+INSERT INTO country ( id, name, code) VALUES(35,'Brunei Darussalam','BN');
+INSERT INTO country ( id, name, code) VALUES(36,'Bulgaria','BG');
+INSERT INTO country ( id, name, code) VALUES(37,'Burkina Faso','BF');
+INSERT INTO country ( id, name, code) VALUES(38,'Burundi','BI');
+INSERT INTO country ( id, name, code) VALUES(39,'Cambodia','KH');
+INSERT INTO country ( id, name, code) VALUES(40,'Cameroon','CM');
+INSERT INTO country ( id, name, code) VALUES(41,'Canada','CA');
+INSERT INTO country ( id, name, code) VALUES(42,'Cabo Verde','CV');
+INSERT INTO country ( id, name, code) VALUES(43,'Cayman Islands','KY');
+INSERT INTO country ( id, name, code) VALUES(44,'Central African Republic','CF');
+INSERT INTO country ( id, name, code) VALUES(45,'Chad','TD');
+INSERT INTO country ( id, name, code) VALUES(46,'Chile','CL');
+INSERT INTO country ( id, name, code) VALUES(47,'China','CN');
+INSERT INTO country ( id, name, code) VALUES(48,'Christmas Island','CX');
+INSERT INTO country ( id, name, code) VALUES(49,'Cocos (Keeling) Islands','CC');
+INSERT INTO country ( id, name, code) VALUES(50,'Colombia','CO');
+INSERT INTO country ( id, name, code) VALUES(51,'Comoros','KM');
+INSERT INTO country ( id, name, code) VALUES(52,'Cook Islands','CK');
+INSERT INTO country ( id, name, code) VALUES(53,'Costa Rica','CR');
+INSERT INTO country ( id, name, code) VALUES(54,'Croatia','HR');
+INSERT INTO country ( id, name, code) VALUES(55,'Cuba','CU');
+INSERT INTO country ( id, name, code) VALUES(56,'Curaçao','CW');
+INSERT INTO country ( id, name, code) VALUES(57,'Cyprus','CY');
+INSERT INTO country ( id, name, code) VALUES(58,'Czech Republic','CZ');
+INSERT INTO country ( id, name, code) VALUES(59,'Congo, the Democratic Republic of the','CD');
+INSERT INTO country ( id, name, code) VALUES(60,'Denmark','DK');
+INSERT INTO country ( id, name, code) VALUES(61,'Djibouti','DJ');
+INSERT INTO country ( id, name, code) VALUES(62,'Dominica','DM');
+INSERT INTO country ( id, name, code) VALUES(63,'Dominican Republic','DO');
+INSERT INTO country ( id, name, code) VALUES(64,'Timor-Leste','TL');
+INSERT INTO country ( id, name, code) VALUES(65,'Ecuador','EC');
+INSERT INTO country ( id, name, code) VALUES(66,'Egypt','EG');
+INSERT INTO country ( id, name, code) VALUES(67,'El Salvador','SV');
+INSERT INTO country ( id, name, code) VALUES(68,'Equatorial Guinea','GQ');
+INSERT INTO country ( id, name, code) VALUES(69,'Eritrea','ER');
+INSERT INTO country ( id, name, code) VALUES(70,'Estonia','EE');
+INSERT INTO country ( id, name, code) VALUES(71,'Ethiopia','ET');
+INSERT INTO country ( id, name, code) VALUES(72,'Falkland Islands (Malvinas)','FK');
+INSERT INTO country ( id, name, code) VALUES(73,'Faroe Islands','FO');
+INSERT INTO country ( id, name, code) VALUES(74,'Fiji','FJ');
+INSERT INTO country ( id, name, code) VALUES(75,'Finland','FI');
+INSERT INTO country ( id, name, code) VALUES(76,'France','FR');
+INSERT INTO country ( id, name, code) VALUES(77,'French Guiana','GF');
+INSERT INTO country ( id, name, code) VALUES(78,'French Polynesia','PF');
+INSERT INTO country ( id, name, code) VALUES(79,'French Southern Territories','TF');
+INSERT INTO country ( id, name, code) VALUES(80,'Gabon','GA');
+INSERT INTO country ( id, name, code) VALUES(81,'Gambia','GM');
+INSERT INTO country ( id, name, code) VALUES(82,'Georgia','GE');
+INSERT INTO country ( id, name, code) VALUES(83,'Germany','DE');
+INSERT INTO country ( id, name, code) VALUES(84,'Ghana','GH');
+INSERT INTO country ( id, name, code) VALUES(85,'Gibraltar','GI');
+INSERT INTO country ( id, name, code) VALUES(86,'Greece','GR');
+INSERT INTO country ( id, name, code) VALUES(87,'Greenland','GL');
+INSERT INTO country ( id, name, code) VALUES(88,'Grenada','GD');
+INSERT INTO country ( id, name, code) VALUES(89,'Guadeloupe','GP');
+INSERT INTO country ( id, name, code) VALUES(90,'Guam','GU');
+INSERT INTO country ( id, name, code) VALUES(91,'Guatemala','GT');
+INSERT INTO country ( id, name, code) VALUES(92,'Guernsey','GG');
+INSERT INTO country ( id, name, code) VALUES(93,'Guinea','GN');
+INSERT INTO country ( id, name, code) VALUES(94,'Guinea-Bissau','GW');
+INSERT INTO country ( id, name, code) VALUES(95,'Guyana','GY');
+INSERT INTO country ( id, name, code) VALUES(96,'Haiti','HT');
+INSERT INTO country ( id, name, code) VALUES(97,'Heard Island and McDonald Islands','HM');
+INSERT INTO country ( id, name, code) VALUES(98,'Honduras','HN');
+INSERT INTO country ( id, name, code) VALUES(99,'Hong Kong','HK');
+INSERT INTO country ( id, name, code) VALUES(100,'Hungary','HU');
+INSERT INTO country ( id, name, code) VALUES(101,'Iceland','IS');
+INSERT INTO country ( id, name, code) VALUES(102,'India','IN');
+INSERT INTO country ( id, name, code) VALUES(103,'Indonesia','ID');
+INSERT INTO country ( id, name, code) VALUES(104,'Iran, Islamic Republic of','IR');
+INSERT INTO country ( id, name, code) VALUES(105,'Iraq','IQ');
+INSERT INTO country ( id, name, code) VALUES(106,'Ireland','IE');
+INSERT INTO country ( id, name, code) VALUES(107,'Isle of Man','IM');
+INSERT INTO country ( id, name, code) VALUES(108,'Israel','IL');
+INSERT INTO country ( id, name, code) VALUES(109,'Italy','IT');
+INSERT INTO country ( id, name, code) VALUES(110,'Côte dIvoire','CI');
+INSERT INTO country ( id, name, code) VALUES(111,'Jamaica','JM');
+INSERT INTO country ( id, name, code) VALUES(112,'Japan','JP');
+INSERT INTO country ( id, name, code) VALUES(113,'Jersey','JE');
+INSERT INTO country ( id, name, code) VALUES(114,'Jordan','JO');
+INSERT INTO country ( id, name, code) VALUES(115,'Kazakhstan','KZ');
+INSERT INTO country ( id, name, code) VALUES(116,'Kenya','KE');
+INSERT INTO country ( id, name, code) VALUES(117,'Kiribati','KI');
+INSERT INTO country ( id, name, code) VALUES(118,'Kosovo', 'XK');
+INSERT INTO country ( id, name, code) VALUES(119,'Kuwait','KW');
+INSERT INTO country ( id, name, code) VALUES(120,'Kyrgyzstan','KG');
+INSERT INTO country ( id, name, code) VALUES(121,'Lao Peoples Democratic Republic','LA');
+INSERT INTO country ( id, name, code) VALUES(122,'Latvia','LV');
+INSERT INTO country ( id, name, code) VALUES(123,'Lebanon','LB');
+INSERT INTO country ( id, name, code) VALUES(124,'Lesotho','LS');
+INSERT INTO country ( id, name, code) VALUES(125,'Liberia','LR');
+INSERT INTO country ( id, name, code) VALUES(126,'Libya','LY');
+INSERT INTO country ( id, name, code) VALUES(127,'Liechtenstein','LI');
+INSERT INTO country ( id, name, code) VALUES(128,'Lithuania','LT');
+INSERT INTO country ( id, name, code) VALUES(129,'Luxembourg','LU');
+INSERT INTO country ( id, name, code) VALUES(130,'Macao','MO');
+INSERT INTO country ( id, name, code) VALUES(131,'Macedonia, the former Yugoslav Republic of','MK');
+INSERT INTO country ( id, name, code) VALUES(132,'Madagascar','MG');
+INSERT INTO country ( id, name, code) VALUES(133,'Malawi','MW');
+INSERT INTO country ( id, name, code) VALUES(134,'Malaysia','MY');
+INSERT INTO country ( id, name, code) VALUES(135,'Maldives','MV');
+INSERT INTO country ( id, name, code) VALUES(136,'Mali','ML');
+INSERT INTO country ( id, name, code) VALUES(137,'Malta','MT');
+INSERT INTO country ( id, name, code) VALUES(138,'Marshall Islands','MH');
+INSERT INTO country ( id, name, code) VALUES(139,'Martinique','MQ');
+INSERT INTO country ( id, name, code) VALUES(140,'Mauritania','MR');
+INSERT INTO country ( id, name, code) VALUES(141,'Mauritius','MU');
+INSERT INTO country ( id, name, code) VALUES(142,'Mayotte','YT');
+INSERT INTO country ( id, name, code) VALUES(143,'Mexico','MX');
+INSERT INTO country ( id, name, code) VALUES(144,'Micronesia, Federated States of','FM');
+INSERT INTO country ( id, name, code) VALUES(145,'Moldova, Republic of','MD');
+INSERT INTO country ( id, name, code) VALUES(146,'Monaco','MC');
+INSERT INTO country ( id, name, code) VALUES(147,'Mongolia','MN');
+INSERT INTO country ( id, name, code) VALUES(148,'Montenegro','ME');
+INSERT INTO country ( id, name, code) VALUES(149,'Montserrat','MS');
+INSERT INTO country ( id, name, code) VALUES(150,'Morocco','MA');
+INSERT INTO country ( id, name, code) VALUES(151,'Mozambique','MZ');
+INSERT INTO country ( id, name, code) VALUES(152,'Myanmar','MM');
+INSERT INTO country ( id, name, code) VALUES(153,'Namibia','NA');
+INSERT INTO country ( id, name, code) VALUES(154,'Nauru','NR');
+INSERT INTO country ( id, name, code) VALUES(155,'Nepal','NP');
+INSERT INTO country ( id, name, code) VALUES(156,'Netherlands','NL');
+INSERT INTO country ( id, name, code) VALUES(157,'Netherlands Antilles','AN');
+INSERT INTO country ( id, name, code) VALUES(158,'New Caledonia','NC');
+INSERT INTO country ( id, name, code) VALUES(159,'New Zealand','NZ');
+INSERT INTO country ( id, name, code) VALUES(160,'Nicaragua','NI');
+INSERT INTO country ( id, name, code) VALUES(161,'Niger','NE');
+INSERT INTO country ( id, name, code) VALUES(162,'Nigeria','NG');
+INSERT INTO country ( id, name, code) VALUES(163,'Niue','NU');
+INSERT INTO country ( id, name, code) VALUES(164,'Norfolk Island','NF');
+INSERT INTO country ( id, name, code) VALUES(165,'Korea, Democratic Peoples Republic of','KP');
+INSERT INTO country ( id, name, code) VALUES(166,'Northern Mariana Islands','MP');
+INSERT INTO country ( id, name, code) VALUES(167,'Norway','NO');
+INSERT INTO country ( id, name, code) VALUES(168,'Oman','OM');
+INSERT INTO country ( id, name, code) VALUES(169,'Pakistan','PK');
+INSERT INTO country ( id, name, code) VALUES(170,'Palau','PW');
+INSERT INTO country ( id, name, code) VALUES(171,'Palestine, State of','PS');
+INSERT INTO country ( id, name, code) VALUES(172,'Panama','PA');
+INSERT INTO country ( id, name, code) VALUES(173,'Papua New Guinea','PG');
+INSERT INTO country ( id, name, code) VALUES(174,'Paraguay','PY');
+INSERT INTO country ( id, name, code) VALUES(175,'Peru','PE');
+INSERT INTO country ( id, name, code) VALUES(176,'Philippines','PH');
+INSERT INTO country ( id, name, code) VALUES(177,'Pitcairn','PN');
+INSERT INTO country ( id, name, code) VALUES(178,'Poland','PL');
+INSERT INTO country ( id, name, code) VALUES(179,'Portugal','PT');
+INSERT INTO country ( id, name, code) VALUES(180,'Puerto Rico','PR');
+INSERT INTO country ( id, name, code) VALUES(181,'Qatar','QA');
+INSERT INTO country ( id, name, code) VALUES(182,'Republic of the Congo','CG');
+INSERT INTO country ( id, name, code) VALUES(183,'Réunion','RE');
+INSERT INTO country ( id, name, code) VALUES(184,'Romania','RO');
+INSERT INTO country ( id, name, code) VALUES(185,'Russian Federation','RU');
+INSERT INTO country ( id, name, code) VALUES(186,'Rwanda','RW');
+INSERT INTO country ( id, name, code) VALUES(187,'Saint Barthélemy','BL');
+INSERT INTO country ( id, name, code) VALUES(188,'Saint Helena, Ascension and Tristan da Cunha','SH');
+INSERT INTO country ( id, name, code) VALUES(189,'Saint Kitts and Nevis','KN');
+INSERT INTO country ( id, name, code) VALUES(190,'Saint Lucia','LC');
+INSERT INTO country ( id, name, code) VALUES(191,'Saint Martin (French part)','MF');
+INSERT INTO country ( id, name, code) VALUES(192,'Saint Pierre and Miquelon','PM');
+INSERT INTO country ( id, name, code) VALUES(193,'Saint Vincent and the Grenadines','VC');
+INSERT INTO country ( id, name, code) VALUES(194,'Samoa','WS');
+INSERT INTO country ( id, name, code) VALUES(195,'San Marino','SM');
+INSERT INTO country ( id, name, code) VALUES(196,'Sao Tome and Principe','ST');
+INSERT INTO country ( id, name, code) VALUES(197,'Saudi Arabia','SA');
+INSERT INTO country ( id, name, code) VALUES(198,'Senegal','SN');
+INSERT INTO country ( id, name, code) VALUES(199,'Serbia','RS');
+INSERT INTO country ( id, name, code) VALUES(200,'Serbia and Montenegro','CS');
+INSERT INTO country ( id, name, code) VALUES(201,'Seychelles','SC');
+INSERT INTO country ( id, name, code) VALUES(202,'Sierra Leone','SL');
+INSERT INTO country ( id, name, code) VALUES(203,'Singapore','SG');
+INSERT INTO country ( id, name, code) VALUES(204,'Sint Maarten (Dutch part)','SX');
+INSERT INTO country ( id, name, code) VALUES(205,'Slovakia','SK');
+INSERT INTO country ( id, name, code) VALUES(206,'Slovenia','SI');
+INSERT INTO country ( id, name, code) VALUES(207,'Solomon Islands','SB');
+INSERT INTO country ( id, name, code) VALUES(208,'Somalia','SO');
+INSERT INTO country ( id, name, code) VALUES(209,'South Africa','ZA');
+INSERT INTO country ( id, name, code) VALUES(210,'South Georgia and the South Sandwich Islands','GS');
+INSERT INTO country ( id, name, code) VALUES(211,'Korea, Republic of','KR');
+INSERT INTO country ( id, name, code) VALUES(212,'South Sudan','SS');
+INSERT INTO country ( id, name, code) VALUES(213,'Spain','ES');
+INSERT INTO country ( id, name, code) VALUES(214,'Sri Lanka','LK');
+INSERT INTO country ( id, name, code) VALUES(215,'Sudan','SD');
+INSERT INTO country ( id, name, code) VALUES(216,'Suriname','SR');
+INSERT INTO country ( id, name, code) VALUES(217,'Svalbard and Jan Mayen','SJ');
+INSERT INTO country ( id, name, code) VALUES(218,'Swaziland','SZ');
+INSERT INTO country ( id, name, code) VALUES(219,'Sweden','SE');
+INSERT INTO country ( id, name, code) VALUES(220,'Switzerland','CH');
+INSERT INTO country ( id, name, code) VALUES(221,'Syrian Arab Republic','SY');
+INSERT INTO country ( id, name, code) VALUES(222,'Taiwan, Province of China','TW');
+INSERT INTO country ( id, name, code) VALUES(223,'Tajikistan','TJ');
+INSERT INTO country ( id, name, code) VALUES(224,'Tanzania, United Republic of','TZ');
+INSERT INTO country ( id, name, code) VALUES(225,'Thailand','TH');
+INSERT INTO country ( id, name, code) VALUES(226,'Togo','TG');
+INSERT INTO country ( id, name, code) VALUES(227,'Tokelau','TK');
+INSERT INTO country ( id, name, code) VALUES(228,'Tonga','TO');
+INSERT INTO country ( id, name, code) VALUES(229,'Trinidad and Tobago','TT');
+INSERT INTO country ( id, name, code) VALUES(230,'Tunisia','TN');
+INSERT INTO country ( id, name, code) VALUES(231,'Turkey','TR');
+INSERT INTO country ( id, name, code) VALUES(232,'Turkmenistan','TM');
+INSERT INTO country ( id, name, code) VALUES(233,'Turks and Caicos Islands','TC');
+INSERT INTO country ( id, name, code) VALUES(234,'Tuvalu','TV');
+INSERT INTO country ( id, name, code) VALUES(235,'Virgin Islands, U.S.','VI');
+INSERT INTO country ( id, name, code) VALUES(236,'Uganda','UG');
+INSERT INTO country ( id, name, code) VALUES(237,'Ukraine','UA');
+INSERT INTO country ( id, name, code) VALUES(238,'United Arab Emirates','AE');
+INSERT INTO country ( id, name, code) VALUES(239,'United Kingdom','GB');
+INSERT INTO country ( id, name, code) VALUES(240,'United States of America','US');
+INSERT INTO country ( id, name, code) VALUES(241,'United States Minor Outlying Islands','UM');
+INSERT INTO country ( id, name, code) VALUES(242,'Uruguay','UY');
+INSERT INTO country ( id, name, code) VALUES(243,'Uzbekistan','UZ');
+INSERT INTO country ( id, name, code) VALUES(244,'Vanuatu','VU');
+INSERT INTO country ( id, name, code) VALUES(245,'Holy See (Vatican City State)','VA');
+INSERT INTO country ( id, name, code) VALUES(246,'Venezuela, Bolivarian Republic of','VE');
+INSERT INTO country ( id, name, code) VALUES(247,'Viet Nam','VN');
+INSERT INTO country ( id, name, code) VALUES(248,'Wallis and Futuna','WF');
+INSERT INTO country ( id, name, code) VALUES(249,'Western Sahara','EH');
+INSERT INTO country ( id, name, code) VALUES(250,'Yemen','YE');
+INSERT INTO country ( id, name, code) VALUES(251,'Zambia','ZM');
+INSERT INTO country ( id, name, code) VALUES(252,'Zimbabwe','ZW');
+
+INSERT INTO language ( id, name, code) VALUES(1,'Abkhaz','ab');
+INSERT INTO language ( id, name, code) VALUES(2,'Afar','aa');
+INSERT INTO language ( id, name, code) VALUES(3,'Afrikaans','af');
+INSERT INTO language ( id, name, code) VALUES(4,'Akan','ak');
+INSERT INTO language ( id, name, code) VALUES(5,'Albanian','sq');
+INSERT INTO language ( id, name, code) VALUES(6,'Amharic','am');
+INSERT INTO language ( id, name, code) VALUES(7,'Arabic','ar');
+INSERT INTO language ( id, name, code) VALUES(8,'Aragonese','an');
+INSERT INTO language ( id, name, code) VALUES(9,'Armenian','hy');
+INSERT INTO language ( id, name, code) VALUES(10,'Assamese','as');
+INSERT INTO language ( id, name, code) VALUES(11,'Avaric','av');
+INSERT INTO language ( id, name, code) VALUES(12,'Avestan','ae');
+INSERT INTO language ( id, name, code) VALUES(13,'Aymara','ay');
+INSERT INTO language ( id, name, code) VALUES(14,'Azerbaijani','az');
+INSERT INTO language ( id, name, code) VALUES(15,'Bambara','bm');
+INSERT INTO language ( id, name, code) VALUES(16,'Bashkir','ba');
+INSERT INTO language ( id, name, code) VALUES(17,'Basque','eu');
+INSERT INTO language ( id, name, code) VALUES(19,'Belarusian','be');
+INSERT INTO language ( id, name, code) VALUES(20,'Bengali, Bangla','bn');
+INSERT INTO language ( id, name, code) VALUES(21,'Bihari','bh');
+INSERT INTO language ( id, name, code) VALUES(22,'Bislama','bi');
+INSERT INTO language ( id, name, code) VALUES(23,'Bosnian','bs');
+INSERT INTO language ( id, name, code) VALUES(24,'Breton','br');
+INSERT INTO language ( id, name, code) VALUES(25,'Bulgarian','bg');
+INSERT INTO language ( id, name, code) VALUES(26,'Burmese','my');
+INSERT INTO language ( id, name, code) VALUES(27,'Catalan, Valencian','ca');
+INSERT INTO language ( id, name, code) VALUES(28,'Chamorro','ch');
+INSERT INTO language ( id, name, code) VALUES(29,'Chechen','ce');
+INSERT INTO language ( id, name, code) VALUES(30,'Chichewa, Chewa, Nyanja','ny');
+INSERT INTO language ( id, name, code) VALUES(31,'Chinese','zh');
+INSERT INTO language ( id, name, code) VALUES(32,'Chuvash','cv');
+INSERT INTO language ( id, name, code) VALUES(33,'Cornish','kw');
+INSERT INTO language ( id, name, code) VALUES(34,'Corsican','co');
+INSERT INTO language ( id, name, code) VALUES(35,'Cree','cr');
+INSERT INTO language ( id, name, code) VALUES(36,'Croatian','hr');
+INSERT INTO language ( id, name, code) VALUES(37,'Czech','cs');
+INSERT INTO language ( id, name, code) VALUES(38,'Danish','da');
+INSERT INTO language ( id, name, code) VALUES(39,'Divehi, Dhivehi, Maldivian','dv');
+INSERT INTO language ( id, name, code) VALUES(40,'Dutch','nl');
+INSERT INTO language ( id, name, code) VALUES(41,'Dzongkha','dz');
+INSERT INTO language ( id, name, code) VALUES(42,'English','en');
+INSERT INTO language ( id, name, code) VALUES(43,'Esperanto','eo');
+INSERT INTO language ( id, name, code) VALUES(44,'Estonian','et');
+INSERT INTO language ( id, name, code) VALUES(45,'Ewe','ee');
+INSERT INTO language ( id, name, code) VALUES(46,'Faroese','fo');
+INSERT INTO language ( id, name, code) VALUES(47,'Fijian','fj');
+INSERT INTO language ( id, name, code) VALUES(48,'Finnish','fi');
+INSERT INTO language ( id, name, code) VALUES(49,'French','fr');
+INSERT INTO language ( id, name, code) VALUES(50,'Fula, Fulah, Pulaar, Pular','ff');
+INSERT INTO language ( id, name, code) VALUES(51,'Galician','gl');
+INSERT INTO language ( id, name, code) VALUES(52,'Georgian','ka');
+INSERT INTO language ( id, name, code) VALUES(53,'German','de');
+INSERT INTO language ( id, name, code) VALUES(54,'Greek (modern)','el');
+INSERT INTO language ( id, name, code) VALUES(55,'Guaraní','gn');
+INSERT INTO language ( id, name, code) VALUES(56,'Gujarati','gu');
+INSERT INTO language ( id, name, code) VALUES(57,'Haitian, Haitian Creole','ht');
+INSERT INTO language ( id, name, code) VALUES(58,'Hausa','ha');
+INSERT INTO language ( id, name, code) VALUES(59,'Hebrew (modern)','he');
+INSERT INTO language ( id, name, code) VALUES(60,'Herero','hz');
+INSERT INTO language ( id, name, code) VALUES(61,'Hindi','hi');
+INSERT INTO language ( id, name, code) VALUES(62,'Hiri Motu','ho');
+INSERT INTO language ( id, name, code) VALUES(63,'Hungarian','hu');
+INSERT INTO language ( id, name, code) VALUES(64,'Interlingua','ia');
+INSERT INTO language ( id, name, code) VALUES(65,'Indonesian','id');
+INSERT INTO language ( id, name, code) VALUES(66,'Interlingue','ie');
+INSERT INTO language ( id, name, code) VALUES(67,'Irish','ga');
+INSERT INTO language ( id, name, code) VALUES(68,'Igbo','ig');
+INSERT INTO language ( id, name, code) VALUES(69,'Inupiaq','ik');
+INSERT INTO language ( id, name, code) VALUES(70,'Ido','io');
+INSERT INTO language ( id, name, code) VALUES(71,'Icelandic','is');
+INSERT INTO language ( id, name, code) VALUES(72,'Italian','it');
+INSERT INTO language ( id, name, code) VALUES(73,'Inuktitut','iu');
+INSERT INTO language ( id, name, code) VALUES(74,'Japanese','ja');
+INSERT INTO language ( id, name, code) VALUES(75,'Javanese','jv');
+INSERT INTO language ( id, name, code) VALUES(76,'Kalaallisut, Greenlandic','kl');
+INSERT INTO language ( id, name, code) VALUES(77,'Kannada','kn');
+INSERT INTO language ( id, name, code) VALUES(78,'Kanuri','kr');
+INSERT INTO language ( id, name, code) VALUES(79,'Kashmiri','ks');
+INSERT INTO language ( id, name, code) VALUES(80,'Kazakh','kk');
+INSERT INTO language ( id, name, code) VALUES(81,'Khmer','km');
+INSERT INTO language ( id, name, code) VALUES(82,'Kikuyu, Gikuyu','ki');
+INSERT INTO language ( id, name, code) VALUES(83,'Kinyarwanda','rw');
+INSERT INTO language ( id, name, code) VALUES(84,'Kyrgyz','ky');
+INSERT INTO language ( id, name, code) VALUES(85,'Komi','kv');
+INSERT INTO language ( id, name, code) VALUES(86,'Kongo','kg');
+INSERT INTO language ( id, name, code) VALUES(87,'Korean','ko');
+INSERT INTO language ( id, name, code) VALUES(88,'Kurdish','ku');
+INSERT INTO language ( id, name, code) VALUES(89,'Kwanyama, Kuanyama','kj');
+INSERT INTO language ( id, name, code) VALUES(90,'Latin','la');
+INSERT INTO language ( id, name, code) VALUES(91,'Luxembourgish, Letzeburgesch','lb');
+INSERT INTO language ( id, name, code) VALUES(92,'Ganda','lg');
+INSERT INTO language ( id, name, code) VALUES(93,'Limburgish, Limburgan, Limburger','li');
+INSERT INTO language ( id, name, code) VALUES(94,'Lingala','ln');
+INSERT INTO language ( id, name, code) VALUES(95,'Lao','lo');
+INSERT INTO language ( id, name, code) VALUES(96,'Lithuanian','lt');
+INSERT INTO language ( id, name, code) VALUES(97,'Luba-Katanga','lu');
+INSERT INTO language ( id, name, code) VALUES(98,'Latvian','lv');
+INSERT INTO language ( id, name, code) VALUES(99,'Manx','gv');
+INSERT INTO language ( id, name, code) VALUES(100,'Macedonian','mk');
+INSERT INTO language ( id, name, code) VALUES(101,'Malagasy','mg');
+INSERT INTO language ( id, name, code) VALUES(102,'Malay','ms');
+INSERT INTO language ( id, name, code) VALUES(103,'Malayalam','ml');
+INSERT INTO language ( id, name, code) VALUES(104,'Maltese','mt');
+INSERT INTO language ( id, name, code) VALUES(105,'M?ori','mi');
+INSERT INTO language ( id, name, code) VALUES(106,'Marathi (Mar??h?)','mr');
+INSERT INTO language ( id, name, code) VALUES(107,'Marshallese','mh');
+INSERT INTO language ( id, name, code) VALUES(108,'Mongolian','mn');
+INSERT INTO language ( id, name, code) VALUES(109,'Nauru','na');
+INSERT INTO language ( id, name, code) VALUES(110,'Navajo, Navaho','nv');
+INSERT INTO language ( id, name, code) VALUES(111,'Northern Ndebele','nd');
+INSERT INTO language ( id, name, code) VALUES(112,'Nepali','ne');
+INSERT INTO language ( id, name, code) VALUES(113,'Ndonga','ng');
+INSERT INTO language ( id, name, code) VALUES(114,'Norwegian Bokmål','nb');
+INSERT INTO language ( id, name, code) VALUES(115,'Norwegian Nynorsk','nn');
+INSERT INTO language ( id, name, code) VALUES(116,'Norwegian','no');
+INSERT INTO language ( id, name, code) VALUES(117,'Nuosu','ii');
+INSERT INTO language ( id, name, code) VALUES(118,'Southern Ndebele','nr');
+INSERT INTO language ( id, name, code) VALUES(119,'Occitan','oc');
+INSERT INTO language ( id, name, code) VALUES(120,'Ojibwe, Ojibwa','oj');
+INSERT INTO language ( id, name, code) VALUES(121,'Old Church Slavonic, Church Slavonic, Old Bulgarian','cu');
+INSERT INTO language ( id, name, code) VALUES(122,'Oromo','om');
+INSERT INTO language ( id, name, code) VALUES(123,'Oriya','or');
+INSERT INTO language ( id, name, code) VALUES(124,'Ossetian, Ossetic','os');
+INSERT INTO language ( id, name, code) VALUES(125,'Panjabi, Punjabi','pa');
+INSERT INTO language ( id, name, code) VALUES(126,'P?li','pi');
+INSERT INTO language ( id, name, code) VALUES(127,'Persian (Farsi)','fa');
+INSERT INTO language ( id, name, code) VALUES(128,'Polish','pl');
+INSERT INTO language ( id, name, code) VALUES(129,'Pashto, Pushto','ps');
+INSERT INTO language ( id, name, code) VALUES(130,'Portuguese','pt');
+INSERT INTO language ( id, name, code) VALUES(131,'Quechua','qu');
+INSERT INTO language ( id, name, code) VALUES(132,'Romansh','rm');
+INSERT INTO language ( id, name, code) VALUES(133,'Kirundi','rn');
+INSERT INTO language ( id, name, code) VALUES(134,'Romanian','ro');
+INSERT INTO language ( id, name, code) VALUES(135,'Russian','ru');
+INSERT INTO language ( id, name, code) VALUES(136,'Sanskrit (Sa?sk?ta)','sa');
+INSERT INTO language ( id, name, code) VALUES(137,'Sardinian','sc');
+INSERT INTO language ( id, name, code) VALUES(138,'Sindhi','sd');
+INSERT INTO language ( id, name, code) VALUES(139,'Northern Sami','se');
+INSERT INTO language ( id, name, code) VALUES(140,'Samoan','sm');
+INSERT INTO language ( id, name, code) VALUES(141,'Sango','sg');
+INSERT INTO language ( id, name, code) VALUES(142,'Serbian','sr');
+INSERT INTO language ( id, name, code) VALUES(143,'Scottish Gaelic, Gaelic','gd');
+INSERT INTO language ( id, name, code) VALUES(144,'Shona','sn');
+INSERT INTO language ( id, name, code) VALUES(145,'Sinhala, Sinhalese','si');
+INSERT INTO language ( id, name, code) VALUES(146,'Slovak','sk');
+INSERT INTO language ( id, name, code) VALUES(147,'Slovene','sl');
+INSERT INTO language ( id, name, code) VALUES(148,'Somali','so');
+INSERT INTO language ( id, name, code) VALUES(149,'Southern Sotho','st');
+INSERT INTO language ( id, name, code) VALUES(150,'Spanish, Castilian','es');
+INSERT INTO language ( id, name, code) VALUES(151,'Sundanese','su');
+INSERT INTO language ( id, name, code) VALUES(152,'Swahili','sw');
+INSERT INTO language ( id, name, code) VALUES(153,'Swati','ss');
+INSERT INTO language ( id, name, code) VALUES(154,'Swedish','sv');
+INSERT INTO language ( id, name, code) VALUES(155,'Tamil','ta');
+INSERT INTO language ( id, name, code) VALUES(156,'Telugu','te');
+INSERT INTO language ( id, name, code) VALUES(157,'Tajik','tg');
+INSERT INTO language ( id, name, code) VALUES(158,'Thai','th');
+INSERT INTO language ( id, name, code) VALUES(159,'Tigrinya','ti');
+INSERT INTO language ( id, name, code) VALUES(160,'Tibetan Standard, Tibetan, Central','bo');
+INSERT INTO language ( id, name, code) VALUES(161,'Turkmen','tk');
+INSERT INTO language ( id, name, code) VALUES(162,'Tagalog','tl');
+INSERT INTO language ( id, name, code) VALUES(163,'Tswana','tn');
+INSERT INTO language ( id, name, code) VALUES(164,'Tonga (Tonga Islands)','to');
+INSERT INTO language ( id, name, code) VALUES(165,'Turkish','tr');
+INSERT INTO language ( id, name, code) VALUES(166,'Tsonga','ts');
+INSERT INTO language ( id, name, code) VALUES(167,'Tatar','tt');
+INSERT INTO language ( id, name, code) VALUES(168,'Twi','tw');
+INSERT INTO language ( id, name, code) VALUES(169,'Tahitian','ty');
+INSERT INTO language ( id, name, code) VALUES(170,'Uyghur, Uighur','ug');
+INSERT INTO language ( id, name, code) VALUES(171,'Ukrainian','uk');
+INSERT INTO language ( id, name, code) VALUES(172,'Urdu','ur');
+INSERT INTO language ( id, name, code) VALUES(173,'Uzbek','uz');
+INSERT INTO language ( id, name, code) VALUES(174,'Venda','ve');
+INSERT INTO language ( id, name, code) VALUES(175,'Vietnamese','vi');
+INSERT INTO language ( id, name, code) VALUES(176,'Volapük','vo');
+INSERT INTO language ( id, name, code) VALUES(177,'Walloon','wa');
+INSERT INTO language ( id, name, code) VALUES(178,'Welsh','cy');
+INSERT INTO language ( id, name, code) VALUES(179,'Wolof','wo');
+INSERT INTO language ( id, name, code) VALUES(180,'Western Frisian','fy');
+INSERT INTO language ( id, name, code) VALUES(181,'Xhosa','xh');
+INSERT INTO language ( id, name, code) VALUES(182,'Yiddish','yi');
+INSERT INTO language ( id, name, code) VALUES(183,'Yoruba','yo');
+INSERT INTO language ( id, name, code) VALUES(184,'Zhuang, Chuang','za');
+INSERT INTO language ( id, name, code) VALUES(185,'Zulu','zu');
+INSERT INTO language ( id, name, code) VALUES(186,'Papiamento','pap');
+INSERT INTO language ( id, name, code) VALUES(187,'Yue Chinese','yue');
+INSERT INTO language ( id, name, code) VALUES(188,'Wuu Chinese','wuu');
+INSERT INTO language ( id, name, code) VALUES(189,'Daur Chinese','dta');
+INSERT INTO language ( id, name, code) VALUES(190,'Tetum','tet');
+INSERT INTO language ( id, name, code) VALUES(191,'Tigre','tig');
+INSERT INTO language ( id, name, code) VALUES(192,'Sidamo','sid');
+INSERT INTO language ( id, name, code) VALUES(193,'Inari Sami','smn');
+INSERT INTO language ( id, name, code) VALUES(194,'Serbo-Croatian','sh');
+
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(1,'United Arab Emirates dirham',NULL,'AED','784');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(2,'Afghan afghani',NULL,'AFN','971');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(3,'Albanian lek',NULL,'ALL','8');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(4,'Armenian dram',NULL,'AMD','51');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(5,'Netherlands Antillean guilder',NULL,'ANG','532');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(6,'Angolan kwanza',NULL,'AOA','973');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(7,'Argentine peso',NULL,'ARS','32');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(8,'Australian dollar',NULL,'AUD','36');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(9,'Aruban florin',NULL,'AWG','533');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(10,'Azerbaijani manat',NULL,'AZN','944');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(11,'Bosnia and Herzegovina convertible mark',NULL,'BAM','977');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(12,'Barbados dollar',NULL,'BBD','52');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(13,'Bangladeshi taka',NULL,'BDT','50');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(14,'Bulgarian lev',NULL,'BGN','975');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(15,'Bahraini dinar',NULL,'BHD','48');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(16,'Burundian franc',NULL,'BIF','108');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(17,'Bermudian dollar',NULL,'BMD','60');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(18,'Brunei dollar',NULL,'BND','96');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(19,'Boliviano',NULL,'BOB','68');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(20,'Bolivian Mvdol (funds code)',NULL,'BOV','984');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(21,'Brazilian real',NULL,'BRL','986');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(22,'Bahamian dollar',NULL,'BSD','44');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(23,'Bhutanese ngultrum',NULL,'BTN','64');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(24,'Botswana pula',NULL,'BWP','72');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(25,'Belarusian ruble',NULL,'BYR','974');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(26,'Belize dollar',NULL,'BZD','84');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(27,'Canadian dollar',NULL,'CAD','124');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(28,'Congolese franc',NULL,'CDF','976');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(29,'WIR Euro (complementary currency)',NULL,'CHE','947');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(30,'Swiss franc',NULL,'CHF','756');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(31,'WIR Franc (complementary currency)',NULL,'CHW','948');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(32,'Unidad de Fomento (funds code)',NULL,'CLF','990');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(33,'Chilean peso',NULL,'CLP','152');
+/*INSERT INTO currency ( id, name, symbol, code, number) VALUES(34,'Chinese yuan when traded in Hong Kong',NULL,'CNH','156');*/
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(35,'Chinese yuan',NULL,'CNY','156');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(36,'Colombian peso',NULL,'COP','170');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(37,'Unidad de Valor Real (UVR) (funds code)[7]',NULL,'COU','970');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(38,'Costa Rican colon',NULL,'CRC','188');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(39,'Cuban convertible peso',NULL,'CUC','931');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(40,'Cuban peso',NULL,'CUP','192');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(41,'Cape Verde escudo',NULL,'CVE','132');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(42,'Czech koruna',NULL,'CZK','203');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(43,'Djiboutian franc',NULL,'DJF','262');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(44,'Danish krone',NULL,'DKK','208');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(45,'Dominican peso',NULL,'DOP','214');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(46,'Algerian dinar',NULL,'DZD','12');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(47,'Egyptian pound',NULL,'EGP','818');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(48,'Eritrean nakfa',NULL,'ERN','232');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(49,'Ethiopian birr',NULL,'ETB','230');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(50,'Euro',NULL,'EUR','978');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(51,'Fiji dollar',NULL,'FJD','242');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(52,'Falkland Islands pound',NULL,'FKP','238');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(53,'Pound sterling',NULL,'GBP','826');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(54,'Georgian lari',NULL,'GEL','981');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(55,'Ghanaian cedi',NULL,'GHS','936');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(56,'Gibraltar pound',NULL,'GIP','292');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(57,'Gambian dalasi',NULL,'GMD','270');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(58,'Guinean franc',NULL,'GNF','324');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(59,'Guatemalan quetzal',NULL,'GTQ','320');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(60,'Guyanese dollar',NULL,'GYD','328');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(61,'Hong Kong dollar',NULL,'HKD','344');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(62,'Honduran lempira',NULL,'HNL','340');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(63,'Croatian kuna',NULL,'HRK','191');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(64,'Haitian gourde',NULL,'HTG','332');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(65,'Hungarian forint',NULL,'HUF','348');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(66,'Indonesian rupiah',NULL,'IDR','360');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(67,'Israeli new shekel',NULL,'ILS','376');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(68,'Indian rupee',NULL,'INR','356');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(69,'Iraqi dinar',NULL,'IQD','368');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(70,'Iranian rial',NULL,'IRR','364');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(71,'Icelandic króna',NULL,'ISK','352');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(72,'Jamaican dollar',NULL,'JMD','388');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(73,'Jordanian dinar',NULL,'JOD','400');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(74,'Japanese yen',NULL,'JPY','392');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(75,'Kenyan shilling',NULL,'KES','404');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(76,'Kyrgyzstani som',NULL,'KGS','417');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(77,'Cambodian riel',NULL,'KHR','116');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(78,'Comoro franc',NULL,'KMF','174');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(79,'North Korean won',NULL,'KPW','408');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(80,'South Korean won',NULL,'KRW','410');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(81,'Kuwaiti dinar',NULL,'KWD','414');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(82,'Cayman Islands dollar',NULL,'KYD','136');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(83,'Kazakhstani tenge',NULL,'KZT','398');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(84,'Lao kip',NULL,'LAK','418');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(85,'Lebanese pound',NULL,'LBP','422');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(86,'Sri Lankan rupee',NULL,'LKR','144');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(87,'Liberian dollar',NULL,'LRD','430');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(88,'Lesotho loti',NULL,'LSL','426');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(89,'Lithuanian litas',NULL,'LTL','440');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(90,'Libyan dinar',NULL,'LYD','434');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(91,'Moroccan dirham',NULL,'MAD','504');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(92,'Moldovan leu',NULL,'MDL','498');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(93,'Malagasy ariary',NULL,'MGA','969');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(94,'Macedonian denar',NULL,'MKD','807');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(95,'Myanmar kyat',NULL,'MMK','104');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(96,'Mongolian tugrik',NULL,'MNT','496');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(97,'Macanese pataca',NULL,'MOP','446');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(98,'Mauritanian ouguiya',NULL,'MRO','478');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(99,'Mauritian rupee',NULL,'MUR','480');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(100,'Maldivian rufiyaa',NULL,'MVR','462');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(101,'Malawian kwacha',NULL,'MWK','454');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(102,'Mexican peso',NULL,'MXN','484');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(103,'Mexican Unidad de Inversion (UDI) (funds code)',NULL,'MXV','979');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(104,'Malaysian ringgit',NULL,'MYR','458');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(105,'Mozambican metical',NULL,'MZN','943');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(106,'Namibian dollar',NULL,'NAD','516');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(107,'Nigerian naira',NULL,'NGN','566');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(108,'Nicaraguan córdoba',NULL,'NIO','558');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(109,'Norwegian krone',NULL,'NOK','578');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(110,'Nepalese rupee',NULL,'NPR','524');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(111,'New Zealand dollar',NULL,'NZD','554');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(112,'Omani rial',NULL,'OMR','512');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(113,'Panamanian balboa',NULL,'PAB','590');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(114,'Peruvian nuevo sol',NULL,'PEN','604');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(115,'Papua New Guinean kina',NULL,'PGK','598');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(116,'Philippine peso',NULL,'PHP','608');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(117,'Pakistani rupee',NULL,'PKR','586');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(118,'Polish z?oty',NULL,'PLN','985');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(119,'Paraguayan guaraní',NULL,'PYG','600');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(120,'Qatari riyal',NULL,'QAR','634');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(121,'Romanian new leu',NULL,'RON','946');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(122,'Serbian dinar',NULL,'RSD','941');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(123,'Russian ruble',NULL,'RUB','643');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(124,'Rwandan franc',NULL,'RWF','646');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(125,'Saudi riyal',NULL,'SAR','682');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(126,'Solomon Islands dollar',NULL,'SBD','90');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(127,'Seychelles rupee',NULL,'SCR','690');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(128,'Sudanese pound',NULL,'SDG','938');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(129,'Swedish krona/kronor',NULL,'SEK','752');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(130,'Singapore dollar',NULL,'SGD','702');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(131,'Saint Helena pound',NULL,'SHP','654');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(132,'Sierra Leonean leone',NULL,'SLL','694');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(133,'Somali shilling',NULL,'SOS','706');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(134,'Surinamese dollar',NULL,'SRD','968');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(135,'South Sudanese pound',NULL,'SSP','728');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(136,'São Tomé and Príncipe dobra',NULL,'STD','678');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(137,'Syrian pound',NULL,'SYP','760');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(138,'Swazi lilangeni',NULL,'SZL','748');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(139,'Thai baht',NULL,'THB','764');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(140,'Tajikistani somoni',NULL,'TJS','972');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(141,'Turkmenistani manat',NULL,'TMT','934');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(142,'Tunisian dinar',NULL,'TND','788');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(143,'Tongan pa?anga',NULL,'TOP','776');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(144,'Turkish lira',NULL,'TRY','949');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(145,'Trinidad and Tobago dollar',NULL,'TTD','780');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(146,'New Taiwan dollar',NULL,'TWD','901');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(147,'Tanzanian shilling',NULL,'TZS','834');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(148,'Ukrainian hryvnia',NULL,'UAH','980');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(149,'Ugandan shilling',NULL,'UGX','800');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(150,'United States dollar',NULL,'USD','840');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(151,'United States dollar (next day) (funds code)',NULL,'USN','997');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(152,'United States dollar (same day) (funds code)[10]',NULL,'USS','998');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(153,'Uruguay Peso en Unidades Indexadas (URUIURUI) (funds code)',NULL,'UYI','940');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(154,'Uruguayan peso',NULL,'UYU','858');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(155,'Uzbekistan som',NULL,'UZS','860');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(156,'Venezuelan bolívar',NULL,'VEF','937');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(157,'Vietnamese dong',NULL,'VND','704');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(158,'Vanuatu vatu',NULL,'VUV','548');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(159,'Samoan tala',NULL,'WST','882');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(160,'CFA franc BEAC',NULL,'XAF','950');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(161,'Silver (one troy ounce)',NULL,'XAG','961');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(162,'Gold (one troy ounce)',NULL,'XAU','959');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(163,'European Composite Unit (EURCO) (bond market unit)',NULL,'XBA','955');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(164,'European Monetary Unit (E.M.U.-6) (bond market unit)',NULL,'XBB','956');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(165,'European Unit of Account 9 (E.U.A.-9) (bond market unit)',NULL,'XBC','957');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(166,'European Unit of Account 17 (E.U.A.-17) (bond market unit)',NULL,'XBD','958');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(167,'East Caribbean dollar',NULL,'XCD','951');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(168,'Special drawing rights',NULL,'XDR','960');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(169,'UIC franc (special settlement currency)',NULL,'XFU','Nil');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(170,'CFA franc BCEAO',NULL,'XOF','952');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(171,'Palladium (one troy ounce)',NULL,'XPD','964');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(172,'CFP franc (franc Pacifique)',NULL,'XPF','953');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(173,'Platinum (one troy ounce)',NULL,'XPT','962');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(174,'SUCRE',NULL,'XSU','994');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(175,'Code reserved for testing purposes',NULL,'XTS','963');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(176,'ADB Unit of Account',NULL,'XUA','965');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(177,'No currency ',NULL,'XXX','999');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(178,'Yemeni rial',NULL,'YER','886');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(179,'South African rand',NULL,'ZAR','710');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(180,'Zambian kwacha',NULL,'ZMW','967');
+INSERT INTO currency ( id, name, symbol, code, number) VALUES(181,'Zimbabwe dollar',NULL,'ZWD','932');
+
+INSERT INTO based_type ( id, name) VALUES(1,'Doujinshi');
+INSERT INTO based_type ( id, name) VALUES(2,'Spin-off');
+INSERT INTO based_type ( id, name) VALUES(3,'Prequel');
+INSERT INTO based_type ( id, name) VALUES(4,'Sequel');
+INSERT INTO based_type ( id, name) VALUES(5,'Fan composition');
+
+INSERT INTO stage_developer_type ( id, name) VALUES(1,'Pre Alpha');
+INSERT INTO stage_developer_type ( id, name) VALUES(2,'Alpha');
+INSERT INTO stage_developer_type ( id, name) VALUES(3,'Beta');
+INSERT INTO stage_developer_type ( id, name) VALUES(4,'Release Candidate');
+INSERT INTO stage_developer_type ( id, name) VALUES(5,'Gold');
+
+INSERT INTO url_type (id, name ) VALUES (1, 'Direct Link');
+INSERT INTO url_type (id, name ) VALUES (2, 'Torrent');
+INSERT INTO url_type (id, name ) VALUES (3, 'Magnetic Torrent');
+INSERT INTO url_type (id, name ) VALUES (4, 'P2P');
+INSERT INTO url_type (id, name ) VALUES (5, 'IRC');
+
+INSERT INTO image_soundtrack_type ( id, name ) VALUES(1, 'Cover');
+INSERT INTO image_soundtrack_type ( id, name ) VALUES(2, 'Box');
+INSERT INTO image_soundtrack_type ( id, name ) VALUES(3, 'Unbox');
+INSERT INTO image_soundtrack_type ( id, name ) VALUES(4, 'CD');
+INSERT INTO image_soundtrack_type ( id, name ) VALUES(5, 'Info');
+
+INSERT INTO image_user_type ( id, name ) VALUES( 1, 'profile');
+
+INSERT INTO lyric_type ( id, name) VALUES(1,'Original');
+INSERT INTO lyric_type ( id, name) VALUES(2,'Transalation');
+
+INSERT INTO figure_version ( id, name) VALUES (1,'Limited');
+INSERT INTO figure_version ( id, name) VALUES (2,'Game Prize');
+INSERT INTO figure_version ( id, name) VALUES (3,'Enumerated');
+INSERT INTO figure_version ( id, name) VALUES (4,'Standard');
+
+INSERT INTO release_ownership_type ( id, name) VALUES(1, 'Downloaded');
+INSERT INTO release_ownership_type ( id, name) VALUES(2, 'CD Save');
+INSERT INTO release_ownership_type ( id, name) VALUES(3, 'DVD Save');
+INSERT INTO release_ownership_type ( id, name) VALUES(4, 'BluRay Save');
+INSERT INTO release_ownership_type ( id, name) VALUES(5, 'Discarted');
+
+INSERT INTO plataform_type ( id, name ) VALUES(1, 'PC');
+INSERT INTO plataform_type ( id, name ) VALUES(2, 'MAC');
+INSERT INTO plataform_type ( id, name ) VALUES(3, 'iOS');
+INSERT INTO plataform_type ( id, name ) VALUES(4, 'Android');
+INSERT INTO plataform_type ( id, name ) VALUES(5, 'Nintendo DS');
+INSERT INTO plataform_type ( id, name ) VALUES(6, 'Nintendo 3DS');
+INSERT INTO plataform_type ( id, name ) VALUES(7, 'Nintendo 64');
+INSERT INTO plataform_type ( id, name ) VALUES(8, 'Nintendo Wii');
+INSERT INTO plataform_type ( id, name ) VALUES(9, 'Nintendo Wii U');
+INSERT INTO plataform_type ( id, name ) VALUES(10, 'NES');
+INSERT INTO plataform_type ( id, name ) VALUES(11, 'Vita');
+INSERT INTO plataform_type ( id, name ) VALUES(12, 'PSP');
+INSERT INTO plataform_type ( id, name ) VALUES(13, 'PlayStation');
+INSERT INTO plataform_type ( id, name ) VALUES(14, 'PlayStation 2');
+INSERT INTO plataform_type ( id, name ) VALUES(15, 'PlayStation 3');
+INSERT INTO plataform_type ( id, name ) VALUES(16, 'PlayStation 4');
+INSERT INTO plataform_type ( id, name ) VALUES(17, 'Mega-drive');
+INSERT INTO plataform_type ( id, name ) VALUES(18, 'Mega-drive 2');
+INSERT INTO plataform_type ( id, name ) VALUES(19, 'X-Box');
+INSERT INTO plataform_type ( id, name ) VALUES(20, 'X-Box 360');
+INSERT INTO plataform_type ( id, name ) VALUES(21, 'X-Box One');
+
+INSERT INTO software_type ( id, name) VALUES(1,'Game');
+INSERT INTO software_type ( id, name) VALUES(2,'EroGame');
+INSERT INTO software_type ( id, name) VALUES(3,'Card Game');
+INSERT INTO software_type ( id, name) VALUES(4,'Visual Novel');
+
+INSERT INTO visual_type ( id, name ) VALUES (1, '2D');
+INSERT INTO visual_type ( id, name ) VALUES (2, '3D');
+INSERT INTO visual_type ( id, name ) VALUES (3, 'Isometric');
+
+INSERT INTO company_function_type ( id, name) VALUES(1,'Publisher');
+INSERT INTO company_function_type ( id, name) VALUES(2,'Translate');
+INSERT INTO company_function_type ( id, name) VALUES(3,'Animate');
+INSERT INTO company_function_type ( id, name) VALUES(4,'Special Effects');
+INSERT INTO company_function_type ( id, name) VALUES(5,'Remaster');
+INSERT INTO company_function_type ( id, name) VALUES(6,'Cast');
+INSERT INTO company_function_type ( id, name) VALUES(7,'Dubber');
+INSERT INTO company_function_type ( id, name) VALUES(8,'Illustrate');
+INSERT INTO company_function_type ( id, name) VALUES(9,'Print');
+INSERT INTO company_function_type ( id, name) VALUES(10,'Diagram');
+INSERT INTO company_function_type ( id, name) VALUES(11,'Program');
+INSERT INTO company_function_type ( id, name) VALUES(12,'Develop');
+INSERT INTO company_function_type ( id, name) VALUES(13,'Motion Capture');
+INSERT INTO company_function_type ( id, name) VALUES(14,'Stuntmen');
+INSERT INTO company_function_type ( id, name) VALUES(15,'Distribute');
+INSERT INTO company_function_type ( id, name) VALUES(16,'Sale');
+INSERT INTO company_function_type ( id, name) VALUES(17,'Create');
+
+INSERT INTO print_type ( id, name) VALUES(1,'Platinum');
+INSERT INTO print_type ( id, name) VALUES(2,'Gelatin Silver');
+INSERT INTO print_type ( id, name) VALUES(3,'Digital C-Print (Lightjet)');
+INSERT INTO print_type ( id, name) VALUES(4,'Lithograph');
+INSERT INTO print_type ( id, name) VALUES(5,'Chromogenic (C-Print)');
+INSERT INTO print_type ( id, name) VALUES(6,'Cibachrome');
+INSERT INTO print_type ( id, name) VALUES(7,'Giclée');
+INSERT INTO print_type ( id, name) VALUES(8,'Iris');
+INSERT INTO print_type ( id, name) VALUES(9,'Inkjet');
+
+/*People: Create Goods, Produces Entity*/
+INSERT INTO create_type ( id, name) VALUES(1, 'Ilustrator');
+INSERT INTO create_type ( id, name) VALUES(2, 'Painter');
+INSERT INTO create_type ( id, name) VALUES(3, 'Sculptor');
+INSERT INTO create_type ( id, name) VALUES(5, 'Editor');
+INSERT INTO create_type ( id, name) VALUES(6, 'Revisor');
+INSERT INTO create_type ( id, name) VALUES(7, 'Translator');
+INSERT INTO create_type ( id, name) VALUES(8, 'Organizator');
+INSERT INTO create_type ( id, name) VALUES(9, 'Consultant');
+INSERT INTO create_type ( id, name) VALUES(10, 'Weave');
+INSERT INTO create_type ( id, name) VALUES(11, 'Woodworker');
+INSERT INTO create_type ( id, name) VALUES(12, 'Creator idea');
+INSERT INTO create_type ( id, name) VALUES(13, 'Repair Expert');
+INSERT INTO create_type ( id, name) VALUES(14, 'Reviewer');
+INSERT INTO create_type ( id, name) VALUES(15, 'Typesetter');
+
+INSERT INTO produces_type ( id, name) VALUES(1, 'Illustrator');
+INSERT INTO produces_type ( id, name) VALUES(2, 'Writer');
+INSERT INTO produces_type ( id, name) VALUES(3, 'Cover Blurb Writer');
+INSERT INTO produces_type ( id, name) VALUES(4, 'Editor');
+INSERT INTO produces_type ( id, name) VALUES(5, 'Revisor');
+INSERT INTO produces_type ( id, name) VALUES(6, 'Book designer');
+INSERT INTO produces_type ( id, name) VALUES(7, 'Translator');
+INSERT INTO produces_type ( id, name) VALUES(8, 'Restorer');
+INSERT INTO produces_type ( id, name) VALUES(9, 'Printer');
+INSERT INTO produces_type ( id, name) VALUES(10, 'Repair Expert');
+INSERT INTO produces_type ( id, name) VALUES(11, 'Reviewer');
+INSERT INTO produces_type ( id, name) VALUES(12, 'Typesetter');
+INSERT INTO produces_type ( id, name) VALUES(13, 'Manager');
+INSERT INTO produces_type ( id, name) VALUES(14, 'Designer');
+INSERT INTO produces_type ( id, name) VALUES(15, 'Character Designer');
+INSERT INTO produces_type ( id, name) VALUES(16, 'Game Designer');
+INSERT INTO produces_type ( id, name) VALUES(17, 'Level Designer');
+INSERT INTO produces_type ( id, name) VALUES(18, 'Layout Designer');
+INSERT INTO produces_type ( id, name) VALUES(19, 'Programer');
+INSERT INTO produces_type ( id, name) VALUES(20, 'Voice Actor');
+INSERT INTO produces_type ( id, name) VALUES(21, 'Actor');
+INSERT INTO produces_type ( id, name) VALUES(22, 'Narrator');
+INSERT INTO produces_type ( id, name) VALUES(23, 'Photographer');
+INSERT INTO produces_type ( id, name) VALUES(24, 'Director');
+INSERT INTO produces_type ( id, name) VALUES(25, 'Animator');
+INSERT INTO produces_type ( id, name) VALUES(26, 'Caster');
+INSERT INTO produces_type ( id, name) VALUES(27, 'Animal Trainer');
+INSERT INTO produces_type ( id, name) VALUES(28, 'Screenplay Adaptor');
+
+INSERT INTO user_filter_type ( id, name) VALUES(1,'Category');
+INSERT INTO user_filter_type ( id, name) VALUES(2,'Genre');
+INSERT INTO user_filter_type ( id, name) VALUES(3,'Tag');
+
+
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (1,2,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (2,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (3,3,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (4,46,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (5,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (6,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (7,6,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (8,167,TRUE);
+/*INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (9,'Antarctica',TRUE);*/
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (10,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (11,7,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (12,4,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (13,9,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (14,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (15,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (16,10,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (17,22,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (18,15,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (19,13,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (20,12,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (21,25,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (22,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (23,26,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (24,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (25,17,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (26,23,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (27,19,TRUE); 
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (28,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (29,11,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (30,24,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (31,109,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (32,21,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (33,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (34,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (35,18,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (36,14,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (37,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (38,16,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (39,77,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (40,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (41,27,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (42,41,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (43,82,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (44,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (45,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (46,33,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (47,35,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (48,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (49,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (50,36,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (51,78,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (52,111,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (53,38,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (54,63,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (55,40,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (56,5,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (57,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (58,42,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (59,28,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (60,44,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (61,43,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (62,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (63,45,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (64,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (65,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (66,47,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (67,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (68,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (69,48,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (70,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (71,49,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (72,52,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (73,44,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (74,51,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (75,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (76,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (77,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (78,172,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (79,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (80,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (81,57,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (82,54,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (83,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (84,55,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (85,56,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (86,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (87,44,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (88,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (89,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (90,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (91,59,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (92,53,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (93,58,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (94,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (95,60,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (96,64,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (97,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (98,62,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (99,61,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (100,65,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (101,71,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (102,68,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (103,66,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (104,70,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (105,69,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (106,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (107,53,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (108,67,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (109,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (110,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (111,72,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (112,74,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (113,53,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (114,73,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (115,83,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (116,75,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (117,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (118,50, TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (119,81,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (120,76,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (121,84,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (122,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (123,85,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (124,88,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (125,87,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (126,90,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (127,30,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (128,89,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (129,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (130,97,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (131,94,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (132,93,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (133,101,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (134,104,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (135,100,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (136,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (137,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (138,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (139,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (140,98,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (141,99,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (142,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (143,102,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (144,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (145,92,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (146,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (147,96,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (148,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (149,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (150,91,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (151,105,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (152,95,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (153,106,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (154,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (155,110,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (156,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (157,5,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (158,172,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (159,111,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (160,108,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (161,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (162,107,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (163,111,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (164,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (165,79,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (166,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (167,109,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (168,112,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (169,117,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (170,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (171,67,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (172,113,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (173,115,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (174,119,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (175,114,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (176,116,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (177,111,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (178,118,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (179,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (180,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (181,120,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (182,160,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (183,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (184,121,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (185,123,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (186,124,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (187,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (188,131,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (189,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (190,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (191,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (192,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (193,167,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (194,159,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (195,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (196,136,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (197,125,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (198,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (199,122,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (200,122,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (201,127,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (202,132,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (203,130,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (204,5,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (205,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (206,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (207,126,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (208,133,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (209,179,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (210,53,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (211,80,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (212,135,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (213,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (214,86,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (215,128,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (216,134,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (217,109,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (218,138,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (219,129,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (220,30,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (221,137,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (222,146,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (223,140,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (224,147,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (225,139,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (226,170,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (227,111,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (228,143,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (229,145,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (230,142,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (231,144,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (232,141,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (233,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (234,8,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (235,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (236,149,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (237,148,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (238,1,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (239,53,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (240,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (241,150,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (242,154,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (243,155,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (244,158,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (245,50,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (246,156,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (247,157,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (248,172,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (249,91,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (250,178,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (251,180,TRUE);
+INSERT INTO country_has_currency (country_id, currency_id, main) VALUES (252,181,TRUE);
+
+INSERT INTO country_has_language ( country_id, language_id) VALUES (1,127);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (1,129);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (1,173);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (1,161);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (2,154);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (3,5);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (3,54);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (4,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (5,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (5,140);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (5,164);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (6,27);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (7,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (8,42);
+/*INSERT INTO country_has_language ( country_id, language_id) VALUES (9,'Antarctica',TRUE);*/
+INSERT INTO country_has_language ( country_id, language_id) VALUES (10,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (11,55);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (12,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (13,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (13,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (13,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (14,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (15,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (15,36);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (15,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (15,147);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (16,14);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (16,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (16,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (17,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (18,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (18,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (18,127);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (18,172);;
+INSERT INTO country_has_language ( country_id, language_id) VALUES (19,20);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (19,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (20,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (21,19);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (21,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (22,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (22,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (22,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (23,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (23,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (24,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (25,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (25,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (26,41);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (27,150); 
+INSERT INTO country_has_language ( country_id, language_id) VALUES (27,131); 
+INSERT INTO country_has_language ( country_id, language_id) VALUES (27,13); 
+INSERT INTO country_has_language ( country_id, language_id) VALUES (28,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (28,186);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (28,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (29,23);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (29,36);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (29,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (30,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (30,163);
+/*INSERT INTO country_has_language ( country_id, language_id) VALUES (31,109,TRUE);*/
+INSERT INTO country_has_language ( country_id, language_id) VALUES (32,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (32,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (32,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (32,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (33,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (34,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (35,102);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (35,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (36,25);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (36,165);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (37,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (38,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (38,133);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (39,81);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (39,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (39,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (40,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (40,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (41,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (41,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (41,73);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (42,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (43,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (44,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (44,141);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (44,94);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (44,86);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (45,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (45,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (46,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,187);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,188);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,189);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,170);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (47,184);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (48,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (48,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (48,102);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (49,102);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (49,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (50,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (51,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (51,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (52,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (52,105);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (53,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (53,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (54,36);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (54,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (55,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (56,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (56,186);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (57,54);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (57,165);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (57,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (58,37);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (58,146);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (59,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (59,94);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (59,86);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (60,38);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (60,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (60,46);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (60,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (61,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (61,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (61,148);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (61,2);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (62,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (63,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (64,190);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (64,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (64,65);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (64,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (65,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (66,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (66,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (66,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (67,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (68,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (68,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (69,2);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (69,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (69,191);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (69,159);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (70,44);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (70,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,6);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,122);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,159);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,148);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (71,192);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (72,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (73,46);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (73,38);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (74,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (74,47);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (75,48);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (75,154);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (75,193);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,24);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,27);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,17);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,119);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (76,34);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (77,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (78,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (78,169);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (79,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (80,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (81,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (81,179);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (81,50);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (82,52);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (82,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (82,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (82,14);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (83,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (84,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (84,4);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (84,45);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (84,168);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (85,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (85,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (85,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (85,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (86,54);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (86,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (86,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (87,76);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (87,38);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (87,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (88,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (89,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (90,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (90,28);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (91,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (92,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (92,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (93,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (94,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (95,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (96,57);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (96,49);
+/*INSERT INTO country_has_language ( country_id, language_id) VALUES (97,8,TRUE);*/
+INSERT INTO country_has_language ( country_id, language_id) VALUES (98,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (99,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (99,187);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (99,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (100,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,71);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,38);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,154);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (101,116);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,61);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,20);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,156);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,106);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,155);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,172);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,56);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,77);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,103);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,123);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,125);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,10);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,21);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,79);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,112);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,138);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,136);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (102,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (103,65);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (103,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (103,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (103,75);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (104,127);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (104,88);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (105,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (105,88);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (105,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (106,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (106,67);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (107,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (107,99);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (108,59);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (108,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (108,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,137);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,27);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,34);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (109,147);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (110,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (111,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (112,74);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (113,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (113,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (114,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (114,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (115,80);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (115,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (116,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (116,152);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (117,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (118,5);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (118,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (119,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (119,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (120,84);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (120,173);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (120,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (121,95);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (121,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (121,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (122,98);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (122,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (122,96);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (123,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (123,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (123,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (123,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (124,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (124,149);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (124,185);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (124,181);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (125,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (126,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (126,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (126,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (127,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (128,96);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (128,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (128,128);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (129,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (129,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (130,30);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (130,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (130,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (131,100);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (131,5);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (131,165);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (131,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (132,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (132,101);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (133,30);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,102);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,155);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,156);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,103);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,125);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (134,158);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (135,39);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (135,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (136,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (136,15);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (137,104);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (137,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (138,107);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (138,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (139,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (140,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (140,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (140,179);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (141,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (141,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (142,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (143,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (144,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (145,134);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (145,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (145,165);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (146,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (146,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (146,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (147,108);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (147,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (148,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (148,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (148,23);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (148,5);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (148,36);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (149,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (150,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (150,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (151,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (152,26);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (153,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (153,3);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (153,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (153,60);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (154,109);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (154,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (155,112);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (155,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (156,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (156,180);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (157,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (157,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (157,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (158,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (159,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (159,105);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (160,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (160,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (161,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (161,58);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (161,78);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (162,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (162,58);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (162,183);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (162,68);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (162,50);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (163,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (164,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (165,87);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (166,162);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (166,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (166,28);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (166,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (167,116);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (167,114);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (167,115);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (167,139);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (167,48);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (168,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (168,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (168,172);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (169,172);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (169,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (169,125);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (169,138);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (169,129);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (170,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (170,74);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (170,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (171,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (172,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (172,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (173,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (173,62);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (174,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (174,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (175,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (175,131);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (175,13);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (176,162);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (176,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (177,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (178,128);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (179,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (180,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (180,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (181,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (181,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (182,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (182,86);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (182,94);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (183,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (184,134);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (184,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (185,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (185,85);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (185,29);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (185,32);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (185,16);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (186,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (186,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (186,152);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (187,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (188,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (189,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (190,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (191,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (192,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (193,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (193,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (194,140);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (194,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (195,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (196,130);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (197,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (198,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (198,179);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (199,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (199,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (199,23);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (200,121);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (200,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (200,5);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (200,142);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (201,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (201,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (202,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (203,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (203,102);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (203,155);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (203,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (204,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (204,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (205,146);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (205,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (206,147);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (206,194);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (207,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (208,148);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (208,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (208,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (208,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,185);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,181);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,163);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,149);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,166);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,153);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,174);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (209,118);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (210,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (211,87);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (211,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (212,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (213,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (213,27);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (213,51);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (213,17);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (213,119);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (214,145);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (214,155);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (214,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (215,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (215,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (216,40);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (216,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (216,75);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (217,116);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (217,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (218,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (218,153);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (219,154);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (219,139);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (219,48);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (220,53);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (220,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (220,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (220,132);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (221,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (221,88);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (221,9);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (221,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (221,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (222,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (223,157);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (223,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (224,152);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (224,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (224,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (225,158);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (225,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (226,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (226,45);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (226,58);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (227,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (228,164);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (228,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (229,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (229,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (229,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (229,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (230,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (230,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (231,165);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (231,88);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (231,14);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (231,11);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (232,161);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (232,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (232,173);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (233,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (234,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (234,140);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (235,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (236,152);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (236,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (236,92);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (237,171);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (237,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (237,128);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (237,63);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (238,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (238,127);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (238,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (238,61);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (238,172);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (239,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (239,178);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (239,143);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (240,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (240,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (240,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (241,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (242,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (243,173);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (243,135);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (243,157);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (244, 22);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (244, 42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (244, 49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (245,90);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (245,72);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (245,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (246,150);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (247,175);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (247,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (247,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (247,31);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (247,81);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (248,49);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (249,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (250,7);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (251,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (251,30);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (252,42);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (252,144);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (252,118);
+INSERT INTO country_has_language ( country_id, language_id) VALUES (252,111);
+
+INSERT INTO archive_container (
+  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id);
 );
-VALUES();
-INSERT INTO blood_type (
-  id
-  name 
-);
+
+
 INSERT INTO box_condition_type (
   id
   name 
 );
 VALUES();
-INSERT INTO based_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO stage_developer_type (
-  id
-  name 
-);
-VALUES();
-INSERT INTO company_function_type (
-  id
-  name 
-);
-VALUES();
+
+
+
 INSERT INTO soundtrack_type (
   id
   name 
@@ -388,246 +2010,64 @@ VALUES();
 INSERT INTO compose_type (
   id
   name 
-); 
+) VALUES();
+
+/* Site locations to show tag, categories. Used to separate tags from Games, Books, etc.*/
+INSERT INTO filter_type ( id, name) VALUES(,'');
+
+INSERT INTO function_type (
+  id
+  name 
+);
 VALUES();
-INSERT INTO image_soundtrack_type (
+INSERT INTO condition_type (
   id
   name 
 );
 VALUES();
 
-INSERT INTO image_user_type ( id, name ) VALUES( 1, 'profile');
 
-INSERT INTO lyric_type (
+INSERT INTO product_condition_type (id
+  name 
+);
+VALUES();
+
+
+INSERT INTO paper_type ( id, name) VALUES(9,'Inkjet');
+
+INSERT INTO related_type (
   id
   name 
 );
 VALUES();
-INSERT INTO social_type (
-  id
-  name 
-  website 
-  website_secure 
-);
-VALUES();
-INSERT INTO country (
-  id
-  name 
-  code 
-);
-VALUES();
-INSERT INTO language (
-  id
-  name 
-  code 
-);
-VALUES();
-INSERT INTO image (
-  id 
-  url 
-  extension 
-  name 
-);
-VALUES();
-INSERT INTO shops (
-  id
-  url 
-  name 
-);
-VALUES();
-INSERT INTO currency (
-  id
-  name 
-  symbol 
-  code 
-);
-VALUES();
-INSERT INTO collaborator (
-  id
-  name 
-  irc 
-  description 
-  create_date
-);
-VALUES();
-INSERT INTO collaborator_member (
-  id
-  name 
-  active
-);
-VALUES();
-INSERT INTO users (
-  id
-  username 
-  pass 
-  gender
-  location 
-  birthday
-  signup_date
-  activated
-);
-VALUES();
-INSERT INTO spider_item (
-  id
-  identify 
-  url 
-  complete_crawled
-);
-VALUES();
-INSERT INTO tag (
+
+
+INSERT INTO edition_type (
   id
   name 
 );
 VALUES();
-INSERT INTO category (
+
+INSERT INTO image_entity_edition_type (
   id
   name 
 );
 VALUES();
-INSERT INTO genre (
-  id
-  name 
-);
-VALUES();
-INSERT INTO collection (
-  id
-  name 
-  description 
-);
-VALUES();
-INSERT INTO lists_goods (
-  id
-  user_id
-  name 
-  create_date
-);
-INSERT INTO user_email (
-  users_id
-  email 
-);
-VALUES();
-INSERT INTO company (
-  id
-  country_id
-  name 
-  social_name 
-  start_year 
-  foundation_date
-  website 
-  description 
-  create_date
-);
-VALUES();
-INSERT INTO collaborator_website (
-  collaborator_id
-  website 
-);
-VALUES();
-INSERT INTO soundtrack (
-  id
-  soundtrack_type_id
-  name 
-  launch_year 
-);
-VALUES();
-INSERT INTO social (
-  id
-  social_type_id
-  url 
-);
-VALUES();
-INSERT INTO event (
-  id
-  name 
-  edition 
-  location 
-  website 
-  date
-  duration
-  free
-);
-VALUES();
-INSERT INTO version (
-  id
-  stage_developer_type_id
-  number 
-  changelog 
-);
-VALUES();
-INSERT INTO requirements (
-  id
-  version_id
-  video_board 
-  processor 
-  memory 
-  hd_storage 
-);
-VALUES();
-INSERT INTO user_filter (
-  id
-  user_filter_type_id
-  users_id
-  name 
-);
-VALUES();
-INSERT INTO people (
-  id 
-  country_id
-  blood_type_id
-  website 
-  description 
-);
-VALUES();
-INSERT INTO users_has_social (
-  users_id
-  social_id
-  last_checked
-  create_date
-);
-VALUES();
+
+
+INSERT INTO users (  id,  username,pass, gender,birthday,signup_date,  activated) VALUES(1,'teste', '12345', 'Male','1989-04-13', DEFAULT, DEFAULT);
+
+
+
+
+
+
+
 INSERT INTO tag_has_filter_type (
   filter_type_id
   tag_id
 );
-VALUES();
-INSERT INTO people_has_social (
-  social_id
-  people_id 
-  last_checked
-  create_date
-);
-VALUES();
-INSERT INTO collaborator_has_social (
-  social_id
-  collaborator_id
-  create_date
-  last_checked
-);
-VALUES();
-INSERT INTO shops_operate_on_country (
-  shops_id
-  country_id
-);
-VALUES();
-INSERT INTO people_nacionalization_on_country (
-  people_id 
-  country_id
-);
-INSERT INTO country_has_language (
-  language_id
-  country_id
-);
-VALUES();
-INSERT INTO collaborator_has_collaborator_member (
-  collaborator_id
-  collaborator_member_id
-  founder
-);
-INSERT INTO soundtrack_integrate_collection (
-  collection_id
-  soundtrack_id
-);
-VALUES();
+
 INSERT INTO category_has_filter_type (
   category_id
   filter_type_id
@@ -638,235 +2078,14 @@ INSERT INTO genre_has_filter_type (
   filter_type_id
 );
 VALUES();
-INSERT INTO audio (
-  id
-  country_id
-  audio_codec_id
-  name 
-  duration TIME NULL,
-  bitrate
-);
-VALUES();
-INSERT INTO audio_has_language (
-  audio_id
-  language_id
-);
-VALUES();
-INSERT INTO company_sponsors_event (
-  company_id
-  event_id
-);
-VALUES();
-INSERT INTO country_has_currency (
-  currency_id
-  country_id
-  main
-);
-VALUES();
-INSERT INTO company_owner_collection (
-  company_id
-  collection_id
-);
-VALUES();
-INSERT INTO company_has_country (
-  country_id
-  company_id
-);
-VALUES();
-INSERT INTO company_has_social (
-  social_id
-  company_id
-  last_checked
-  create_date
-);
-VALUES();
-INSERT INTO people_has_image (
-  image_id 
-  people_id 
-);
-VALUES();
-INSERT INTO lists_edition (
-  id
-  entity_type_id
-  user_id
-  name 
-  create_date
-);
-VALUES();
-INSERT INTO lists_release (
-  id
-  entity_type_id
-  user_id
-  name 
-  create_date
-);
-VALUES();
-INSERT INTO audio_has_genre (
-  genre_id
-  audio_id
-);
-VALUES();
-INSERT INTO soundtrack_has_image (
-  soundtrack_id
-  image_id 
-  image_soundtrack_type_id
-);
-VALUES();
-INSERT INTO lyrics (
-  id
-  lyric_type_id
-  user_id
-  audio_id
-  language_id
-  title 
-  lyric 
-);
-VALUES();
-INSERT INTO entity (
-  id 
-  entity_type_id
-  classification_type_id
-  collection_id
-  language_id
-  country_id
-  launch_year 
-  collection_started
-);
-VALUES();
-INSERT INTO driver (
-  id
-  requirements_id
-  name 
-  url_download 
-);
-VALUES();
-INSERT INTO entity_description (
-  language_id
-  entity_id 
-  description 
-);
-VALUES();
-INSERT INTO entity_wiki (
-  id
-  language_id
-  entity_id 
-  name 
-  url 
-);
-VALUES();
-INSERT INTO archive (
-  id 
-  version_id
-  name 
-  url 
-  size
-  extension 
-);
-VALUES();
-INSERT INTO entity_synopse (
-  entity_id 
-  language_id
-  content 
-);
-VALUES();
-INSERT INTO people_alias(
-  id
-  alias_type_id
-  people_id 
-  name 
-  lastname 
-);
-VALUES();
-INSERT INTO persona (
-  id
-  blood_type_id
-  entity_id 
-  name 
-  gender SET NULL,
-  birthday
-  first_appear_on 
-  height
-  weight DECIMAL NULL,
-  eyes_color 
-  hair_color 
-);
-VALUES();
-INSERT INTO soundtrack_has_audio (
-  soundtrack_id
-  audio_id
-  exclusive
-);
-INSERT INTO entity_has_category (
-  entity_id 
-  category_id
-);
-VALUES();
-INSERT INTO entity_has_tag (
-  tag_id
-  entity_id 
-);
-VALUES();
-INSERT INTO hash (
-  id 
-  hash_type_id
-  archive_id 
-  code 
-  create_date
-);
-VALUES();
+
 INSERT INTO persona_related_persona (
   persona_id
   another_persona_id
   related_type_id
 );
 VALUES();
-INSERT INTO entity_based_entity (
-  entity_id 
-  another_entity_id
-  based_type_id
-);
-VALUES();
-INSERT INTO entity_alias (
-  id
-  people_alias_type_id
-  entity_id 
-  language_id
-  name 
-);
-VALUES();
-INSERT INTO entity_edition (
-  id
-  edition_type_id
-  event_id
-  entity_id 
-  title 
-  free
-  release_description 
-  censored
-  code 
-  complement_code 
-  height
-  width
-  depth
-  weight DECIMAL NULL,
-);
-INSERT INTO entity_release (
-  id 
-  entity_id 
-  release_type_id
-  country_id
-  entity_edition_id
-  description 
-  release_date
-);
-VALUES();
-INSERT INTO software_edition (
-  entity_edition_id
-  plataform_type_id
-  software_type_id
-  media_type_id
-);
-VALUES();
+
 INSERT INTO people_compose_audio (
   audio_id
   people_id 
@@ -874,353 +2093,6 @@ INSERT INTO people_compose_audio (
   compose_type_id
 );
 VALUES();
-INSERT INTO people_produces_entity (
-  people_id 
-  entity_id 
-  people_alias_id
-  produces_type_id
-);
-VALUES();
-INSERT INTO goods (
-  id 
-  entity_id 
-  goods_version_id
-  currency_id
-  scale_id
-  country_id
-  height TINYINT UNSIGNED NOT NULL,
-  width TINYINT UNSIGNED NULL,
-  weight DECIMAL NULL,
-  launch_price DECIMAL NOT NULL,
-  release_date
-  observation 
-);
-VALUES();
-INSERT INTO lists_edition_list_entity_edition (
-  lists_edition_id
-  entity_edition_id
-  ownership_status_id
-  condition_type_id
-  edition_read_status_type_id
-  observation 
-);
-VALUES();
-INSERT INTO lists_goods_list_goods (
-  lists_goods_id
-  goods_id 
-  ownership_status_id
-  box_condition_type_id
-  product_condition_type_id
-  observation 
-);
-VALUES();
-INSERT INTO persona_unusual_features (
-  id
-  persona_id
-  name 
-);
-VALUES();
-INSERT INTO persona_alias (
-  id
-  persona_id
-  name,
-  type_id
-);
-VALUES();
-INSERT INTO persona_occupation (
-  id
-  persona_id
-  occupation 
-);
-VALUES();
-INSERT INTO game_release (
-  entity_release_id 
-  emulate
-  installation_instructions 
-);
-VALUES();
-INSERT INTO persona_affiliation (
-  id
-  persona_id
-  name 
-);
-VALUES();
-INSERT INTO persona_race (
-  id
-  persona_id
-  name 
-);
-VALUES();
-INSERT INTO software_edition_has_version (
-  software_edition_id
-  version_id
-);
-VALUES();
-INSERT INTO read_edition (
-  entity_edition_id
-  print_type_id
-  pages_number
-  chapters_number
-);
-INSERT INTO software_edition_has_subtitle (
-  software_edition_id
-  subtitle_id
-);
-VALUES();
-INSERT INTO soundtrack_for_entity_edition (
-  soundtrack_id
-  entity_edition_id
-);
-VALUES();
-INSERT INTO entity_edition_launch_country (
-  entity_edition_id
-  country_id
-  launch_date
-  launch_price DECIMAL NOT NULL,
-);
-VALUES();
-INSERT INTO entity_edition_has_subtitle (
-  subtitle_id
-  entity_edition_id
-);
-VALUES();
-INSERT INTO entity_edition_has_language (
-  entity_edition_id
-  language_id
-);
-VALUES();
-INSERT INTO entity_edition_has_currency (
-  entity_edition_id
-  currency_id
-);
-VALUES();
-INSERT INTO goods_from_persona (
-  goods_id 
-  persona_id
-);
-VALUES();
-INSERT INTO goods_has_category (
-  category_id
-  goods_id 
-);
-VALUES();
-INSERT INTO entity_release_has_version (
-  entity_release_id 
-  version_id
-);
-VALUES();
-INSERT INTO entity_release_has_language (
-  entity_release_id 
-  language_id
-);
-VALUES();
-INSERT INTO goods_has_material (
-  goods_id 
-  material_id
-);
-VALUES();
-INSERT INTO mod (
-  id
-  entity_release_id 
-  mod_type_id
-  name 
-  author 
-  launch_date
-  description 
-  installation_instruction 
-);
-VALUES();
-INSERT INTO goods_has_shop_location (
-  goods_id 
-  shop_location_id
-);
-VALUES();
-INSERT INTO goods_has_tag (
-  tag_id
-  goods_id 
-);
-VALUES();
-INSERT INTO goods_has_shops (
-  goods_id 
-  shops_id
-  product_url 
-  checked_last
-);
-VALUES();
-INSERT INTO mod_has_image (
-  mod_id
-  image_id 
-);
-VALUES();
-INSERT INTO collaborator_provides_release (
-  collaborator_id
-  entity_release_id 
-  collaborator_type_id
-);
-VALUES();
-INSERT INTO collaborator_member_produces_entity_release (
-  collaborator_member_id
-  entity_release_id 
-  collaborator_member_type_id
-);
-VALUES();
 
-INSERT INTO archive_container (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id);
-);
-
-
-INSERT INTO url_type (
-  id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR NOT NULL,
-  PRIMARY KEY(id);
-);
-
-INSERT INTO entity_edition_has_company (
-  company_id
-  entity_edition_id
-  company_function_type_id
-);
-VALUES();
-INSERT INTO entity_has_company (
-  company_id
-  entity_id 
-  company_function_type_id
-);
-VALUES();
-INSERT INTO goods_has_image (
-  image_id 
-  goods_id 
-  image_goods_type_id
-);
-VALUES();
-INSERT INTO entity_edition_has_image (
-  image_id 
-  entity_edition_id
-  image_entity_edition_type_id
-);
-VALUES();
-INSERT INTO number_edition (
-  id
-  entity_edition_id
-  number_type_id
-  entity_type_id
-  number
-);
-INSERT INTO number_release (
-  id
-  number_release_id
-  entity_release_id 
-  number_type_id
-  entity_type_id
-  number
-);
-VALUES();
-INSERT INTO lists_release_list_entity_release (
-  lists_release_id
-  entity_release_id 
-  release_edition_read_status_type_id
-  release_ownership_type_id
-  local_storage 
-);
-VALUES();
-INSERT INTO people_produces_goods (
-  people_id 
-  goods_id 
-  people_alias_id
-  create_type_id
-);
-VALUES();
-INSERT INTO soundtrack_comments (
-  id
-  soundtrack_id
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO audio_comments (
-  id
-  audio_id
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO company_comments (
-  id
-  company_id
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO people_comments (
-  id
-  people_id 
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO goods_comments (
-  id
-  goods_id 
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO entity_edition_comments (
-  id
-  entity_edition_id
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO entity_release_comments (
-  id
-  entity_release_id 
-  users_id
-  content 
-  title 
-  create_date
-  update_date
-);
-VALUES();
-INSERT INTO people_voice_persona (
-  persona_id
-  people_id 
-  language_id
-  entity_id 
-  entity_edition_id
-  observation 
-);
-INSERT INTO tag_user_filter (
-  user_filter_id
-  tag_id
-);
-VALUES();
-INSERT INTO classification_user_filter (
-  user_filter_id
-  classification_id
-);
-VALUES();
-INSERT INTO category_user_filter (  user_filter_id
-  category_id
-) VALUES
+select 'ALTER TABLE ' || table_name || ' OWNER TO teste;' from information_schema.tables where table_schema = 'public';
+select 'ALTER SEQUENCE ' || sequence_name || ' OWNER TO teste;' from information_schema.sequences where sequence_schema = 'public';
