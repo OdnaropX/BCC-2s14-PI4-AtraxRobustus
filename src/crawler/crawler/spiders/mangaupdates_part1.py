@@ -7,14 +7,15 @@ from scrapy.contrib.linkextractors import LinkExtractor
 from scrapy.selector import Selector
 from scrapy.utils.project import get_project_settings as Settings
 from .. import database
-import re
-import urlparse
 from .. import langid
 from .. import groups_website
+from .. import groups
+from .. import util
+import re
+import urlparse
 import sys
 import urllib2
 import json 
-from .. import groups
 
 class MangaUpdatesSpider(CrawlSpider):
 		name = "mangaupdates_part1"
@@ -23,8 +24,8 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		allowed_domains = ["www.mangaupdates.com"]
 		start_urls = ["http://www.mangaupdates.com/groups.html?page=1&",
-		#"http://www.mangaupdates.com/authors.html?page=1&",
-		#"http://www.mangaupdates.com/publishers.html?page=1&",
+		"http://www.mangaupdates.com/authors.html?page=1&",
+		"http://www.mangaupdates.com/publishers.html?page=1&",
 		]
 		dbase = None
 		groups = None
@@ -51,6 +52,9 @@ class MangaUpdatesSpider(CrawlSpider):
 		pattern_authors = re.compile(ur'authors\.html\?id=[0-9]{1,}')
 		pattern_json = re.compile(r'.*groups = ', re.DOTALL)
 		pattern_json2 = re.compile(r'}.*', re.DOTALL)
+		
+		pattern_blood = re.compile(ur'[-+]')
+		pattern_blood_rh = re.compile(ur'[a-zA-Z]{1,}')
 	
 		"""
 			Method to overwrite the CrawlSpider homonym method.
@@ -68,7 +72,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			This method gets the user name and password from settings.
 		"""
 		def login(self, response):
-			print "login"
+			print "Logging"
 			return FormRequest.from_response(response,
                     formdata={'username': Settings().get('MUUSERNAME'), 'password': Settings().get('MUPASSWORD')},
                     callback=self.after_login,
@@ -81,7 +85,6 @@ class MangaUpdatesSpider(CrawlSpider):
 		
 		"""
 		def after_login(self, response):
-			print "here3"
 			if "You are currently logged in as" in response.body:
 				self.log("Successfully logged in. Let's start crawling!")
 				print "Successfully logged in. Let's start crawling!"
@@ -139,7 +142,6 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_items(self, response):
 			self.instancialize_database()
-			print "Initialized database and parse"
 			
 			if(re.search(self.pattern_groups, response.url) != None):
 				#Parse Groups.
@@ -156,16 +158,17 @@ class MangaUpdatesSpider(CrawlSpider):
 			
 					
 		"""
-			Method used to insert
+			Method used to retrieve the scanlator information 
 		"""
 		def parse_groups(self, response):	
-			name = response.css('span.specialtext').extract()
-			name = name[0].strip()
+			self.instancialize_database()
+			print response.url
 			
-			country_id = self.dbase.country_us
+			#Get name
+			name = response.css('span.specialtext::text').extract()
 			
+			#Get website				
 			website = []
-			
 			try:
 				#self.load_website()
 				id = urlparse.urlparse(response.url)
@@ -174,245 +177,374 @@ class MangaUpdatesSpider(CrawlSpider):
 				website.append(groups.groups[index[0]])
 			except:
 				print "Website not found for group %s" % (response.url)
-				
+			
+			#Get IRC
 			irc = response.css('#main_content table table table tr:nth-child(2) > td:nth-child(2)::text').extract()
-			if(irc):
-				irc = irc[0].strip()
-				if(irc == 'No IRC'):
-					irc = None
 			
-			socials = []
-			#Social Twitter
-			for url in response.css('#main_content table table table tr:nth-child(3) > td:nth-child(2) a::attr(href)').extract():
-				social_twitter = {}
-				social_twitter['type_id'] = self.dbase.create_social_type_from_url(url)
-				social_twitter['url'] = url
-				social_twitter['last_checked'] = None
-				socials.append(social_twitter)
-				
-			#Social Facebook
-			for url in response.css('#main_content table table table tr:nth-child(4) > td:nth-child(2) a::attr(href)').extract():
-				social_facebook = {}
-				social_facebook['type_id'] = self.dbase.create_social_type_from_url(url)
-				social_facebook['url'] = url
-				social_facebook['last_checked'] = None
-				socials.append(social_facebook)
+			#Get Socials
+			socials_twitter = response.css('#main_content > table table table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) a::attr(href)').extract()
+			socials_facebook = response.css('#main_content > table table table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) a::attr(href)').extract()
 			
+			#Get Comments		
 			comments = response.css('#main_content table table table tr:nth-child(11) > td:nth-child(2)::text').extract()
-			if(comments != None):
-				comments = "\n".join(comments)
+	
 			
 			try:
+				#Format name
+				name = util.sanitize_title(name[0])
+				print "Parse groups: ", name
+			
+				#Format country
+				country_id = self.dbase.country_us
+				
+				#Dont need to format website.
+				
+				#Format IRC
+				if irc:
+					irc = util.sanitize_title(irc[0])
+					if 'No IRC' in irc:
+						irc = None
+				
+				#Format socials
+				socials = []
+				#Social Twitter
+				for url in socials_twitter:
+					social_twitter = {}
+					social_twitter['type_id'] = self.dbase.create_social_type_from_url(url)
+					social_twitter['url'] = url
+					social_twitter['last_checked'] = None
+					socials.append(social_twitter)
+					
+				#Social Facebook
+				for url in socials_facebook:
+					social_facebook = {}
+					social_facebook['type_id'] = self.dbase.create_social_type_from_url(url)
+					social_facebook['url'] = url
+					social_facebook['last_checked'] = None
+					socials.append(social_facebook)
+				
+				#Format comments
+				if(comments != None):
+					comments = util.sanitize_content(comments)
+			except ValueError as e:
+				print "Error on formatting and getting IDs to save Group", e.message
+				return
+			except:
+				print "Error on formatting Group", sys.exc_info()[0]
+				util.PrintException()
+				return
+				
+			try:
+				self.dbase.set_auto_transaction(False)
 				#Add group to database. If group already exists will not be duplicated.
 				collaborator_id = self.dbase.create_collaborator(name, country_id, None, irc, None,[], [], [], socials, [])
 				#Add group comment
-				self.dbase.add_comment('Crawler note', comments, 1, collaborator_id, 'collaborator')
+				if comments:
+					self.dbase.add_comment('Crawler note', comments, 1, collaborator_id, 'collaborator')
+				
+				#Add url to spider_item
+				self.dbase.add_spider_item('collaborator', collaborator_id, response.url, True)
+				self.dbase.commit()
+				print "Success"
 			except ValueError as e:
 				print e.message
+				self.dbase.rollback()
+				print "Error on save Group", e.message
+				util.PrintException()
 			except:
-				print "Error on Group", sys.exc_info()[0]
-		"""
-			Method used to format the name.
-		"""
-		def get_formatted_name(self, name, name_first = False):
-			names = name.split()
-			name = {}
-			name['name'] = ""
-			name['lastname'] = ""
-			
-			length_names = len(names)
-			if(length_names > 1):
-				if(name_first):
-					name['name'] = names[0] 
-					names.remove[0]
-					name['lastname'] = " ".join(names) 
-				else:
-					name['name'] = names.pop()
-					name['lastname'] = " ".join(names)
-			elif(length_names == 1):
-				name['name'] = names[0]
-				name['lastname'] = ""
-			
-			name['name'] = name['name'].strip()
-			name['lastname'] = name['lastname'].strip()
-			return name;
+				self.dbase.rollback()
+				print "Error on save Group", sys.exc_info()[0]
+				util.PrintException()
+			finally:
+				self.dbase.set_auto_transaction(True)
 				
 		"""
 			Method used to retrieve the author information.
 		"""
 		def parse_authors(self, response):
+			self.instancialize_database()
+			print response.url
 			#Parse author content html and extract texts from TR. Why Table?!! Why!!!! 
 			
+			#Get romanized name
 			romanized_name = response.css('#main_content .tabletitle > b::text').extract()
-			name = self.get_formatted_name(romanized_name[0])
 			
+			#Get images
 			images = response.css('#main_content > table table table table td:nth-child(1) > table tr:nth-child(2) > td img').xpath('@src').extract()
-			formatted_image = []
-			for image in images:
-				image_array = image.split('.')
-				new_image = {}
-				new_image['url'] = image
-				new_image['extension'] = image_array.pop()
-				new_image['name'] = image_array.pop()
-				formatted_image.append(new_image)
-				
-
+			
+			#Get associated names
 			associated_names = response.css('#main_content > table table table table td:nth-child(1) > table tr:nth-child(5) > td::text').extract()
-			alias = []
-			for names in associated_names:
-				alias.append(self.get_formatted_name(names))
-				
-			#print associated_names
 			
+			#Get native names
 			native_name = response.css('#main_content > table table table table td:nth-child(1) > table tr:nth-child(8) > td::text').extract()
-			natives = []
-			for native in native_name:
-				if(native != 'N/A'):
-					natives.append(self.get_formatted_name(native))
-					
-			#print native_name
-			#associated_names = response.css().extract()
 			
+			#Get birthplace
 			birth_place = response.css('#main_content > table table table table td:nth-child(1) > table tr:nth-child(11) > td::text').extract()
-			birth_place = ".\n".join(birth_place)
 			
+			#Get birthdate
 			birth_date = response.css('#main_content > table table table table td:nth-child(1) > table tr:nth-child(14) > td::text').extract()
-			if(birth_date[0] == 'N/A'):
-				birth_date = None
-			else:
-				#check if date has year.
-				date_match = re.compile(ur'[0-9]{4}')
-				if(re.search(date_match, birth_date[0]) != None):
-					#has year, so must have day and month (I Hope)
-					try:
-						birth_date = datetime.strptime(birth_date[0], '%Y %B %d')
-						birth_date = birth_date.strftime('%Y-%m-%d')
-					except:
-						birth_date = None
-				else:
-					birth_date = None
-					
 			
-			country = []
-			country.append(birth_place)
-			country_id = self.dbase.get_var('country', ['id'], "%s LIKE name = '%' || name || '%'", country)
-			if(country_id == None):
-				#check native name.
-				if(len(natives) > 0):
-					text_language = natives[0]
-					lang = langid.classify(text_language['name'])
-					country_id = self.dbase.get_country_from_language(lang)
-			else:
-				country_id = countries[0]
-				
-			#gender
+			#Get gender
 			gender = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(8) > td::text').extract()
 			
+			#Get description
 			description = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(2) > td::text').extract()
-			description = "\n".join(description)
 			
+			#Get blood type
 			blood_type = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(5) > td::text').extract()
-			blood_type = blood_type[0].strip()
-			if(blood_type != 'N/A'):
-				new_blood = re.sub('[-+]', '', blood_type)
-				blood_name = []
-				blood_name.append(new_blood)
-				blood_type_id = self.dbase.get_var('blood_type', ['id'], 'name = %s', blood_name)
 			
-			new_rh = re.sub('[a-zA-Z]{1,}','', blood_type)
-			rh_name = []
-			rh_name.append(new_rh)
-			blood_rh_type_id = self.dbase.get_var('blood_rh_type', ['id'], 'name = %s', rh_name)
+			#Get socials
+			socials_twitter = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(17) > td a::attr(href)').extract()
+			socials_facebook = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(20) > td a::attr(href)').extract()
 			
-			print "BT"
-			print blood_rh_type_id
-			
-			if(blood_rh_type_id != None):
-				blood_rh_type_id = blood_rh_type_id[0]
-			
-			print "BT"
-			print blood_rh_type_id
-			
-			socials = []
-			#Social Twitter
-			for url in response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(17) > td a::attr(href)').extract():
-				social_twitter = {}
-				social_twitter['type_id'] = self.dbase.create_social_type_from_url(url)
-				social_twitter['url'] = url
-				social_twitter['last_checked'] = None
-				socials.append(social_twitter)
-				
-			#Social Facebook
-			for url in response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(20) > td a::attr(href)').extract():
-				social_facebook = {}
-				social_facebook['type_id'] = self.dbase.create_social_type_from_url(url)
-				social_facebook['url'] = url
-				social_facebook['last_checked'] = None
-				socials.append(social_facebook)
-				
-			#website
+			#Get website
 			website = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(14) > td a::attr(href)').extract()
 				
 			try:
-				people_id = self.dbase.create_people(name['name'], name['lastname'], country_id, gender[0], birth_place, birth_date, blood_type_id, blood_rh_type_id, website[0], description, alias, [], natives, [], [], [], [], formatted_image, socials)
+				print "Romanized", romanized_name[0]
+				#Format romanized_name
+				name = util.get_formatted_name(romanized_name[0])
+				
+				#Format images
+				formatted_image = []
+				for image in images:
+					image_array = image.split('.')
+					new_image = {}
+					new_image['url'] = image
+					new_image['extension'] = image_array.pop()
+					new_image['name'] = image_array.pop()
+					formatted_image.append(new_image)
+				
+				#Format associated names
+				alias = []
+				for names in associated_names:
+					names = util.get_formatted_name(names)
+					if(names):
+						alias.append(names)
+					
+				#Format native names
+				natives = []
+				for native in native_name:
+					native = util.get_formatted_name(native)
+					if(native):
+						natives.append(native)
+				
+				#Format birthplace
+				birth_place = util.sanitize_content(birth_place)
+			
+				#Format birthdate
+				birth_date = util.sanitize_content(birth_date)
+				if(birth_date == 'N/A'):
+					birth_date = None
+					
+				
+				#Format country
+				country_id = None
+				
+				if birth_place:
+					country = []
+					country.append(birth_place)
+					country_id = self.dbase.get_var('country', ['id'], "%s LIKE name = '%' || name || '%'", country)
+					if(country_id == None):
+						#check native name.
+						if natives:
+							text_language = natives[0]
+							lang = langid.classify(text_language['name'])
+							country_id = self.dbase.get_country_from_language(lang[0])
+				
+				if not country_id:
+					country_id = self.dbase.country_jp
+				
+				#Format gender
+				gender = util.sanitize_title(gender[0])
+				
+				#Format description
+				description = util.sanitize_content(description)
+				
+				#Format blood type
+				blood_type = util.sanitize_title(blood_type[0])
+				if blood_type:
+					new_blood = re.sub(self.pattern_blood, '', blood_type)
+					blood_name = []
+					blood_name.append(new_blood)
+					blood_type_id = self.dbase.get_var('blood_type', ['id'], 'name = %s', blood_name)
+					
+					#get rh from blood_type
+					new_rh = re.sub(self.pattern_blood_rh,'', blood_type)
+					rh_name = []
+					rh_name.append(new_rh)
+					blood_rh_type_id = self.dbase.get_var('blood_rh_type', ['id'], 'name = %s', rh_name)
+				else:
+					blood_type_id = None
+					blood_rh_type_id = None
+					
+				#Format socials
+				socials = []
+				#Social Twitter
+				for url in socials_twitter:
+					social_twitter = {}
+					social_twitter['type_id'] = self.dbase.create_social_type_from_url(url)
+					social_twitter['url'] = url
+					social_twitter['last_checked'] = None
+					socials.append(social_twitter)
+					
+				#Social Facebook
+				for url in socials_facebook:
+					social_facebook = {}
+					social_facebook['type_id'] = self.dbase.create_social_type_from_url(url)
+					social_facebook['url'] = url
+					social_facebook['last_checked'] = None
+					socials.append(social_facebook)
+				
+				#Format website.
+				if website:
+					website = website[0]
+				
+				print "Website", website
+			except ValueError as e:
+				print "Error on formatting and getting IDs to save Author", e.message
+				return
+			except:
+				print "Error on formatting Author", sys.exc_info()[0]
+				util.PrintException()
+				return
+				
+			try:
+				self.dbase.set_auto_transaction(False)
+				
+				people_id = self.dbase.create_people(name['name'], name['lastname'], country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description, alias, [], natives, [], [], [], [], formatted_image, socials)
+				
 				#Add url to spider_item
 				self.dbase.add_spider_item('people', people_id, response.url, True)
+				self.dbase.commit()
+				print "Success"
 			except ValueError as e:
-				print e.message
+				self.dbase.rollback()
+				print "Error on save Author", e.message
+				util.PrintException()
 			except:
-				print "Error on Author", sys.exc_info()[0]
+				self.dbase.rollback()
+				print "Error on save Author", sys.exc_info()[0]
+				util.PrintException()
+			finally:
+				self.dbase.set_auto_transaction(True)
 		
 		"""
 			Method used to get the information from publisher. 
 			This method will not make any relationship between entity and company.
 		"""
 		def parse_publishers(self, response):
+			self.instancialize_database()
+			print response.url
 			#Parse publisher content html and extract texts from TR. Why Table?!! Why!!!! 
-			romanized_name = response.css('span.tabletitle b::text').extract()
-			name = romanized_name[0]
 			
+			#Get romanized_name
+			romanized_name = response.css('span.tabletitle b::text').extract()
+	
+			#Get type for country origin
 			type = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(1) > table tr:nth-child(5) > td:nth-child(1)::text').extract()
-			if(type):
-				if(type[0] == 'English'):
-					country_origin_id = self.dbase.country_us
-				elif(type[0] == '--'):
-					country_origin_id = None
-				else:
-					lang = []
-					lang.append(type[0])
-					language = self.dbase.get_var('language', ['id'], "name = %s", lang)
-					#Get country from language:
-					country_origin_id = self.dbase.get_country_from_language(language, self.dbase.country_us)
 					
+			#Get alternated names
 			alternate_name = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(1) > table tr:nth-child(2) > td:nth-child(1)').extract()
-			aliases = []
-			for alternate in alternate_name:
-				code = []
-				code.append(langid.classify(alternate))
-				language = self.dbase.get_var('language', ['id'], "code = %s", code)
-				if(language == None):
-					language = self.dbase.language_jp
-				alias = {}
-				alias['name'] = alternate
-				alias['language_id'] = language
-				aliases.append(alias)
 				
+			#Get website
 			website = response.css('#main_content table table table table table tr:nth-child(5) > td:nth-child(1) a::attr(href)').extract()
-			if(website):
-				print website
-				website = website[0]
-				
+			
+			#Get comments	
 			comments = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(3) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1)::text').extract()		
-			if(comments != None):
-				comments = "\n".join(comments)
+			
+			try:
+				#Format romanized_name
+				name = util.sanitize_title(romanized_name[0])
+				print "Parse publisher: ", name
+			
+				#Format alias
+				aliases = []
+				for alternate in alternate_name:
+					code = []
+					code.append(langid.classify(alternate)[0])
+					language = self.dbase.get_var('language', ['id'], "code = %s", code)
+					if(language == None):
+						language = self.dbase.language_ja
+					alias = {}
+					alias['name'] = util.sanitize_title(alternate)
+					alias['language_id'] = language
+					aliases.append(alias)
+				
+				use_alias = False
+				
+				language_id = None
+				country_origin_id = None 
+				#Format country_origin_id
+				type = util.sanitize_title(type[0])
+				if(type):
+					if 'English' in type:
+						country_origin_id = self.dbase.country_us
+						language_id - self.dbase.language_en
+					elif type != '--':						
+						lang = []
+						lang.append(type)
+						language_id = self.dbase.get_var('language', ['id'], "name = %s", lang)
+						if(language_id):
+							#Get country from language:
+							country_origin_id = self.dbase.get_country_from_language_id(language_id, self.dbase.country_us)
+				
+				if not country_origin_id:
+					language_country = {'ja': self.dbase.country_jp, 'ko': self.dbase.country_kr, 'zn': self.dbase.country_cn}
+					language_test = {'ja': 0, 'ko': 0, 'zn' : 0}
+					for title in aliases:
+						if title['language_id'] == self.dbase.language_ja:
+							language_test['ja'] += 1
+						elif title['language_id'] == self.dbase.language_ko:
+							language_test['ko'] += 1
+						elif title['language_id'] == self.dbase.language_zn:
+							language_test['zn'] += 1
+					
+					if(language_test['ja'] == language_test['ko'] and language_test['ko'] == language_test['zn']):
+						language_id = language_country['ja']
+					else:
+						language, value = max(language_test.iteritems(), key=lambda x: x[1])
+						language_id =  self.dbase.get_var('language', ['id'], "code = %s", language)
+					
+					country_origin_id = language_country[language]
+					print "Here country id:", country_origin_id 
+					
+				if not language_id:
+					language_id = self.dbase.get_language_from_country_id(country_origin_id, self.dbase.language_en)
+					
+				#Format website
+				if(website):
+					website = util.sanitize_title(website[0])
+						
+				#Format comments
+				comments = util.sanitize_content(comments)
+					
+			except ValueError as e:
+				print "Error on formatting and getting IDs to save Publisher", e.message
+				return
+			except:
+				print "Error on formatting Publisher", sys.exc_info()[0]
+				util.PrintException()
+				return
 				
 			try:
-				company_id = self.dbase.create_company(name, country_origin_id, None, None, None, website, None, [], [], [], [], [], [], [], aliases)	
-				self.dbase.add_comment('Crawler note', comments, 1, company_id, 'company')
-				#Add url to spider_item
-				self.dbase.add_spider_item('collaborator', company_id, response.url, True)
-			except ValueError as e:
-				print e.message
-			except:
-				print "Error on Publisher", sys.exc_info()[0]
+				print "Country id", country_origin_id
+				self.dbase.set_auto_transaction(False)
+				company_id = self.dbase.create_company(name, language_id, country_origin_id, None, None, None, website, None, [], [], [], [], [], [], [], aliases)	
+				if comments:
+					self.dbase.add_comment('Crawler note', comments, 1, company_id, 'company')
 				
+				#Add url to spider_item
+				self.dbase.add_spider_item('company', company_id, response.url, True)
+				self.dbase.commit()
+				print "Success"
+			except ValueError as e:
+				self.dbase.rollback()
+				print "Error on save Publisher", e.message
+				util.PrintException()
+			except:
+				self.dbase.rollback()
+				print "Error on save Publisher", sys.exc_info()[0]
+				util.PrintException()
+			finally:
+				self.dbase.set_auto_transaction(True)
