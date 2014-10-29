@@ -160,9 +160,18 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 			Method used to retrieve the scanlator information 
 		"""
-		def parse_groups(self, response):	
-			self.instancialize_database()
+		def parse_groups(self, response):
 			print response.url
+			
+			update_id = None
+			try:
+				#Check if there is a dummy, if there is update only. If there inst the id will be none
+				update_id = self.dbase.get_spider_item_id(response.url, 'collaborator')
+			except ValueError as e:
+				print "Error on getting dummy id on Groups", e.message
+			except:
+				print "Error on getting dummy on Groups", sys.exc_info()[0]
+				util.PrintException()
 			
 			#Get name
 			name = response.css('span.specialtext::text').extract()
@@ -237,7 +246,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			try:
 				self.dbase.set_auto_transaction(False)
 				#Add group to database. If group already exists will not be duplicated.
-				collaborator_id = self.dbase.create_collaborator(name, country_id, None, irc, None,[], [], [], socials, [])
+				collaborator_id = self.dbase.create_collaborator(name, country_id, None, irc, None,[], [], [], socials, [], update_id)
 				#Add group comment
 				if comments:
 					self.dbase.add_comment('Crawler note', comments, 1, collaborator_id, 'collaborator')
@@ -262,10 +271,19 @@ class MangaUpdatesSpider(CrawlSpider):
 			Method used to retrieve the author information.
 		"""
 		def parse_authors(self, response):
-			self.instancialize_database()
 			print response.url
 			#Parse author content html and extract texts from TR. Why Table?!! Why!!!! 
 			
+			update_id = None
+			try:
+				#Check if there is a dummy, if there is update only. If there inst the id will be none
+				update_id = self.dbase.get_spider_item_id(response.url, 'people')
+			except ValueError as e:
+				print "Error on getting dummy id Authors", e.message
+			except:
+				print "Error on getting dummy on Authors", sys.exc_info()[0]
+				util.PrintException()
+				
 			#Get romanized name
 			romanized_name = response.css('#main_content .tabletitle > b::text').extract()
 			
@@ -412,7 +430,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			try:
 				self.dbase.set_auto_transaction(False)
 				
-				people_id = self.dbase.create_people(name['name'], name['lastname'], country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description, alias, [], natives, [], [], [], [], formatted_image, socials)
+				people_id = self.dbase.create_people(name['name'], name['lastname'], country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description, alias, [], natives, [], [], [], [], formatted_image, socials, update_id)
 				
 				#Add url to spider_item
 				self.dbase.add_spider_item('people', people_id, response.url, True)
@@ -434,10 +452,20 @@ class MangaUpdatesSpider(CrawlSpider):
 			This method will not make any relationship between entity and company.
 		"""
 		def parse_publishers(self, response):
-			self.instancialize_database()
 			print response.url
 			#Parse publisher content html and extract texts from TR. Why Table?!! Why!!!! 
 			
+			update_id = None
+			try:
+				#Check if there is a dummy, if there is update only. If there inst the id will be none
+				update_id = self.dbase.get_spider_item_id(response.url, 'company')
+			except ValueError as e:
+				print "Error on getting dummy id on Publishers", e.message
+			except:
+				print "Error on getting dummy on Publishers", sys.exc_info()[0]
+				util.PrintException()
+				
+				
 			#Get romanized_name
 			romanized_name = response.css('span.tabletitle b::text').extract()
 	
@@ -530,7 +558,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			try:
 				print "Country id", country_origin_id
 				self.dbase.set_auto_transaction(False)
-				company_id = self.dbase.create_company(name, language_id, country_origin_id, None, None, None, website, None, [], [], [], [], [], [], [], aliases)	
+				company_id = self.dbase.create_company(name, language_id, country_origin_id, None, None, None, website, None, [], [], [], [], [], [], [], aliases, update_id)	
 				if comments:
 					self.dbase.add_comment('Crawler note', comments, 1, company_id, 'company')
 				
