@@ -237,10 +237,13 @@ class MangaUpdatesSpider(CrawlSpider):
 					comments = util.sanitize_content(comments)
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Group", e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 				return
 			except:
 				print "Error on formatting Group", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 				return
 				
 			try:
@@ -260,10 +263,12 @@ class MangaUpdatesSpider(CrawlSpider):
 				self.dbase.rollback()
 				print "Error on save Group", e.message
 				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				self.dbase.rollback()
 				print "Error on save Group", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 			finally:
 				self.dbase.set_auto_transaction(True)
 				
@@ -421,10 +426,13 @@ class MangaUpdatesSpider(CrawlSpider):
 				print "Website", website
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Author", e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 				return
 			except:
 				print "Error on formatting Author", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 				return
 				
 			try:
@@ -440,10 +448,12 @@ class MangaUpdatesSpider(CrawlSpider):
 				self.dbase.rollback()
 				print "Error on save Author", e.message
 				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				self.dbase.rollback()
 				print "Error on save Author", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 			finally:
 				self.dbase.set_auto_transaction(True)
 		
@@ -549,10 +559,13 @@ class MangaUpdatesSpider(CrawlSpider):
 					
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Publisher", e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 				return
 			except:
 				print "Error on formatting Publisher", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 				return
 				
 			try:
@@ -570,9 +583,11 @@ class MangaUpdatesSpider(CrawlSpider):
 				self.dbase.rollback()
 				print "Error on save Publisher", e.message
 				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				self.dbase.rollback()
 				print "Error on save Publisher", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 			finally:
 				self.dbase.set_auto_transaction(True)

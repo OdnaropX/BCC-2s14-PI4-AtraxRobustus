@@ -131,7 +131,11 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_genres(self, response):
 			print "Genres"
+			
+			#Get genre name
 			genres = response.css('.releasestitle b::text').extract()
+			
+			#Get genre link
 			genres_links = response.css('#main_content td.text td.text a::attr(href)').extract()
 			
 			try:
@@ -143,12 +147,12 @@ class MangaUpdatesSpider(CrawlSpider):
 					if 'series' in link:
 						Request(url=link,callback=self.parse_genres_series)
 			except ValueError as e:
-				print e.message
-				print self.dbase.last_error
-				print self.dbase.status_message
-				print self.dbase.last_query
+				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				print "Error on Parse Genre", sys.exc_info()[0]
+				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 
 		"""
 			Method to parse the series.html that have genre.
@@ -156,17 +160,19 @@ class MangaUpdatesSpider(CrawlSpider):
 			The entities must be already save on database in order for this method to work, else a unknown exception is returned.
 		"""
 		def parse_genres_series(self, response):
-			#res = urlparse.urlparse(response.url)
 			print "Genre series"
 			genre = res = re.sub('.*genre=','', response.url)
-			genre = genre.replace('+',' ')
+			genre = util.sanitize_title(genre.replace('+',' '))
 			genre_id = self.dbase.add_name_to_table(genre, 'genre')
 			
 			series = response.css('td.text.col1 a::text').extract()
 			series_url = response.css('td.text.col1 a::attr(href)').extract()
 			
-			adult_content = False
+			#Get next url for the crawler
+			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 			
+			
+			adult_content = False
 			value = []
 			value.append(self.dbase.classification_type_18)
 			
@@ -182,11 +188,20 @@ class MangaUpdatesSpider(CrawlSpider):
 				value[0] = self.dbase.classification_type_16
 			
 			try:
-				for index in range(len(series)):
-					values = []
-					values.append(series[index])
-					series_id = self.dbase.get_var('entity_alias', ['entity_id'], "name = %s", values)
+				
+				for index, serie in enumerate(series):
+					#Get series id from spider_item, if there isn't create dummy.
+					series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
+					if not series_id:
+						if index < lenght_related_text:
+							dummy_name = util.sanitize_title(serie)
+						else:
+							dummy_name = None
+						series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
+						self.dbase.add_spider_item('entity', series_id, series_url[index])
+
 					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'genre')
+					
 					if(adult_content):
 						#if genre is Hentai, Doujinshi or Adult change classification for 18+ on Series.
 						where_value = []
@@ -195,11 +210,13 @@ class MangaUpdatesSpider(CrawlSpider):
 
 			except ValueError as e:
 				print e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				print "Error on parse series genre", sys.exc_info()[0]
+				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 			
-			#Get next url for the crawler
-			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 			if(next_url):
 				Request(url=next_url[0],callback=self.parse_genres_series)
 				
@@ -210,32 +227,42 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_categories_series(self, response):			
 			print "Categories series"
+			
 			category = res = re.sub('.*category=','', response.url)
-			category = category.replace('+',' ')
+			category = util.sanitize_title(category.replace('+',' '))
 			category_id = self.dbase.add_name_to_table(category, 'tag')
 			
 			series = response.css('td.text.col1 a::text').extract()
 			series_url = response.css('td.text.col1 a::attr(href)').extract()
 			
+			#Get next url for the crawler
+			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 				
 			try:
 				for index in range(len(series)):
-					values = []
-					values.append(series[index])
-					series_id = self.dbase.get_var('entity_alias', ['entity_id'], "name = %s", values)
+					#Get series id from spider_item, if there isn't create dummy.
+					series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
+					if not series_id:
+						if index < lenght_related_text:
+							dummy_name = util.sanitize_title(serie)
+						else:
+							dummy_name = None
+						series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
+						self.dbase.add_spider_item('entity', series_id, series_url[index])
+						
 					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'tag')
 					
 					#Change type to Web Novel if there category is Web Novel
 					#if 'Web Novel' in category:
-					
-					#Get next url for the crawler
-					next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
-					if(next_url):
-						Request(url=next_url[0],callback=self.parse_categories_series)
 			
 			except ValueError as e:
 				print e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
 				print "Unknown exception"
-			print "Category internal"
+				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 			
+			if(next_url):
+				Request(url=next_url[0],callback=self.parse_categories_series)

@@ -35,6 +35,7 @@ class MangaUpdatesSpider(CrawlSpider):
 		pattern_series_releases = re.compile(ur'releases\.html\?(page=[0-9]{1,}&)?search=[0-9]{1,}&stype=series')
 		pattern_last_newline = re.compile(ur'\n$')
 		pattern_last_bracket = re.compile(ur'\[$')
+		pattern_doujin = re.compilech(ur'\bdj\b')
 		
 		language_probabilistic_pass = 0.7
 		
@@ -67,7 +68,6 @@ class MangaUpdatesSpider(CrawlSpider):
 		
 		"""
 		def after_login(self, response):
-			print "here3"
 			if "You are currently logged in as" in response.body:
 				self.log("Successfully logged in. Let's start crawling!")
 				print "Successfully logged in. Let's start crawling!"
@@ -91,7 +91,6 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				self.dbase = database.Database(dbname, dbuser,dbpass, dbhost,dbport)
 				if(self.dbase.connect() == False):
-					print vars(self.dbase)
 					self.dbase = None
 					raise SystemExit
 		
@@ -115,7 +114,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			TODO: Change anime relation and series status on database so the information is relational. 
 		"""
 		def parse_series(self, response):
-			print response.url			
+			#print response.url			
 			
 			update_id = None
 			try:
@@ -184,35 +183,38 @@ class MangaUpdatesSpider(CrawlSpider):
 			#Get partial categories
 			categories = response.css('li.tag_normal a::text').extract()
 			
-			try:
+			try:		
 				#format romanized title
 				romanized_title = util.sanitize_title(romanized_title[0])
 				
 				#format description (synopsis)
 				description = util.sanitize_content(description)
-				synopsis = []
-				new_description = {}
-				new_description['language_id'] = self.dbase.language_en
-				new_description['content'] = description
-				synopsis.append(new_description)
+				
+				descriptions = []
+				if(description):
+					new_description = {}
+					new_description['language_id'] = self.dbase.language_en
+					new_description['content'] = description
+					descriptions.append(new_description)
 				
 				#format titles
 				titles = []
 				language_titles = []
 				for name in associated_name:
 					new_name = util.sanitize_title(name)
-					language = langid.classify(new_name)
-					language_titles.append(language[0])
-					code = []
-					code.append(language[0])
-					
-					language_id = self.dbase.get_var('language', ['id'], "code = %s", code)
-					
-					new_title = {}
-					new_title['title'] = new_name
-					new_title['language_id'] = language_id
-					
-					titles.append(new_title)
+					if(new_name):
+						language = langid.classify(new_name)
+						language_titles.append(language[0])
+						code = []
+						code.append(language[0])
+						
+						language_id = self.dbase.get_var('language', ['id'], "code = %s", code)
+						
+						new_title = {}
+						new_title['title'] = new_name
+						new_title['language_id'] = language_id
+						
+						titles.append(new_title)
 				
 				webnovel = False
 				country_id = None
@@ -258,7 +260,6 @@ class MangaUpdatesSpider(CrawlSpider):
 				#get author. If author don't exists create dummy author   
 				peoples = []
 				
-				print "Author before"
 				author_alias_text = [x for x in author_alias_text if x != ']']
 				relation_type_id = self.dbase.people_relation_type_writer
 				
@@ -282,7 +283,7 @@ class MangaUpdatesSpider(CrawlSpider):
 							where_values.append(people_name['name'])
 							where_values.append(people_name['lastname'])
 							where_values.append(people_id)
-							alias_used_id = self.dbase.get_var('people_alias', ['id'], "name = %s and lastname = % and people_id = %s", where_values)
+							alias_used_id = self.dbase.get_var('people_alias', ['id'], "name = %s and lastname = %s and people_id = %s", where_values)
 							if(alias_used_id == None):
 								#Insert alias.
 								alias_used_id = self.dbase.add_people_alias(people_name['name'], people_name['lastname'], people_id, self.dbase.alias_type_alias)
@@ -297,7 +298,7 @@ class MangaUpdatesSpider(CrawlSpider):
 						where_values.append(people_id)
 						alias_used_id = self.dbase.get_var('people_alias', ['id'], "name = %s and lastname = %s and people_id = %s", where_values)
 						self.dbase.add_spider_item('people', people_id, url)
-						print "Added dummy people"
+						#print "Added dummy people"
 						
 					new_people = {}
 					new_people['id'] = people_id
@@ -305,11 +306,10 @@ class MangaUpdatesSpider(CrawlSpider):
 					new_people['relation_type_id'] = relation_type_id
 					peoples.append(new_people)
 					
-				print "Artist before"
 				artist_alias_text = [x for x in artist_alias_text if x != ']']
 				relation_type_id = self.dbase.people_relation_type_illustrator
 					
-				for index, url in enumerate(author_url):
+				for index, url in enumerate(artist_url):
 					add_dummy = False
 					if 'add_author' in url:
 						#Add dummy author
@@ -317,7 +317,7 @@ class MangaUpdatesSpider(CrawlSpider):
 						add_dummy = True
 					else:
 						#Get author id from link.
-						people_id = self.dbase.self.dbase.get_spider_item_id(url, 'people')
+						people_id = self.dbase.get_spider_item_id(url, 'people')
 						people_name = util.get_formatted_name(util.sanitize_content(artist_alias[index]))
 						if(people_id == None):
 							add_dummy = True
@@ -326,12 +326,12 @@ class MangaUpdatesSpider(CrawlSpider):
 							where_values.append(people_name['name'])
 							where_values.append(people_name['lastname'])
 							where_values.append(people_id)
-							alias_used_id = self.dbase.get_var('people_alias', ['id'], "name = %s and lastname = % and people_id = %s", where_values)
+							alias_used_id = self.dbase.get_var('people_alias', ['id'], "name = %s and lastname = %s and people_id = %s", where_values)
 							if(alias_used_id == None):
 								#Insert alias.
 								alias_used_id = self.dbase.add_people_alias(people_name['name'], people_name['lastname'], people_id, self.dbase.alias_type_alias)
 								
-					if(add_dummy):
+					if(add_dummy):						
 						if(country_id != None):
 							people_country = country_id
 						else:
@@ -356,10 +356,13 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				#format company
 				companies = []
+				
 				company_publisher = False
 				original_publisher_text = [x for x in original_publisher_text if x != ']']
 				
 				company_function_type_id = self.dbase.company_function_type_publisher
+				
+				#print original_publisher_url, original_publisher_alias, original_publisher_text
 				
 				for index, url in enumerate(original_publisher_url):
 					add_dummy = False
@@ -371,6 +374,7 @@ class MangaUpdatesSpider(CrawlSpider):
 						#Get author id from link.
 						company_id = self.dbase.get_spider_item_id(url, 'company')
 						company_name = util.sanitize_content(original_publisher_alias[index])
+						
 						if(company_id == None):
 							add_dummy = True
 						else:
@@ -378,6 +382,7 @@ class MangaUpdatesSpider(CrawlSpider):
 							where_values.append(company_name)
 							where_values.append(company_id)
 							alias_used_id = self.dbase.get_var('company_alias', ['id'], "name = %s and company_id = %s", where_values)
+							#print "Alias used id", alias_used_id
 							#Get country_id from original publisher
 							if(country_id == None):
 								where_values = []
@@ -396,8 +401,10 @@ class MangaUpdatesSpider(CrawlSpider):
 								code = []
 								code.append(language[0])
 								language_id = self.dbase.get_var('language', ['id'], "code = %s", code)
+								#print "Name :", company_name
 								alias_used_id = self.dbase.add_alias(company_name, company_id, language_id, 'company', self.dbase.alias_type_alias)
 								
+					#print "Company name: ", company_name
 					if(add_dummy):
 						if(country_id != None):
 							country_origin_id = country_id
@@ -421,6 +428,12 @@ class MangaUpdatesSpider(CrawlSpider):
 					
 					company_publisher = True
 					
+				#Get serialized company:
+				
+				
+				#Get english company:
+				
+				
 				create_lightnovel = False
 					
 				if(webnovel and company_publisher):
@@ -456,20 +469,28 @@ class MangaUpdatesSpider(CrawlSpider):
 						languages = {'ja': self.dbase.language_ja, 'ko': self.dbase.language_ko, 'zn': self.dbase.language_zn}
 						language_id = languages[language]
 					else:
-					language_id = self.dbase.language_ja
+						language_id = self.dbase.language_ja
 					
 				#format related
 				relateds = []
+				
 				if(related):
+					lenght_related_text = len(related_text)
 					for index, item in enumerate(related):
 						#Save dummy if not on database, if in database get id.
-						dummy_series_id = self.get_spider_item_id(url, 'entity')
+						dummy_series_id = self.dbase.get_spider_item_id(url, 'entity')
 						if dummy_series_id == None:
+							if index < lenght_related_text:
+								dummy_name = util.sanitize_title(related_text[index])
+							else:
+								dummy_name = None
 							#Create dummy
-							dummy_series_id = self.dbase.create_entity(util.sanitize_title(related_text[index]), self.dbase.entity_type_manga, self.dbase.classification_type_12, language_id, country_id)
+							dummy_series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, language_id, country_id)
 							self.dbase.add_spider_item('entity', dummy_series_id, item)
 							
+						#print "Dummy" , dummy_series_id
 						new_related_type = util.sanitize_content(related_type[index])
+						
 						if new_related_type:
 							related_type_id = self.dbase.add_type(new_related_type, 'based')
 						else:
@@ -479,9 +500,6 @@ class MangaUpdatesSpider(CrawlSpider):
 						new_related['id'] = dummy_series_id
 						new_related['type_id'] = related_type_id
 						relateds.append(new_related)
-							
-					
-				print relateds
 				
 				#Format images. The correct would be the edition have image and not entity. But mangaupdate don't save any related editions. 
 				#image = image[0]
@@ -495,10 +513,12 @@ class MangaUpdatesSpider(CrawlSpider):
 					formatted_image.append(new_image)
 				
 				
+				#Get a collection from a related item only if type is prequel, sequel or spin-off. 
 				
 				#format collection
 				#create new collection with the first name type, get firstname part using regex.
-				collection_id = 0
+				collection_id = None
+				collection_started = 'False'
 				#Check if related is sequel, doujinshi or based on. If is there is a collection with the name of this entity. Collection will be the first part of the name.
 				#Check if related is prequel, if is the collection is the name of prequel if there inst a collection on the prequel.
 				#Update name of collection if there is more than one prequel. check recursive prequel.
@@ -507,70 +527,89 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				#if there inst any related work or other works registered the collection with this entity name. 
 				
+				#Get name to make a new collection name.
+				#self.dbase.get_related_item(self, table, first_field, second_field, relation_type, type_id, entity_id, limit = None)
+				
 			
 				'''
 					Change this to use a relation on database.
 				'''
-				
-				comments = []
-				new_comment = {}
-				new_comment['title'] = ""
-				new_comment['content'] util.sanitize_content()
 				#format status
-					#if complete register status
-					#elif ongoing register status
-					#if more than on type register
-					#remove last \n from elements
+				status = util.sanitize_content(status)
 			
 				#format animé comparative
 				anime_start_end = util.sanitize_content(anime_start_end)
-				
-				
 
 				category_adult = False	
 				#format classification_type_id
 				if(categories):
 					if "Adult" in categories or "Hentai" in categories or "Doujin" in categories or "Seinen" in categories:
-						classification_type_id = self.dbase.classification_type_18
 						category_adult = True
 				
+				related_doujin = False
+				
+				#check if is doujinshi on title
+				if(re.search(self.pattern_doujin, romanized_title) != None):
+					#if is doujinshi, create a relation of doujinshi type.
+					related_doujin = True
+					category_adult = True
+					#Get original from first part of " dj - "
+					original_id = 
+				
 				if(not category_adult):
-					#check if is doujinshi on title
-					
-					
 					classification_type_id = self.dbase.classification_type_12
+				else:
+					classification_type_id = self.dbase.classification_type_18
 				
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Series", e.message
 				util.PrintException()
+				util.Log(response.url, e.message)
 				return
 			except:
 				print "Error on formatting Series", sys.exc_info()[0]
 				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
 				return
-			
-			try:
-				entity_id = dbase.create_entity(romanized_title, entity_type_id, classification_type_id, language_id, country_id, year, collection_id = None, collection_started = 0, titles, [], synopsis, [], [], [], [], [], [], companies, peoples, relateds, None, formatted_image, update_id):
 
+			try:
+				self.dbase.set_auto_transaction(False)
+				entity_id = self.dbase.create_entity(romanized_title, entity_type_id, classification_type_id, language_id, country_id, year, collection_id, collection_started, titles, [], [], [], descriptions, [], [], [], [], companies, peoples, relateds, None, formatted_image, update_id)
 				
-				#create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-				#titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], relateds = [], romanize_subtitle = None, update_id = None)
-	
-				#if(create_lightnovel):
-				#	entity_id = dbase.create_entity(romanized_title, self.dbase.entity_type_lightnovel, classification_type_id, genre_id, collection_id, language_id, country_id, year, collection_started = 0, 
-				#	titles, [], synopsis, [], [], [], [], [], companies, peoples)
+				if(status):
+					self.dbase.add_comment('Crawler status', status, 1, entity_id, 'entity')
+				
+				if(anime_start_end):
+					self.dbase.add_comment('Crawler anime_start_end', anime_start_end, 1, entity_id, 'entity')
+					
+				#Create doujinshi relation.
+				if related_doujin:
+					self.dbase.add_relation_with_type('entity', 'entity', original_id, entity_id, 'based', self.dbase.based_type_doujin)
+			
+				
+				self.dbase.add_spider_item('entity', entity_id, response.url, True)
+				self.dbase.commit()
+				print "Success"
 				
 				#Request release
 				if(releases):
 					meta = {}
 					meta['series_id'] = entity_id
-					meta['name'] = 1
+					meta['name'] = romanized_title
+					meta['url'] = response.url
 					Request(url=releases[0],callback=self.parse_series_releases,meta=meta)
-					
 			except ValueError as e:
-				print e.message
+				self.dbase.rollback()
+				print "Error on save Series", e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
+				self.dbase.rollback()
 				print "Error on save Series", sys.exc_info()[0]
+				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
+			finally:
+				self.dbase.set_auto_transaction(True)
 		
 		"""
 			Method used to save all genres on database and pass initial genre link to be crawled.
@@ -578,40 +617,44 @@ class MangaUpdatesSpider(CrawlSpider):
 			TODO: Save on database.
 		"""
 		def parse_series_releases(self, response):
-			print "Genres"
+			print "Releases"
+			print response.meta
+			
+			#Get urls from series
+			
+			
+			#Get release number
+			
+			
+			#Get groups url for the releases
+			
+			#Get groups text for the releases 
+			
+			
+			#Get next url for the crawler
+			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
+			
 			genres = response.css('.releasestitle b::text').extract()
 			genres_links = response.css('#main_content td.text td.text a::attr(href)').extract()
 			
 			try:
+			
+				
 				for genre in genres:
 					print genre
 					self.dbase.add_name_to_table(genre, 'genre')
 				for	link in genres_links:
 					if 'series' in link:
 						Request(url=link,callback=self.parse_genres_series)
+						
 			except ValueError as e:
 				print self.dbase.last_error
 				print self.dbase.status_message
 				print self.dbase.last_query
-			
-		#def check_series_type(self, response):
-			#from response check what is the type, if is dounjinshi check has tag dounjinshi, if novel check name, if other check Type.
-		
-		#def check_derivate_from(self, response):
-			#check if series is derivate from another work.
-
-			#if it is add derivate type if is a new one and create original work if it was not save on database yet using website url to identify the item. 
-		
-		#def check_adult_content(self, response):
-			#if have tag adult or (+18) on content.
-		
-		#def get_collection(self,):
-			"""
-				Pega coleção. Se não for prequel, sequel, spin-off, spinoff, derivate, doujinshi or fanart retorna o nome do trabalho atual.
-					como detectar quando a coleção é Gundam, exemplo:
-					Kidou Senshi Gundam
-		"""	
-			
-		#def log_error(self, error):
-			
-		
+			except:
+				print "Unknown exception"
+				util.PrintException()
+				util.Log(response.url, sys.exc_info()[0])
+				
+			if(next_url):
+				Request(url=next_url[0],callback=self.parse_categories_series)
