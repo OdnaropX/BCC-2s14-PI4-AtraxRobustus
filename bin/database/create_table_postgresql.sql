@@ -471,8 +471,7 @@ CREATE TABLE IF NOT EXISTS spider_item (
   id BIGINT NOT NULL,
   table_name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
-  complete_crawled BOOLEAN NOT NULL DEFAULT False,
-  PRIMARY KEY(id)
+  complete_crawled BOOLEAN NOT NULL DEFAULT False
 );
 
 CREATE TABLE IF NOT EXISTS tag (
@@ -1082,10 +1081,10 @@ CREATE TABLE IF NOT EXISTS entity (
   id BIGSERIAL,
   entity_type_id INTEGER  NOT NULL,
   classification_type_id INTEGER  NOT NULL,
-  collection_id INTEGER  NULL,
+  collection_id INTEGER NULL,
   language_id INTEGER  NOT NULL,
   country_id INTEGER  NOT NULL,
-  launch_year CHAR(4) NOT NULL,
+  launch_year CHAR(4) NULL,
   collection_started BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY(id),
   FOREIGN KEY(country_id)
@@ -1505,7 +1504,7 @@ CREATE TABLE IF NOT EXISTS people_produces_entity (
   entity_id BIGINT  NOT NULL,
   people_alias_id INTEGER  NOT NULL,
   produces_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(people_id, entity_id),
+  PRIMARY KEY(people_id, entity_id, produces_type_id),
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
@@ -1927,6 +1926,22 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_image (
   FOREIGN KEY(image_entity_edition_type_id)
     REFERENCES image_entity_edition_type(id)
       ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+;
+
+/* not normalized table */
+CREATE TABLE IF NOT EXISTS entity_has_image (
+  image_id BIGINT  NOT NULL,
+  entity_id INTEGER  NOT NULL,
+  PRIMARY KEY(image_id, entity_id),
+  FOREIGN KEY(image_id)
+    REFERENCES image(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(entity_id)
+    REFERENCES entity(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 ;
