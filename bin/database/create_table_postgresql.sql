@@ -2560,7 +2560,7 @@ CREATE TABLE IF NOT EXISTS people_create_goods (
   goods_id BIGINT  NOT NULL,
   people_alias_id INTEGER  NOT NULL,
   create_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(people_id, goods_id),
+  PRIMARY KEY(people_id, goods_id, create_type_id),
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
