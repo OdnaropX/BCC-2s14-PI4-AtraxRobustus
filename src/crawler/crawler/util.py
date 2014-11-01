@@ -2,6 +2,8 @@ import sys
 import linecache
 import re
 import collections
+import types
+from scrapy import log
 
 pattern_last_newline = re.compile(ur'\n$')
 pattern_last_bracket = re.compile(ur'\[$')
@@ -52,13 +54,17 @@ def PrintException():
 	linecache.checkcache(filename)
 	line = linecache.getline(filename, lineno, f.f_globals)
 	print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
-
-def LogFail():
-	print "Error"
+	
+def Log(url, message):
+	#Save Log
+	message = url + ": " + message
+	log.msg(message, level=log.INFO)
 	
 def sanitize_title(title):
 	#remove type from title.
 			
+	if(isinstance(title, collections.Iterable) and not isinstance(title, types.StringTypes)):
+		title = " ".join(title)
 	#remove last newline with sub
 	title = re.sub(pattern_last_newline, '', title)
 	title = title.strip()
@@ -71,7 +77,7 @@ def sanitize_content(description):
 		return None
 		
 	#if description is list join.
-	if(isinstance(description, collections.Iterable)):
+	if(isinstance(description, collections.Iterable) and not isinstance(description, types.StringTypes)):
 		description = "\n".join(description)
 	#remove extra space. 
 	description = description.strip()
