@@ -987,7 +987,9 @@ INSERT INTO based_type ( id, name) VALUES(1,'Doujinshi');
 INSERT INTO based_type ( id, name) VALUES(2,'Spin-off');
 INSERT INTO based_type ( id, name) VALUES(3,'Prequel');
 INSERT INTO based_type ( id, name) VALUES(4,'Sequel');
+/* Relation that may not be part of the collection */
 INSERT INTO based_type ( id, name) VALUES(5,'Fan composition');
+INSERT INTO based_type ( id, name) VALUES(6,'Lousy based');
 
 INSERT INTO stage_developer_type ( id, name) VALUES(1,'Pre Alpha');
 INSERT INTO stage_developer_type ( id, name) VALUES(2,'Alpha');
@@ -2096,3 +2098,4 @@ VALUES();
 
 select 'ALTER TABLE ' || table_name || ' OWNER TO teste;' from information_schema.tables where table_schema = 'public';
 select 'ALTER SEQUENCE ' || sequence_name || ' OWNER TO teste;' from information_schema.sequences where sequence_schema = 'public';
+insert into users VALUES (1, 'teste','123', 'Male', NULL, '1989/04/13', now(), True)

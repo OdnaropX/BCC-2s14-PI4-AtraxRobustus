@@ -5,6 +5,7 @@ import collections
 import urlparse
 import re
 import sys
+import util
 
 """
 	Class for connection and manipulation of database.
@@ -55,6 +56,10 @@ class Database:
 	alias_type_romanized = 7 #Alias Romanized Title
 	alias_type_subromanized = 8 #Alias Romanized Subtitle
 	
+	entity_type_manga = 3
+	based_type_sequel_spinoff = 2
+	based_type_doujin = 1
+	
 	#Default image types registered
 	image_user_type_profile = 1
 	
@@ -83,6 +88,8 @@ class Database:
 	people_relation_type_writer = 2 #author 
 	people_relation_type_illustrator = 1 #artist
  
+	pattern_remove_function = re.compile(ur'[a-zA-Z ]{1,}\(.*\)')
+	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
 		self.dbuser = dbuser
@@ -95,7 +102,7 @@ class Database:
 		#	self.type_alias = self.get_results('alias_type')
 
 	"""
-		Method to set the auto transaction option status]
+		Method to set the auto transaction option status
 	"""
 	def set_auto_transaction(self, auto):
 		if(self.auto_transaction_call == 0):
@@ -203,21 +210,20 @@ class Database:
 			return True
 		except psycopg2 as e:
 			print "Error on query: ", self.cursor.query
-			print e.pgerror
+			util.PrintException()
 			return False
 		except psycopg2.InternalError as e:
-			print "Error on query: ", self.cursor.query
-			print "############################################################################\nPermission error!! Please change the user that access the table and sequence on schema.\n###########################################################################"
+			print "Error Internal on query: ", self.cursor.query
 			print e.message
+			util.PrintException()
 			return False
 		except:
-			print "Error on query", sys.exc_info()[0]
-			print self.cursor.query
+			print "Error on query", sys.exc_info()[0], self.cursor.query
+			util.PrintException()
 			return False
 		finally:
 			self.last_query = self.cursor.query
 			self.status_message = self.cursor.statusmessage
-			#print self.last_query
 
 	"""
 		This method verify if an error occurred when the query was run.
@@ -258,7 +264,7 @@ class Database:
 			
 		columns = []
 		columns.append("currval('{table}_{column}_seq')".format(table=table, column=column))
-		print columns, "colunas"
+
 		row = self.select("", columns, None, None, [], [], ["INNER"], None, False)
 		
 		if(row):
@@ -337,7 +343,7 @@ class Database:
 		
 		if(where != None):
 			sql = sql + " WHERE " + where
-			for element in where:
+			for element in where_values:
 				values.append(element)
 		
 		sql = sql + ";"
@@ -363,12 +369,12 @@ class Database:
 		Method use to select the data from database.
 		If there is no data None is returned.
 	"""
-	def select(self, table, columns = None, where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None, from_table = True):
+	def select(self, table, columns = ['*'], where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None, from_table = True):
 		if(not table and from_table == True):
 			raise ValueError("Table name cannot be empty on select method.")
 		
 		#Set parameter default.
-		if columns is None or columns == False:
+		if not columns:
 			columns = ['*']
 		
 		if joins is None:
@@ -376,11 +382,9 @@ class Database:
 		
 		if join_columns is None:
 			join_columns = []
-			
+		
 		if join_type is None:
 			join_type = ["INNER"]
-			
-		limited = False
 
 		if(from_table == False):
 			sql = "SELECT {column};".format(column= ",".join(columns))
@@ -388,8 +392,7 @@ class Database:
 			sql = "SELECT {column} FROM {table};".format(table=table, column= ",".join(columns))
 		else:
 			if(len(joins) != 0 and len(joins) != len(join_columns)):
-				self.set_error("Join and column join on can have a length different.")
-				return False
+				raise ValueError("Join and column join on can have a length different.")
 			elif(len(joins) != 0):
 				join = ""
 				default = len(join_type) == 1
@@ -406,12 +409,92 @@ class Database:
 			else:
 				sql = "SELECT {column} FROM {table} WHERE {condition}".format(column = ",".join(columns), table=table, condition=where)
 			if(isinstance( limit, ( int, long ))):
-				limited = True
 				sql + " LIMIT {0}".format(limit);
 			sql = sql + ";"
 			
 		if(self.change(sql, where_values)):
-			if(limit):
+			if(limit == 1):
+				return self.cursor.fetchone();
+			else:
+				return self.cursor.fetchall();
+		return None;
+	
+	"""
+		Method used to get all elements associated with others elements on same 
+		table using temporary table and WITH RECURSIVE.
+	"""
+	def select_with_recursive(self, table, recursive_columns, columns, recursive_where = None, where = None, where_values = None, joins = None, join_columns = None, join_type = None,recursive_alias = None, limit = None):
+		if(not table):
+			raise ValueError("Table name cannot be empty on get_with_recursive method.")
+
+		if not columns:
+			raise ValueError("columns cannot be empty on get_with_recursive method.")
+
+		if(isinstance(columns, types.StringTypes)):
+			raise ValueError("columns must be a list on get_with_recursive method.")
+			
+		if(len(columns) < 2):
+			raise ValueError("columns cannot have less than 2 items on get_with_recursive method.")
+			
+		if(isinstance(recursive_columns, types.StringTypes)):
+			raise ValueError("recursive_columns must be a list on get_with_recursive method.")
+			
+		if(len(recursive_columns) < 2):
+			raise ValueError("recursive_columns cannot have less than 2 items on get_with_recursive method.")
+			
+		
+		if joins is None:
+			joins = []
+		
+		if join_columns is None:
+			join_columns = []
+		
+		if join_type is None:
+			join_type = ["INNER"]
+			cls
+		#where = "based_type_id = 3 and entity_id = 1"
+		columns_filtered = [i for i in columns if not self.pattern_remove_function.search(i)]
+		
+		sql = "WITH RECURSIVE recursive_table({columns}) AS (SELECT {columns} FROM {table}".format(columns=", ".join(recursive_columns),table=table)
+		
+		if(recursive_where):
+			sql += " WHERE {condition}".format(condition = recursive_where)
+		
+		sql += " UNION ALL SELECT p.{second_field}, p.{first_field} FROM recursive_table pr, {table} p WHERE p.{first_field} = pr.{second_field})".format(first_field = recursive_columns[0], second_field = recursive_columns[1],table=table)
+
+		outside_where = ""
+		
+		if where:
+			outside_where = "WHERE " + where
+		
+		if recursive_alias:
+			recursive_alias = "as " + recursive_alias
+			
+		if(len(joins) != 0 and len(joins) != len(join_columns)):
+			raise ValueError("Join and column join on cannot have a length different.")		
+		elif(len(joins) != 0):
+			join = ""
+			default = len(join_type) == 1
+					
+			for index, element in enumerate(joins):
+				if(default):
+					e = join_type[0]
+				else:
+					e = join_type[index]
+				join = join + " {join_type} JOIN {element} ON ({condition}) ".format(join_type=e, element=element, condition=join_columns[index])
+			print columns
+			column = ",".join(columns)
+			sql += "SELECT {columns} FROM recursive_table {recursive_alias} {join} {where} GROUP BY {columns_filtered}".format(columns=", ".join(columns), recursive_alias=recursive_alias,join=join, where=outside_where, columns_filtered = ", ".join(columns_filtered))	
+		else:
+			sql += " SELECT {columns} FROM recursive_table {recursive_alias} {where} GROUP BY {columns_filtered}".format(columns=", ".join(columns), recursive_alias=recursive_alias, where=outside_where, columns_filtered = ", ".join(columns_filtered))
+		
+		if(isinstance( limit, ( int, long ))):
+			limited = True
+			sql + " LIMIT {0}".format(limit);
+		sql = sql + ";"
+		
+		if(self.change(sql, where_values)):
+			if(limit == 1):
 				return self.cursor.fetchone();
 			else:
 				return self.cursor.fetchall();
@@ -423,7 +506,7 @@ class Database:
 	"""
 	def get_var(self, table, columns = ['*'], where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		result = self.select(table, columns, where, where_values, joins, join_columns, join_type, 1)
-		if result == None:
+		if not result:
 			return None
 		else:
 			return result[0]
@@ -452,70 +535,10 @@ class Database:
 	"""
 	def get_results(self, table, where = None, where_values = None, joins = None, join_columns = None, join_type = None, limit = None):
 		return self.select(table, ['*'], where, where_values, joins, join_columns, join_type, limit)
-	
-	
+		
 	############################### Begin of specified methods for the crawler ################################### 
 	##############################################################################################################
 	
-	######################### External Get Methods ###############################
-	
-	"""
-		Method used to get a country id from a given language code.
-	"""
-	def get_country_from_language(self, language_code, default_country = None):
-		if(not language_code):
-			return default_country
-			
-		code = []
-		code.append(language_code)
-		print "Language code", language_code
-		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
-		countries = self.get_col('country_has_language as c', 'c.country_id', "language.code = %s", code, ['language'], ['c.language_id = language.id'])
-		if(countries != None):
-			length_country = len(countries)
-			if(length_country > 1 or length_country < 1):
-				country_id = default_country
-			else:
-				country_id = countries[0]
-			return country_id
-		
-		return default_country
-	
-	"""
-		Method used to get a language id from a given country id.
-		This method return default language if none is found or the first language found on database.
-		TODO: Change database to return only the official and main language from country.
-	"""
-	def get_language_from_country_id(self, country_id, default_language = None):
-		if(not country_id):
-			return default_language
-			
-		code = []
-		code.append(country_id)
-		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
-		countries = self.get_col('country_has_language', 'language_id', "country_id = %s", code)
-		if(countries != None):
-			return countries[0]
-					
-		return default_country
-
-	"""
-		Method used to get a language id from a given country id.
-		This method return default language if none is found or the first language found on database.
-		TODO: Change database to return only the official and main language from country.
-	"""
-	def get_country_from_language_id(self, language_id, default_country = None):
-		if(not language_id):
-			return default_country
-			
-		code = []
-		code.append(language_id)
-		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
-		countries = self.get_col('country_has_language', 'country_id', "language_id = %s", code)
-		if(countries != None):
-			return countries[0]
-					
-		return default_country
 	################### Internal Methods Used by Other Methods #################### 
 	
 	"""
@@ -537,7 +560,6 @@ class Database:
 			sanitize_value = []
 			sanitize_value.append(value)
 		elif(not isinstance(field, types.StringTypes) and isinstance(field, collections.Iterable) and isinstance(value, collections.Iterable)):
-			print "here2"
 			where = []
 			for element in field:
 				where.append("{element}=%s".format(element=element))
@@ -698,13 +720,13 @@ class Database:
 		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, goods_from_persona, goods_has_category,
 		entity_release_has_version, entity_release_has_language, goods_has_material, goods_has_shop_location, goods_has_tag, mod_release_has_image,
 		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
-		genre_has_filter_type, persona_has_image, requirements_has_driver
+		genre_has_filter_type, persona_has_image, requirements_has_driver, entity_has_image
 		
 		The table name to be used will be assembly by first_table + relation_type + second_table. 
 		By default relation_type is equal to has, but can be overwrite.
 	"""
 	def add_multi_relation(self, first_id, second_id, first_table, second_table, relation_type = 'has'):
-		if(not first_table or not sencod_table):
+		if not first_table or not second_table:
 			raise ValueError("Table names cannot be empty on add_multi_relation method.")
 	
 		#check if there is already a compost key with the given ids.
@@ -748,10 +770,10 @@ class Database:
 		relation_type parameter is the middle name for the table, current can be 'has', 'related' or 'based'
 	"""
 	def add_relation_with_type(self, first_table, second_table, first_id, second_id, relation_type, relation_type_id, use_type_id = True):
-		if(not first_table or not sencod_table):
+		if not first_table or not second_table:
 			raise ValueError("Table names cannot be empty on add_relation_with_type method")
 		
-		if(not relation_type):
+		if not relation_type:
 			raise ValueError("Relation type cannot be empty on add_relation_with_type method")
 		
 		#check if there is already a compost key with the given ids.
@@ -876,10 +898,9 @@ class Database:
 		
 	"""
 	def add_alias(self, name, entity_id, language_id, alias_for, alias_type_id):
-		if(not name):
+		if not name:
 			raise ValueError("Name cannot be empty on add_alias method.")
 			
-		print "Alias"
 		#check if entity_id really exists on correct table
 		self.check_id_exists(alias_for, entity_id)
 		
@@ -949,21 +970,26 @@ class Database:
 		This method can be use to insert on entity table.
 		
 	"""
-	def add_entity(self, entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started = 0, update_id = None):
+	def add_entity(self, entity_type_id, classification_type_id, language_id, country_id, launch_year = None, collection_id = None, collection_started = 'False', update_id = None):
 		table = 'entity'
 		#cannot warranty uniqueness
-		columns = ['entity_type_id', 'classification_type_id', 'collection_id','language_id','country_id', 'launch_year', 'collection_started', 'gender_id']
+		columns = ['entity_type_id', 'classification_type_id', 'language_id','country_id', 'collection_started']
 		value = []
 		value.append(entity_type_id)
 		value.append(classification_type_id)
-		value.append(collection_id)
 		value.append(language_id)
 		value.append(country_id)
-		value.append(launch_year)
 		value.append(collection_started)
-		value.append(gender_id)
 		
-		if not update_id:
+		if launch_year:
+			columns.append('launch_year')
+			value.append(launch_year)
+			
+		if collection_id:
+			columns.append('collection_id')
+			value.append(collection_id)
+			
+		if update_id:
 			where_values = []
 			where_values.append(update_id)
 			if not self.update(table, value, columns, "id = %s", where_values):
@@ -974,7 +1000,6 @@ class Database:
 			id = self.get_last_insert_id(table)
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
-		
 		return id
 	
 	
@@ -996,9 +1021,11 @@ class Database:
 		value.append(language_id)
 		value.append(description)
 		
-		if(self.insert(table, value, columns) == False):
+		self.insert(table, value, columns)
+		id = self.get_last_insert_id(table)
+		if(id == 0):
 			raise ValueError("An error occurred when trying to insert on add_entity_description(%s, %s, %s)." % (entity_id, language_id, description))
-		return True
+		return id
 		
 	"""
 		Method used to insert a wiki to an entity.
@@ -1023,6 +1050,7 @@ class Database:
 			value.append(url)
 			value.append(language_id)
 			self.insert(table, value, columns)
+			id = self.get_last_insert_id(table)
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_entity_wiki(%s, %s, %s, %s)." % (entity_id, name, url, language_id))
 		return id
@@ -1056,35 +1084,51 @@ class Database:
 		return True
 	
 	"""
+		Method used to add a image and associated it with an entity.
+		This method implements try except and return boolean, there is need to implement try except on method above because
+		on error a raise will be flagged.
+		This method only will be used when is not possible to have a edition and is necessary to save a entity image.
+	"""	
+	def add_image_to_entity(self, url, extension, name, entity_id):
+		try:
+			image_id = self.add_image(url, extension, name)
+			return self.add_multi_relation(entity_id, image_id, 'entity', 'image')
+		except ValueError as e:
+			print e.message
+			raise ValueError(e.strerror)
+			
+	"""
 		Method used to register all items related with entity.
 		This method must be used instead other specified methos related with entity.
 		
 		To use this method the types must be already registered on database.
 		The parameters titles must have elements that are dict. 
 	"""
-	def create_entity(self, romanized_title, entity_type_id, classification_type_id, genre_id, collection_id, language_id, country_id, launch_year, collection_started = 0, 
-	titles = [], subtitles = [], synopsis = [], wiki = [], descriptions = [], categories = [], tags = [], personas = [], companies = [], peoples = [], romanize_subtitle = None, update_id = None):
-		if(not romanized_title):
-			raise ValueError("Romanized title cannot be empty on create_entity method.")
+	def create_entity(self, romanized_title, entity_type_id, classification_type_id, language_id, country_id, launch_year = None, collection_id = None, collection_started = 'False', 
+	titles = [], subtitles = [], synopsis = [], wikis = [], descriptions = [], categories = [], tags = [], genres = [], personas = [], companies = [], peoples = [], relateds = [], romanize_subtitle = None, images = [], update_id = None):
+		#if(not romanized_title):
+		#	raise ValueError("Romanized title cannot be empty on create_entity method.")
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			entity_id = self.add_entity(entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id)
-		
-			#register main name (Romanize title and Romanized Subtitle)
-			self.add_alias(romanized_title, entity_id, language_id, 'entity', self.alias_type_romanized)
+			entity_id = self.add_entity(entity_type_id, classification_type_id, language_id, country_id, launch_year, collection_id, collection_started, update_id)
 			
-			if(romanize_subtitle != None):
+			if romanized_title:
+				#register main name (Romanize title and Romanized Subtitle)
+				self.add_alias(romanized_title, entity_id, language_id, 'entity', self.alias_type_romanized)
+			
+			if romanize_subtitle:
 				self.add_alias(romanize_subtitle, entity_id, language_id, 'entity', self.alias_type_subromanized)
+			print "Romanized sub"
 			
 			for title in titles:
 				self.add_alias(title['title'], entity_id, title['language_id'], 'entity', self.alias_type_title)
 			
 			for subtitle in subtitles:	
 				self.add_alias(subtitle['title'], entity_id, subtitle['language_id'], 'entity', self.alias_type_subtitle)
-				
+			
 			#register synopsis
 			for synops in synopsis:	
 				self.add_entity_synopsis(entity_id, synops['language_id'], synops['content'])
@@ -1106,19 +1150,29 @@ class Database:
 				self.add_persona_to_entity(entity_id, persona['id'], persona['alias_id'], persona['first_appear'])
 			
 			for company in companies:
+				print company
 				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
 			
 			for people in peoples:
 				self.add_relation_people(people['id'], people['alias_used_id'], entity_id, 'entity', people['relation_type_id'])
-				
+			
+			for related in relateds:
+				self.add_relation_with_type('entity', 'entity', entity_id, related['id'], 'based', related['type_id'])
+			
+			for genre in genres:
+				self.add_multi_relation(entity_id, genre['id'], 'entity', 'genre')
+			
+			for image in images:
+				self.add_image_to_entity(image['url'], image['extension'], image['name'], entity_id)
+			
 			#commit changes
 			self.commit()
 			
 			return entity_id
 		except ValueError as e:
-			print "ValueError: {0}".format(e.message)
+			print "ValueError: ", e.message
 			self.rollback()
-			raise ValueError("Return id is equal to 0 on create_entity method. Some error must have occurred.")
+			raise ValueError("Return id is equal to 0 on create_entity method. Some error must have occurred on create_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)." % (romanized_title, entity_type_id, classification_type_id, language_id, country_id, launch_year, collection_id, collection_started, titles, subtitles, synopsis, wikis, descriptions, categories, tags, genres, personas, companies, peoples, relateds, romanize_subtitle, images, update_id))
 		finally:
 			self.set_auto_transaction(True)
 	
@@ -1189,7 +1243,7 @@ class Database:
 				columns.append('subtitle')
 				value.append(subtitle)
 			
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -1292,11 +1346,11 @@ class Database:
 				columns.append('chapters_number')
 				value.append(chapters_number)
 
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
-					raise ValueError("An error occurred while trying to update on add_read_edition(%s, %s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number, update_id)))
+					raise ValueError("An error occurred while trying to update on add_read_edition(%s, %s, %s, %s, %s)." % (entity_edition_id, print_type_id, pages_number, chapters_number, update_id))
 				id = update_id	
 			else:
 				if(self.insert(table, value, columns) == False):
@@ -1310,8 +1364,8 @@ class Database:
 	"""
 	def add_image_to_edition(self, url, extension, name, edition_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('entity_edition', image_id, edition_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('entity_edition', image_id, edition_id, image_type_id)
 		except ValueError as e:
 			print e.message
 			raise ValueError(e.strerror)
@@ -1535,7 +1589,7 @@ class Database:
 				columns.append('installation_instruction')
 				value.append(installation_instruction)
 			
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -1577,7 +1631,7 @@ class Database:
 			else:
 				value.append(0)
 			
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -1628,8 +1682,8 @@ class Database:
 	"""
 	def add_image_to_release(self, url, extension, name, release_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('entity_release', image_id, release_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('entity_release', image_id, release_id, image_type_id)
 		except ValueError as e:
 			print e.message
 			raise ValueError(e.strerror)
@@ -1808,7 +1862,7 @@ class Database:
 			columns.append('hair_color')
 			value.append(hair_color)
 		
-		if not update_id:
+		if update_id:
 			where_values = []
 			where_values.append(update_id)
 			if not self.update(table, value, columns, "id = %s", where_values):
@@ -1897,7 +1951,7 @@ class Database:
 	"""
 	def add_image_to_persona(self, url, extension, name, persona_id):
 		try:
-			image_id = add_image(url, extension, name)
+			image_id = self.add_image(url, extension, name)
 			return add_multi_relation(persona_id, image_id, 'persona', 'image')
 		except ValueError as e:
 			print e.message
@@ -2054,7 +2108,7 @@ class Database:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 				
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -2077,16 +2131,16 @@ class Database:
 		The parameter relation_table is used as the first part of table name that have _has_company
 	"""
 	def add_relation_company(self, company_id, second_id, company_function_type_id, relation_table):
-		if(not company_id):
+		if not company_id:
 			raise ValueError("company_id cannot be empty on add_relation_company method.")
 		
-		if(not second_id):
+		if not second_id:
 			raise ValueError("second_id cannot be empty on add_relation_company method.")
 		
-		if(not company_function_type_id):
+		if not company_function_type_id:
 			raise ValueError("company_function_type_id cannot be empty on add_relation_company method.")
 			
-		if(not relation_table):
+		if not relation_table:
 			raise ValueError("relation_table cannot be empty on add_relation_company method.")
 			
 		self.check_id_exists('company', company_id)
@@ -2097,7 +2151,7 @@ class Database:
 		where_values.append(company_id)
 		where_values.append(second_id)
 		where_values.append(company_function_type_id)
-		id = self.get_var(table, ['company_id'], "company_id = %s and {relation_table}_id = %s and company_function_type_id = %s".format(relation_table),where_values)
+		id = self.get_var(table, ['company_id'], "company_id = %s and {relation_table}_id = %s and company_function_type_id = %s".format(relation_table=relation_table),where_values)
 		if(id == None):
 			columns = ['company_id', relation_table + '_id', 'company_function_type_id']
 			value = []
@@ -2116,8 +2170,8 @@ class Database:
 	"""		
 	def add_image_to_company(self, url, extension, name, company_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('entity_edition', image_id, company_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('entity_edition', image_id, company_id, image_type_id)
 		except ValueError as e:
 			print e.message
 			raise ValueError(e.strerror)
@@ -2230,9 +2284,10 @@ class Database:
 			columns.append('birth_date')
 			value.append(birth_date)
 			
-		if not update_id:
+		if update_id:
 			where_values = []
 			where_values.append(update_id)
+			print where_values
 			if not self.update(table, value, columns, "id = %s", where_values):
 				raise ValueError("An error occurred while trying to update on add_people(%s, %s, %s, %s, %s, %s, %s, %s)." % (country_id, blood_type_id, gender, birth_place, birth_date, website, description, update_id))
 			id = update_id	
@@ -2453,7 +2508,7 @@ class Database:
 	"""			
 	def add_image_to_people(self, url, extension, name, people_id):
 		try:
-			image_id = add_image(url, extension, name)
+			image_id = self.add_image(url, extension, name)
 			return self.add_multi_relation(people_id, image_id, 'people', 'image')
 			
 		except ValueError as e:
@@ -2896,7 +2951,7 @@ class Database:
 			value.append(duration)
 			value.append(bitrate)
 			
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -3001,7 +3056,7 @@ class Database:
 				columns.append('user_id')
 				value.append(user_id)
 			
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -3065,7 +3120,7 @@ class Database:
 			value.append(launch_country_id)
 			value.append(code)
 
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -3086,8 +3141,8 @@ class Database:
 	"""	
 	def add_image_to_audio(self, url, extension, name, audio_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('audio', image_id, audio_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('audio', image_id, audio_id, image_type_id)
 			
 		except ValueError as e:
 			print e.message
@@ -3100,8 +3155,8 @@ class Database:
 	"""	
 	def add_image_to_soundtrack(self, url, extension, name, soundtrack_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('soundtrack', image_id, soundtrack_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('soundtrack', image_id, soundtrack_id, image_type_id)
 			
 		except ValueError as e:
 			print e.message
@@ -3209,7 +3264,7 @@ class Database:
 			columns.append('observation')
 			value.append(observation)
 		
-		if not update_id:
+		if update_id:
 			where_values = []
 			where_values.append(update_id)
 			if not self.update(table, value, columns, "id = %s", where_values):
@@ -3327,8 +3382,8 @@ class Database:
 	"""	
 	def add_image_to_goods(self, url, extension, name, goods_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('goods', image_id, goods_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('goods', image_id, goods_id, image_type_id)
 			
 		except ValueError as e:
 			print e.message
@@ -3546,7 +3601,7 @@ class Database:
 				columns.append('duration')
 				value.append(duration)
 				
-			if not update_id:
+			if update_id:
 				where_values = []
 				where_values.append(update_id)
 				if not self.update(table, value, columns, "id = %s", where_values):
@@ -3590,46 +3645,6 @@ class Database:
 	
 	############################## Collaborator methods ###########################
 	
-	"""
-		Method used to update a collaborator on database given a id.
-	
-	"""
-	def update_collaborator(self, update_id, name, country_id, description = None, irc = None, foundation_date = None):
-		if not update_id:
-			raise ValueError("Update id cannot be empty on update_collaborator method.")
-			
-		if(not name):
-			raise ValueError("Name cannot be empty on update_collaborator method.")
-		
-		if(not country_id):
-			raise ValueError("Country id cannot be empty on update_collaborator method.")
-		
-		table = 'collaborator'
-		
-		columns = ['name', 'country_id']
-		value = []
-		value.append(name)
-		value.append(country_id)
-		
-		if(irc):
-			columns.append('irc')
-			value.append(irc)
-			
-		if(description != None):
-			columns.append('description')
-			value.append(description)
-		
-		if(foundation_date != None):
-			columns.append('foundation_date')
-			value.append(foundation_date)
-				
-		where_values = []
-		where_values.append(update_id)
-		
-		if(not self.update(table, value, columns, "id = %s", where_values)):
-			raise ValueError("An error occurred while trying to update on update_collaborator(%s, %s, %s, %s, %s, %s)." % (update_id, name, country_id, description, irc, foundation_date))
-		return update_id
-		
 	"""
 		Method used to insert a collaborator on database. This method don't insert any related item to a collaborator.
 		This method can be used to insert on collaborator table.
@@ -3835,8 +3850,8 @@ class Database:
 	"""
 	def add_image_to_collaborator(self, url, extension, name, collaborator_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('collaborator', image_id, collaborator_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('collaborator', image_id, collaborator_id, image_type_id)
 			
 		except ValueError as e:
 			print e.message
@@ -4515,8 +4530,8 @@ class Database:
 	"""	
 	def add_image_to_user(self, url, extension, name, user_id, image_type_id):
 		try:
-			image_id = add_image(url, extension, name)
-			return add_relation_image('user', image_id, user_id, image_type_id)
+			image_id = self.add_image(url, extension, name)
+			return self.add_relation_image('user', image_id, user_id, image_type_id)
 			
 		except ValueError as e:
 			print e.message
@@ -4578,12 +4593,15 @@ class Database:
 		
 		if(not content):
 			raise ValueError("Content cannot be empty on add_comment method.")
+			
+		if(not user_id):
+			raise ValueError("user_id cannot be empty on add_comment method.")
 	
 		self.check_id_exists('users', user_id)
 		
 		table = type + '_comments'
 		
-		#dont need to check if already exists.
+		#don't need to check if already exists.
 		columns = [type + '_id', 'user_id', 'content', 'title']
 		value = []
 		value.append(entity_id)
@@ -4597,8 +4615,130 @@ class Database:
 			raise ValueError("There is no last insert id to return on add_comment(%s, %s, %s, %s, %s)." % (title, content, user_id, entity_id, type))
 		return id
 	
+	
+	######################### External Get Methods ###############################
+	#where = "based_type_id = 3 and entity_id = 1"
+	"""
+		Method used to get the related ID from a hierarchic relationship. 
+		This method can be used with the follow table:
+		entity_based_entity, persona_related_persona
+	"""
+	def get_related_item_id(self, table, first_field, second_field, relation_type, type_id, entity_id, limit = None):
+		if not first_field:
+			raise ValueError("first_field cannot be empty on get_related_item method.")
+			
+		if not second_field:
+			raise ValueError("second_field cannot be empty on get_related_item method.")
+
+		table = table + "_" + relation_type + "_" + table
+		
+		recursive_columns = [first_field, second_field]
+		
+		where = "{relation_type}_type_id = %s and {first_field} = %s".format(relation_type=relation_type,first_field=first_field)
+		
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(type_id)
+		
+		return self.select_with_recursive(table, recursive_columns, recursive_columns, where, None, where_values, None, None, None, None, limit)
+		
+		
+	"""
+		Method used to get the related item from a hierarchic relationship. 
+		This Method return the ID and Name.
+	"""
+	def get_related_item(self, table, first_field, second_field, relation_type, type_id, entity_id, limit = None):
+		if not first_field:
+			raise ValueError("first_field cannot be empty on get_related_item method.")
+			
+		if not second_field:
+			raise ValueError("second_field cannot be empty on get_related_item method.")
+
+		table = table + "_" + relation_type + "_" + table
+		
+		recursive_columns = [first_field, second_field]
+		
+		columns = ['r.' + second_field, 'n.name']
+		
+		join = [relation_type + '_alias as n']
+		join_columns = [' n.entity_id = r.another_entity_id ']
+		
+		where = "{relation_type}_type_id = %s and {first_field} = %s".format(relation_type=relation_type,first_field=first_field)
+		
+		where_values = []
+		where_values.append(entity_id)
+		where_values.append(type_id)
+		
+		return self.select_with_recursive(table, recursive_columns, columns, where, None, where_values, join, join_columns, None, 'r', limit)
+	
+	#def get_related_item_collection()
+		
+	
+	"""
+		Method used to get a country id from a given language code.
+	"""
+	def get_country_from_language(self, language_code, default_country = None):
+		if(not language_code):
+			return default_country
+			
+		code = []
+		code.append(language_code)
+		print "Language code", language_code
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language as c', 'c.country_id', "language.code = %s", code, ['language'], ['c.language_id = language.id'])
+		if(countries != None):
+			length_country = len(countries)
+			if(length_country > 1 or length_country < 1):
+				country_id = default_country
+			else:
+				country_id = countries[0]
+			return country_id
+		
+		return default_country
+	
+	"""
+		Method used to get a language id from a given country id.
+		This method return default language if none is found or the first language found on database.
+		TODO: Change database to return only the official and main language from country.
+	"""
+	def get_language_from_country_id(self, country_id, default_language = None):
+		if(not country_id):
+			return default_language
+			
+		code = []
+		code.append(country_id)
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language', 'language_id', "country_id = %s", code)
+		if(countries != None):
+			return countries[0]
+					
+		return default_country
+
+	"""
+		Method used to get a language id from a given country id.
+		This method return default language if none is found or the first language found on database.
+		TODO: Change database to return only the official and main language from country.
+	"""
+	def get_country_from_language_id(self, language_id, default_country = None):
+		if(not language_id):
+			return default_country
+			
+		code = []
+		code.append(language_id)
+		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
+		countries = self.get_col('country_has_language', 'country_id', "language_id = %s", code)
+		if(countries != None):
+			return countries[0]
+					
+		return default_country
+		
 	################################## Crawler Methods ############################
 	
+	"""
+		Method used to insert a item on spider item table.
+		All crawled URL must have a row on spider_item with the status 
+		True or False for complete crawled status.
+	"""
 	def add_spider_item(self, table, id, url, complete_crawled = False):
 		if(not table):
 			raise ValueError("Table cannot be empty on add_spider_item method.")
@@ -4617,7 +4757,7 @@ class Database:
 		where_values.append(table)
 		where = "id = %s and url = %s and table_name = %s"
 		id_base = self.get_var(table_base, ['complete_crawled'], where, where_values)
-		print "Id base", id_base
+		
 		if(id_base == None):
 			columns = ['id','table_name', 'url','complete_crawled']
 			value = []
@@ -4627,16 +4767,21 @@ class Database:
 			value.append(complete_crawled)
 			
 			#insert
-			self.insert(table_base, value, columns)
+			if not self.insert(table_base, value, columns):
+				raise ValueError("An error occurred while trying to insert a URL on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
 		elif(complete_crawled and id_base == 'False'):
 			#Update to full crawled
 			if(not self.update(table_base, ['True'],['complete_crawled'], where, where_values)):
 				raise ValueError("An error occurred while trying to update complete_crawled on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
 		return True
 		
+	"""
+		Method used to get a ID from a already crawled URL.
+		If there isn't no ID for the given URL on database None is returned.
+	"""
 	def get_spider_item_id(self, url, table):
 		where_values = []
 		where_values.append(url)
 		where_values.append(table)
-		return self.dbase.get_var('spider_item', ['id'], "url = %s and table_name = %s", where_values)
+		return self.get_var('spider_item', ['id'], "url = %s and table_name = %s", where_values)
 		

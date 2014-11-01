@@ -1119,10 +1119,11 @@ CREATE TABLE IF NOT EXISTS driver (
 ;
 
 CREATE TABLE IF NOT EXISTS entity_description (
+  id SERIAL,
   language_id INTEGER  NOT NULL,
   entity_id BIGINT  NOT NULL,
   description TEXT NOT NULL,
-  PRIMARY KEY(language_id, entity_id),
+  PRIMARY KEY(id),
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
@@ -2189,6 +2190,27 @@ CREATE TABLE IF NOT EXISTS entity_release_comments (
       ON UPDATE NO ACTION
 )
 ;
+
+CREATE TABLE IF NOT EXISTS entity_comments (
+  id SERIAL,
+  entity_id BIGINT  NOT NULL,
+  user_id INTEGER  NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  PRIMARY KEY(id),
+  FOREIGN KEY(user_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(entity_id)
+    REFERENCES entity(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+;
+
 
 CREATE TABLE IF NOT EXISTS people_voice_persona (
   persona_id INTEGER  NOT NULL,
