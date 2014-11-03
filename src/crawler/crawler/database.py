@@ -547,7 +547,10 @@ class Database:
 	def get_col(self, table, column, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		columns = []
 		columns.append(column)
-		return self.select(table, columns, where, where_values, joins, join_columns, join_type)[0]
+		column = self.select(table, columns, where, where_values, joins, join_columns, join_type)
+		if column:
+			return column[0]
+		return None
 	
 	"""
 		Method used to get all the data from a database query.
@@ -814,7 +817,7 @@ class Database:
 		where_values.append(relation_type_id)
 		id = self.get_var(table, [first_table + '_id'], "{first_table}_id = %s and {another}{second_table}_id = %s and {relation_type}{type}_id = %s".format(first_table=first_table, another=another, second_table=second_table, relation_type=relation_type, type=type),where_values)
 		if(id == None):
-			columns = [first_table + '_id', another + second_table + '_id', relation_table + type + '_id']
+			columns = [first_table + '_id', another + second_table + '_id', relation_type + type + '_id']
 			value = []
 			value.append(first_id)
 			value.append(second_id)
@@ -1009,18 +1012,18 @@ class Database:
 		if collection_id:
 			columns.append('collection_id')
 			value.append(collection_id)
-			
+		
 		if update_id:
 			where_values = []
 			where_values.append(update_id)
 			if not self.update(table, value, columns, "id = %s", where_values):
-				raise ValueError("An error occurred while trying to update on add_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
+				raise ValueError("An error occurred while trying to update on add_entity(%s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
 			id = update_id	
 		else:
 			self.insert(table, value, columns)
 			id = self.get_last_insert_id(table)
 			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, gender_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
+				raise ValueError("There is no last insert id to return on add_entity(%s, %s, %s, %s, %s, %s, %s, %s)." % (entity_type_id, classification_type_id, collection_id, language_id, country_id, launch_year, collection_started, update_id))
 		return id
 	
 	
@@ -2559,8 +2562,7 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters alias, nicknames, goods,entities_produced and audios_composed must have elements that are dictionary. 
 	"""
-	def create_people(self, name, lastname,
-	country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None,blood_rh_type_id = None, website = None, description = None,
+	def create_people(self, name, lastname, country_id, gender = None, birth_place = None, birth_date = None, blood_type_id = None,blood_rh_type_id = None, website = None, description = None,
 	aliases = [], nicknames = [], native_names = [], goods = [], entities_produced = [], audios_composed = [], personas_voiced = [], images = [], socials = [], update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on create_people method.")
@@ -2570,15 +2572,20 @@ class Database:
 		
 		self.set_auto_transaction(False)
 		try:
+			#print "Here people1"
 			#add_people
 			people_id = self.add_people(country_id, gender, birth_place, birth_date, blood_type_id, blood_rh_type_id, website, description, update_id)
 			
+			#print "Here people2"
 			#add_people_alias
 			self.add_people_alias(name, lastname, people_id, self.alias_type_main)
+			
+			#print "People alias Main"
 			
 			for alias in aliases:
 				self.add_people_alias(alias['name'], alias['lastname'], people_id, self.alias_type_alias)
 			
+			#print "People alias"
 			for nick in nicknames:
 				self.add_people_alias(nick['name'], nick['lastname'], people_id, self.alias_type_nickname)
 			

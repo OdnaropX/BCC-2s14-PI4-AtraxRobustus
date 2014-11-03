@@ -4,6 +4,7 @@ import re
 import collections
 import types
 from scrapy import log
+from itertools import groupby
 
 pattern_last_newline = re.compile(ur'\n$')
 pattern_last_bracket = re.compile(ur'\[$')
@@ -59,9 +60,13 @@ def get_line_exception():
 def PrintException():
 	print get_line_exception()
 	
-def Log(url, message):
+def Log(url, message, print_exception = True):
 	#Save Log
-	message = "Error on " + url + ": " +  str(message) + " " + get_line_exception()
+	message = "Error on " + url + ": " +  str(message)
+	
+	if print_exception:
+		message += " " + get_line_exception()
+		
 	log.msg(message, level=log.INFO)
 	
 def concatene_content(title, join_string = ' '):
@@ -130,4 +135,12 @@ def convert_to_number(string):
 		new_number = float(string)
 		return new_number
 		
-		
+"""
+	By Alex Martelli on stackoverflow.
+"""
+def most_common_oneliner(L):
+	result = max(groupby(sorted(L)), key=lambda(x, v):(len(list(v)),-L.index(x)))
+	if result:
+		return result[0]
+	return None
+	
