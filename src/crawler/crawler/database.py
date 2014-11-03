@@ -228,7 +228,8 @@ class Database:
 			util.PrintException()
 			return False
 		except:
-			print "Error on query", sys.exc_info()[0], self.cursor.query
+			
+			print "Error on query", sys.exc_info()[0], self.cursor.query, sql, parameters
 			util.PrintException()
 			return False
 		finally:
@@ -318,8 +319,12 @@ class Database:
 			return False;
 
 		value = []
-		for element in values:
-			value.append("%s")
+		for index, element in enumerate(values):
+			if(isinstance(element, collections.Iterable) and not isinstance(element, types.StringTypes)):
+				value.append(element[0])
+				values[index] = element[1]
+			else:
+				value.append("%s")
 		
 		if(length_columns > 0):
 			sql = "INSERT INTO {table} ({columns}) VALUES ({values});".format(table=table, columns = ",".join(columns), values=",".join(value))
@@ -347,11 +352,15 @@ class Database:
 		
 		value = []
 		for element in values:
-			value.append("%s")
+			if(isinstance(element, collections.Iterable) and not isinstance(element, types.StringTypes)):
+				value.append(element[0])
+				values[index] = element[1]
+			else:
+				value.append("%s")
 			
 		sql = "UPDATE {table} SET ({columns}) = ({values})".format(table=table, columns = ",".join(columns), values=",".join(value))
 		
-		if(where != None):
+		if where:
 			sql = sql + " WHERE " + where
 			for element in where_values:
 				values.append(element)
@@ -413,7 +422,7 @@ class Database:
 					else:
 						e = join_type[index]
 					join = join + " {join_type} JOIN {element} ON ({condition}) ".format(join_type=e, element=joins[index], condition=join_columns[index])
-				print columns
+				#print columns
 				column = ",".join(columns)
 				sql = "SELECT {column} FROM {table} {join} WHERE {condition}".format(column = column, table=table, condition=where, join=join)	
 			else:
@@ -492,7 +501,7 @@ class Database:
 				else:
 					e = join_type[index]
 				join = join + " {join_type} JOIN {element} ON ({condition}) ".format(join_type=e, element=element, condition=join_columns[index])
-			print columns
+			#print columns
 			column = ",".join(columns)
 			sql += "SELECT {columns} FROM recursive_table {recursive_alias} {join} {where} GROUP BY {columns_filtered}".format(columns=", ".join(columns), recursive_alias=recursive_alias,join=join, where=outside_where, columns_filtered = ", ".join(columns_filtered))	
 		else:
@@ -832,13 +841,13 @@ class Database:
 		
 		if(not number_type_id):
 			raise ValueError("Number type id cannot be empty on add_number method.")
-			
+
 		where_values = []
 		#check if already there is this number registered on database
 		if(type == 'release'):
 			#check if entity_id really exists
 			self.check_id_exists('entity_release', entity_id)
-			if(number_release_id != None):
+			if number_release_id:
 				where = "number = %s and number_release_id = %s and entity_release_id = %s and number_type_id = %s"
 				where_values.append(number)
 				where_values.append(number_release_id)
@@ -870,7 +879,7 @@ class Database:
 			value.append(number_type_id)
 			value.append(number)
 			
-			if(number_release_id != None):
+			if number_release_id:
 				columns.append('number_release_id')
 				value.append(number_release_id)
 				
@@ -1076,7 +1085,7 @@ class Database:
 		if(not description):
 			raise ValueError("Description cannot be empty on add_entity_synopse method.")
 		
-		print "Entity_synopsis"
+		#print "Entity_synopsis"
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -1133,7 +1142,6 @@ class Database:
 			
 			if romanize_subtitle:
 				self.add_alias(romanize_subtitle, entity_id, language_id, 'entity', self.alias_type_subromanized)
-			print "Romanized sub"
 			
 			for title in titles:
 				self.add_alias(title['title'], entity_id, title['language_id'], 'entity', self.alias_type_title)
@@ -1162,7 +1170,7 @@ class Database:
 				self.add_persona_to_entity(entity_id, persona['id'], persona['alias_id'], persona['first_appear'])
 			
 			for company in companies:
-				print company
+				#print company
 				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
 			
 			for people in peoples:
@@ -1203,7 +1211,7 @@ class Database:
 		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_edition method.")
 		
-		print "Edition"
+		#print "Edition"
 		#check if entity_id really exists
 		self.check_id_exists('entity', entity_id)
 		
@@ -1211,7 +1219,7 @@ class Database:
 		where_values = []
 		where_values.append(entity_id)
 		where_values.append(title)
-		if(code != None):
+		if code:
 			where.append('code')
 			where_values.append(code)
 			
@@ -1227,31 +1235,31 @@ class Database:
 			value.append(free)
 			value.append(censored)
 			
-			if(code != None):
+			if code:
 				columns.append('code')
 				value.append(code)			
-			if(complement_code != None):
+			if complement_code:
 				columns.append('complement_code')
 				value.append(complement_code)			
-			if(release_description != None):
+			if release_description:
 				columns.append('release_description')
 				value.append(release_description)			
-			if(height != None):
+			if height:
 				columns.append('height')
 				value.append(height)			
-			if(width != None):
+			if width:
 				columns.append('width')
 				value.append(width)	
-			if(depth != None):
+			if depth:
 				columns.append('depth')
 				value.append(depth)			
-			if(weight != None):
+			if weight:
 				columns.append('weight')
 				value.append(weight)		
-			if(event_id != None):
+			if event_id:
 				columns.append('event_id')
 				value.append(event_id)
-			if(subtitle != None):
+			if subtitle:
 				columns.append('subtitle')
 				value.append(subtitle)
 			
@@ -1354,7 +1362,7 @@ class Database:
 			value.append(print_type_id)
 			value.append(pages_number)
 			
-			if(chapters_number != None):
+			if chapters_number:
 				columns.append('chapters_number')
 				value.append(chapters_number)
 
@@ -1491,7 +1499,7 @@ class Database:
 		This method can be use to insert on entity_release table.
 		Only one release per file.
 	"""
-	def add_release(self, entity_id, release_type_id, country_id, entity_edition_id = None, release_date = None, description = None):
+	def add_release(self, entity_id, release_type_id, country_id, release_date = None, entity_edition_id = None, description = None):
 		if(not entity_id):
 			raise ValueError("entity_id cannot be empty on add_release method.")	
 		
@@ -1501,13 +1509,12 @@ class Database:
 		if(not country_id):
 			raise ValueError("country_id cannot be empty on add_release method.")	
 			
-		
-		print "Release"
 		#check if entity really exists
 		self.check_id_exists('entity', entity_id)
 		
 		table = 'entity_release'
 		
+		'''
 		where_values = []
 		where_values.append(entity_id)
 		where_values.append(release_type_id)
@@ -1516,6 +1523,8 @@ class Database:
 		
 		#id = self.get_id_from_field(table, ['entity_id','release_type_id','entity_edition_id','country_id'], where_values)
 		#if(id == None):
+		'''
+		
 		columns = ['entity_id','release_type_id','country_id']
 		value = []
 		value.append(entity_id)
@@ -1523,6 +1532,7 @@ class Database:
 		value.append(country_id)
 			
 		if entity_edition_id:
+			columns.append('entity_edition_id')
 			value.append(entity_edition_id)
 			
 		if description:
@@ -1531,9 +1541,14 @@ class Database:
 		
 		if release_date:
 			columns.append('release_date')
-			value.append(release_date) 
-				
-		self.insert(table, value, columns)
+			release = []
+			release.append('to_timestamp(%s)')
+			release.append(release_date)
+			value.append(release) 
+		
+		#print value, columns
+		
+		print self.insert(table, value, columns)
 				
 		id = self.get_last_insert_id(table)
 		if(id == 0):
@@ -1563,7 +1578,7 @@ class Database:
 			if(emulate != 0):
 				columns.append('emulate')
 				value.append(emulate)
-			if(installation_instructions != None):
+			if installation_instructions:
 				columns.append('installation_instructions')
 				value.append(installation_instructions)
 			
@@ -1595,13 +1610,13 @@ class Database:
 			value.append(name)
 			value.append(author_name)
 			
-			if(launch_date != None):
+			if launch_date:
 				columns.append('launch_date')
 				value.append(launch_date)
-			if(description != None):
+			if description:
 				columns.append('description')
 				value.append(description)
-			if(installation_instruction != None):
+			if installation_instruction:
 				columns.append('installation_instruction')
 				value.append(installation_instruction)
 			
@@ -1677,11 +1692,11 @@ class Database:
 				#register volume first.
 				volume_id = None
 				if number['parent']:
-					volume_id = self.add_number(release_id, number['parent_type'], 'release', number['parent'])
-		
+					volume_id = self.add_number(release_id, number['parent_type'], number['parent'])
+				#print volume_id
 				for chapter in number['child']:
 					self.add_number(release_id, number['child_type'], chapter, 'release', volume_id)
-					
+				
 			return True
 		except ValueError as e:
 			print e.message
@@ -1724,8 +1739,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			release_id = self.add_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description)
-			
+			release_id = self.add_release(entity_id, release_type_id, country_id, release_date, entity_edition_id, description)
 			#register numbers
 			self.add_release_number(release_id, numbers)
 			
@@ -1744,10 +1758,8 @@ class Database:
 			for image in images:
 				self.add_image_to_release(image['url'], image['extension'], image['name'], release_id)
 			
-			
 			#commit changes
 			self.commit()
-			
 			
 			return release_id
 		except ValueError as e:
@@ -1860,25 +1872,25 @@ class Database:
 		value = []
 		value.append(gender)
 			
-		if(blood_type_id != None):
+		if blood_type_id:
 			columns.append('blood_type_id')
 			value.append(blood_type_id)	
-		if(blood_rh_type_id != None):
+		if blood_rh_type_id:
 			columns.append('blood_rh_type_id')
 			value.append(blood_rh_type_id)
-		if(birthday != None):
+		if birthday:
 			columns.append('birthday')
 			value.append(birthday)
-		if(height != None):
+		if height:
 			columns.append('height')
 			value.append(height)
-		if(weight != None):
+		if weight:
 			columns.append('weight')
 			value.append(weight)
-		if(eyes_color != None):
+		if eyes_color:
 			columns.append('eyes_color')
 			value.append(eyes_color)
-		if(hair_color != None):
+		if hair_color:
 			columns.append('hair_color')
 			value.append(hair_color)
 		
@@ -1990,7 +2002,7 @@ class Database:
 		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_persona_items method.")
 			
-		print "persona to entity"
+		#print "persona to entity"
 		self.check_id_exists('entity', entity_id)
 		
 		table = 'persona_appear_on_entity'
@@ -2092,6 +2104,7 @@ class Database:
 		TODO: Use similarity instead equal on name.
 	"""
 	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None, update_id = None):
+		#print name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id
 		if(not name):
 			raise ValueError("Name cannot be empty on add_company method.")
 		
@@ -2110,22 +2123,22 @@ class Database:
 			value = []
 			value.append(name)
 			
-			if(country_origin_id != None):
+			if country_origin_id:
 				columns.append('country_id')
 				value.append(country_origin_id)
-			if(description != None):
+			if description:
 				columns.append('description')
 				value.append(description)
-			if(social_name != None):
+			if social_name:
 				columns.append('social_name')
 				value.append(social_name)
-			if(start_year != None):
+			if start_year:
 				columns.append('start_year')
 				value.append(start_year)
-			if(website != None):
+			if website:
 				columns.append('website')
 				value.append(website)
-			if(foundation_date != None):
+			if foundation_date:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 				
@@ -2136,7 +2149,7 @@ class Database:
 					raise ValueError("An error occurred while trying to update on add_company(%s, %s, %s, %s, %s, %s, %s, %s)." % (name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id))
 				id = update_id	
 			else:
-				self.insert('company', value, columns)
+				self.insert(table, value, columns)
 			
 				id = self.get_last_insert_id(table)
 				if(id == 0):
@@ -2204,15 +2217,17 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters images, editions, entities must have elements that are dict. 
 	"""		
-	def create_company(self, name, language_id, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None,
-	events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = [], update_id = None):	
+	def create_company(self, name, language_id, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None, events_sponsored = [], owned_collections = [], countries = [], socials = [], editions = [], entities = [], images = [], alternate_names = [], update_id = None):	
+		if not language_id:
+			raise ValueError("Language id cannot be empty on create_company method.")
 		
 		self.set_auto_transaction(False)
 		
 		try:
 			company_id = self.add_company(name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id)
 			
-			self.add_alias(name, company_id, language_id, 'company', self.alias_type_romanized)
+			if name:
+				self.add_alias(name, company_id, language_id, 'company', self.alias_type_romanized)
 			
 			#add events sponsored
 			for event_sponsored in events_sponsored:
@@ -2271,23 +2286,23 @@ class Database:
 		value = []
 		value.append(country_id)
 		
-		if(blood_type_id != None):
+		if blood_type_id:
 			columns.append('blood_type_id')
 			value.append(blood_type_id)
 			
-		if(blood_rh_type_id != None):
+		if blood_rh_type_id:
 			columns.append('blood_rh_type_id')
 			value.append(blood_rh_type_id)
 			
-		if(website != None):
+		if website:
 			columns.append('website')
 			value.append(website)
 			
-		if(description != None):
+		if description:
 			columns.append('description')
 			value.append(description)
 			
-		if(gender != None):
+		if gender:
 			if(gender == 'Male' or gender == 'Female'):
 				columns.append('gender')
 				value.append(gender)
@@ -2297,11 +2312,11 @@ class Database:
 				columns.append('gender')
 				value.append('Undefined')
 				
-		if(birth_place != None):
+		if birth_place:
 			columns.append('birth_place')
 			value.append(birth_place)	
 			
-		if(birth_date != None):
+		if birth_date:
 			columns.append('birth_date')
 			value.append(birth_date)
 			
@@ -2427,7 +2442,7 @@ class Database:
 		if(not entity_edition_id):
 			raise ValueError("People id cannot be empty on add_people_alias method.")
 			
-		print "relation people persona"
+		#print "relation people persona"
 		
 		self.check_id_exists('people', people_id)
 		self.check_id_exists('persona', persona_id)
@@ -2451,7 +2466,7 @@ class Database:
 			value.append(entity_id)
 			value.append(entity_edition_id)
 
-			if(observation != None):
+			if observation:
 				columns.append('observation')
 				value.append(observation)
 				
@@ -2583,7 +2598,7 @@ class Database:
 				self.add_relation_people_voice_persona(people_id, persona['id'], persona['language_id'], persona['entity_id'], persona['entity_edition_id'], persona['observation'], persona['numbers'])
 
 			for image in images:
-				self.add_image_to_people(self, image['url'], image['extension'], image['name'], people_id)
+				self.add_image_to_people(image['url'], image['extension'], image['name'], people_id)
 			
 			for social in socials:
 				self.create_social(social['type_id'], social['url'], 'people', people_id, social['last_checked'])
@@ -2784,7 +2799,7 @@ class Database:
 		value.append(stage_developer_type_id)
 		value.append(number)
 			
-		if(changelog != None):
+		if changelog:
 			columns.append('changelog')
 			value.append(changelog)
 			
@@ -2861,9 +2876,9 @@ class Database:
 		self.set_auto_transaction(False)
 		try:
 			version_id = add_version(self, stage_developer_type_id, number, changelog)
-			if(archive != None):
+			if archive:
 				self.create_archive(archive['name'], version_id, archive['url'], archive['size'], archive['extension'], archive['hashes'])
-			if(requirements != None):
+			if requirements:
 				self.create_requirements(version_id, requirements['video_board'], requirements['processor'], requirements['memory'], requirements['hd_storage'], requirements['drivers'])
 			
 			#associate version with entity specified on version_for_table
@@ -2900,7 +2915,8 @@ class Database:
 			columns = ['name']
 			value = []
 			value.append(name)
-			if(description != None):
+			
+			if description:
 				columns.append('description')
 				value.append(description)
 				
@@ -3047,7 +3063,7 @@ class Database:
 		self.check_id_exists('language', language_id)
 		
 		where_values = []
-		if(user_id != None):
+		if user_id:
 			where = ['audio_id','language_id','user_id','title','lyric_type_id']
 			where_values.append(audio_id)
 			where_values.append(language_id)
@@ -3073,7 +3089,7 @@ class Database:
 			value.append(title)
 			value.append(lyric)
 			
-			if(user_id != None):
+			if user_id:
 				columns.append('user_id')
 				value.append(user_id)
 			
@@ -3117,7 +3133,7 @@ class Database:
 		table = 'soundtrack'
 		
 		where_values = []
-		if(code != None):
+		if code:
 			where = ['soundtrack_type_id','name','launch_year','country_id','code']
 			where_values.append(type_id)
 			where_values.append(name)
@@ -3272,16 +3288,16 @@ class Database:
 		value.append(has_counterfeit)
 		value.append(collection_started)
 			
-		if(collection_id != None):
+		if collection_id:
 			columns.append('collection_id')
 			value.append(collection_id)
-		if(width != None):
+		if width:
 			columns.append('width')
 			value.append(width)
-		if(weight != None):
+		if weight:
 			columns.append('weight')
 			value.append(weight)
-		if(observation != None):
+		if observation:
 			columns.append('observation')
 			value.append(observation)
 		
@@ -3371,7 +3387,7 @@ class Database:
 			raise ValueError("Name cannot be empty on add_name_to_table method.")
 	
 		where_values = []
-		if(url != None):
+		if url:
 			where = ['name','url']
 			where_values.append(name)
 			where_values.append(url)
@@ -3385,7 +3401,7 @@ class Database:
 			columns = ['name']
 			value = []
 			value.append(name)
-			if(url != None):
+			if url:
 				columns.append('url')
 				value.append(url)
 			
@@ -3610,15 +3626,15 @@ class Database:
 			value.append(country_id)
 			value.append(free)
 			
-			if(location != None):
+			if location:
 				columns.append('location')
 				value.append(location)
 			
-			if(website != None):
+			if website:
 				columns.append('website')
 				value.append(website)
 			
-			if(duration != None):
+			if duration:
 				columns.append('duration')
 				value.append(duration)
 				
@@ -3696,15 +3712,15 @@ class Database:
 			value.append(name)
 			value.append(country_id)
 			
-			if(irc):
+			if irc:
 				columns.append('irc')
 				value.append(irc)
 			
-			if(description != None):
+			if description:
 				columns.append('description')
 				value.append(description)
 			
-			if(foundation_date != None):
+			if foundation_date:
 				columns.append('foundation_date')
 				value.append(foundation_date)
 			
@@ -3823,7 +3839,7 @@ class Database:
 		where_values = []
 		where_values.append(collaborator_id)
 		where_values.append(release_id)
-		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = %s and entity_release_id = %".format(first_table=first_table), where_values)
+		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = %s and entity_release_id = %s".format(first_table=first_table), where_values)
 		
 		if(id != None):
 			columns = [first_table + '_id', 'entity_release_id', first_table + '_type_id']
@@ -3945,13 +3961,14 @@ class Database:
 			value.append(name)
 			value.append(website)
 			
-			if(website_secure != None):
+			if website_secure:
 				columns.append('website_secure')
 				value.append(website_secure)
 			
-			insert = self.insert(table, value, columns)
+			#insert = self.insert(table, value, columns)
+			self.insert(table, value, columns)
 			id = self.get_last_insert_id(table)
-			print insert
+			#print insert
 			if(id == 0):
 				raise ValueError("There is no last insert id to return on add_social_type(%s, %s, %s)." % (name, website, website_secure))
 		return id	
@@ -3963,7 +3980,7 @@ class Database:
 	def create_social_type_from_url(self, website):
 		url = urlparse.urlparse(website)
 		new_url = []
-		print url
+		#print url
 		#Get name from domain
 		domain = re.sub(r'^ww[w0-9]{1,}.', '', url.netloc) 
 		domain = domain.split('.')
@@ -4042,7 +4059,7 @@ class Database:
 			value.append(social_id)
 			value.append(second_id)
 			
-			if(last_checked != None):
+			if last_checked:
 				columns.append('last_checked')
 				value.append(last_checked)
 
@@ -4071,7 +4088,7 @@ class Database:
 			
 		try:
 			social_id = self.add_social(social_type_id, url)
-			print "SSSSSSSocial ID", social_id
+			
 			self.add_relation_social(relation_table, social_id, second_id, last_checked)
 			
 			#commit changes
@@ -4265,7 +4282,7 @@ class Database:
 			value.append(read_status_type_id)
 			value.append(ownership_type_id)
 			
-			if(local_storage != None):
+			if local_storage:
 				columns.append('local_storage')
 				value.append(local_storage)
 				
@@ -4310,7 +4327,7 @@ class Database:
 			value.append(box_condition_type_id)
 			value.append(product_condition_type_id)
 		
-			if(observation != None):
+			if observation:
 				columns.append('observation')
 				value.append(observation)
 			
@@ -4584,7 +4601,7 @@ class Database:
 			for user_filter in user_filters:
 				self.create_user_filter(user_filter['name'], user_id, user_filter['type_id'], user_filter['elements'])
 			
-			if(photo_profile != None):
+			if photo_profile:
 				self.add_image_to_user(photo_profile['url'], photo_profile['extension'], photo_profile['name'], user_id, self.image_user_type_profile)
 			
 			#commit changes
@@ -4704,7 +4721,7 @@ class Database:
 			
 		code = []
 		code.append(language_code)
-		print "Language code", language_code
+		#print "Language code", language_code
 		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
 		countries = self.get_col('country_has_language as c', 'c.country_id', "language.code = %s", code, ['language'], ['c.language_id = language.id'])
 		if(countries != None):

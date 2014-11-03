@@ -7,7 +7,7 @@ from scrapy import log
 
 pattern_last_newline = re.compile(ur'\n$')
 pattern_last_bracket = re.compile(ur'\[$')
-pattern_number_range = re.compile(ur'^[0-9-]{1,}')
+pattern_number_range = re.compile(ur'^[^a-zA-Z .][0-9-]{1,}$')
 		
 """
 	Class for connection and manipulation of database.
@@ -47,18 +47,21 @@ def get_formatted_name(name, name_first = False):
 	name['lastname'] = name['lastname'].strip()
 	return name;
 	
-def PrintException():
+def get_line_exception():
 	exc_type, exc_obj, tb = sys.exc_info()
 	f = tb.tb_frame
 	lineno = tb.tb_lineno
 	filename = f.f_code.co_filename
 	linecache.checkcache(filename)
 	line = linecache.getline(filename, lineno, f.f_globals)
-	print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
+	return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
+	
+def PrintException():
+	print get_line_exception()
 	
 def Log(url, message):
 	#Save Log
-	message = "Error on " + url + ": " + message
+	message = "Error on " + url + ": " +  str(message) + " " + get_line_exception()
 	log.msg(message, level=log.INFO)
 	
 def concatene_content(title, join_string = ' '):
@@ -72,21 +75,26 @@ def concatene_content(title, join_string = ' '):
 	
 def sanitize_title(title):
 	#remove type from title.
-	title = concatene_content(title)
 	
+	title = concatene_content(title)
+	if not title:
+		return None
+		
 	#remove last newline with sub
 	title = re.sub(pattern_last_newline, '', title)
 	title = title.strip()
-	if(title == 'N/A'):
+	if 'N/A' in title:
+		return None
+	if '\r\n' == title:
 		return None
 	return title
 			
 def sanitize_content(description):
+	description = concatene_content(description, "\n")	
+
 	if not description:
 		return None
 		
-	description = concatene_content(title, "\n")	
-
 	#remove extra space. 
 	description = description.strip()
 	#remove last \n with sub.
@@ -101,20 +109,25 @@ def get_formatted_number(number):
 	numbers = []
 	#if is number or number range:
 	if(re.search(pattern_number_range, number) != None):
-		range = number.split("-")
-		if not isinstance(volume, types.StringTypes) and len(range) > 1:
-			for n in range(convert_to_number(range[0]), convert_to_number(range[1])):
-				numbers.append(n)
+		range = number.split("-", 1)
+		if not isinstance(range, types.StringTypes) and len(range) > 1:
+			try:
+				for n in range(convert_to_number(range[0]), convert_to_number(range[1])):
+					numbers.append(n)
+			except:
+				numbers.append(number)
 		else:
 			numbers.append(range[0])
 	else:#if is text return text
 		numbers.append(number)
-		
 	return numbers
 
 def convert_to_number(string):
 	try:
-        return int(string)
-    except ValueError:
-        return float(string)
+		new_number = int(string)
+		return new_number
+	except ValueError as e:
+		new_number = float(string)
+		return new_number
+		
 		

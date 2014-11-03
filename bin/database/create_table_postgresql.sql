@@ -1422,7 +1422,7 @@ CREATE TABLE IF NOT EXISTS entity_release (
   entity_id BIGINT  NOT NULL,
   release_type_id INTEGER  NOT NULL,
   country_id INTEGER  NOT NULL,
-  entity_edition_id INTEGER  NOT NULL,
+  entity_edition_id INTEGER NULL,
   description TEXT NULL,
   release_date timestamp without time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
@@ -1965,7 +1965,7 @@ CREATE TABLE IF NOT EXISTS number_edition (
 
 CREATE TABLE IF NOT EXISTS number_release (
   id SERIAL,
-  number_release_id INTEGER  NOT NULL,
+  number_release_id INTEGER NULL,
   entity_release_id BIGINT  NOT NULL,
   number_type_id INTEGER  NOT NULL,
   number VARCHAR  NOT NULL,
