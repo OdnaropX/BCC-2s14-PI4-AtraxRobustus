@@ -57,8 +57,11 @@ class Database:
 	alias_type_subromanized = 8 #Alias Romanized Subtitle
 	
 	entity_type_manga = 3
-	based_type_sequel_spinoff = 2
+	entity_type_lightnovel = 9
+	
 	based_type_doujin = 1
+	based_type_sequel_spinoff = 2
+	based_type_adapted_from = 5
 	
 	#Default image types registered
 	image_user_type_profile = 1
@@ -84,10 +87,17 @@ class Database:
 	entity_type_webnovel = 10
 	
 	company_function_type_publisher = 1
+	company_function_type_translator = 1
+	
+	collaborator_function_type_scanlator = 1
+	collaborator_function_type_fansub = 2
 	
 	people_relation_type_writer = 2 #author 
 	people_relation_type_illustrator = 1 #artist
  
+	release_type_chapter = 3
+	release_type_volume = 4
+	
 	pattern_remove_function = re.compile(ur'[a-zA-Z ]{1,}\(.*\)')
 	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
@@ -818,10 +828,10 @@ class Database:
 	"""
 	def add_number(self, entity_id, number_type_id, number, type = 'release', number_release_id = None):
 		if(not number):
-			raise ValueError("Number cannot be empty on add_edition_number method.")
+			raise ValueError("Number cannot be empty on add_number method.")
 		
 		if(not number_type_id):
-			raise ValueError("Number type id cannot be empty on add_edition_number method.")
+			raise ValueError("Number type id cannot be empty on add_number method.")
 			
 		where_values = []
 		#check if already there is this number registered on database
@@ -842,6 +852,7 @@ class Database:
 		else:
 			#check if entity_id really exists
 			self.check_id_exists('entity_edition', entity_id)
+			
 			where = "number = %s and entity_edition_id = %s and number_type_id = %s"
 			where_values.append(number)
 			where_values.append(entity_id)
@@ -850,6 +861,7 @@ class Database:
 		table = 'number_' + type
 		
 		id = self.get_var(table, ['id'], where, where_values)
+		
 		if(id == None):
 			#register
 			columns = ['entity_'+ type +'_id', 'number_type_id', 'number']
@@ -1477,8 +1489,9 @@ class Database:
 	"""
 		Method used to insert a entity release. This method don't insert any related item to entity like number or languages.
 		This method can be use to insert on entity_release table.
+		Only one release per file.
 	"""
-	def add_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None):
+	def add_release(self, entity_id, release_type_id, country_id, entity_edition_id = None, release_date = None, description = None):
 		if(not entity_id):
 			raise ValueError("entity_id cannot be empty on add_release method.")	
 		
@@ -1488,8 +1501,6 @@ class Database:
 		if(not country_id):
 			raise ValueError("country_id cannot be empty on add_release method.")	
 			
-		if(not entity_edition_id):
-			raise ValueError("entity_edition_id cannot be empty on add_release method.")
 		
 		print "Release"
 		#check if entity really exists
@@ -1502,26 +1513,31 @@ class Database:
 		where_values.append(release_type_id)
 		where_values.append(entity_edition_id)
 		where_values.append(country_id)
-		id = self.get_id_from_field(table, ['entity_id','release_type_id','entity_edition_id','country_id'], where_values)
-		if(id == None):
-			columns = ['entity_id','release_type_id','country_id','entity_edition_id','description','release_date']
-			value = []
-			value.append(entity_id)
-			value.append(release_type_id)
-			value.append(country_id)
+		
+		#id = self.get_id_from_field(table, ['entity_id','release_type_id','entity_edition_id','country_id'], where_values)
+		#if(id == None):
+		columns = ['entity_id','release_type_id','country_id']
+		value = []
+		value.append(entity_id)
+		value.append(release_type_id)
+		value.append(country_id)
+			
+		if entity_edition_id:
 			value.append(entity_edition_id)
-			if(description != None):
-				columns.append('description')
-				value.append(description)
-			if(release_date != None):
-				columns.append('release_date')
-				value.append(release_date) 
+			
+		if description:
+			columns.append('description')
+			value.append(description)
+		
+		if release_date:
+			columns.append('release_date')
+			value.append(release_date) 
 				
-			self.insert(table, value, columns)
+		self.insert(table, value, columns)
 				
-			id = self.get_last_insert_id(table)
-			if(id == 0):
-				raise ValueError("There is no last insert id to return on add_release(%s, %s, %s, %s, %s, %s, %s)." % (entity_id, release_type_id, country_id, entity_edition_id, release_date, description, update_id))
+		id = self.get_last_insert_id(table)
+		if(id == 0):
+			raise ValueError("There is no last insert id to return on add_release(%s, %s, %s, %s, %s, %s, %s)." % (entity_id, release_type_id, country_id, entity_edition_id, release_date, description, update_id))
 		return id
 		
 	"""
@@ -1650,8 +1666,8 @@ class Database:
 		e.g. Volume 1 Chapter 1-4 or Season 4 Episode 89-102. 
 	"""
 	def add_release_number(self, release_id, numbers):
-		if(not release_id):
-			raise ValueError("Edition id cannot be empty on add_edition_number method.")
+		if not release_id:
+			raise ValueError("Release id cannot be empty on add_release_number method.")
 			
 		#set commit to false.
 		self.set_auto_transaction(False)
@@ -1660,11 +1676,11 @@ class Database:
 			for number in numbers:
 				#register volume first.
 				volume_id = None
-				if(number['parent'] != ""):
-					volume_id = add_number(release_id, number['parent_type'], 'edition', number['parent'])
+				if number['parent']:
+					volume_id = self.add_number(release_id, number['parent_type'], 'release', number['parent'])
 		
 				for chapter in number['child']:
-					add_number(release_id, number['child_type'], chapter, 'release', volume_id)
+					self.add_number(release_id, number['child_type'], chapter, 'release', volume_id)
 					
 			return True
 		except ValueError as e:
@@ -1695,19 +1711,23 @@ class Database:
 		
 		To use this method the types must be already registered on database.
 		The parameters numbers,collaborators and collaborator_members must have elements that are dict.
-		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method. 
+		Please use only a release per file. If your file contains more than a chapter you can add multiples with this method.
+			
+		One release for each file.
+		
+		Release number must be the same amount on release file, e.g, release chapter 1 and 2 on file release 1, so number must be 1-2 to release 1, case release chapter 1 and 2 on each separated file the release must be one for each file.  
 	"""
-	def create_release(self, entity_id, release_type_id, country_id, entity_edition_id, release_date = None, description = None,
+	def create_release(self, entity_id, release_type_id, country_id, release_date = None, entity_edition_id = None, description = None,
 	numbers = [], languages_id = [], collaborators = [], collaborator_members = [], images = []):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			release_id = add_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description)
+			release_id = self.add_release(entity_id, release_type_id, country_id, entity_edition_id, release_date, description)
 			
 			#register numbers
-			add_release_number(release_id, numbers)
+			self.add_release_number(release_id, numbers)
 			
 			#register languages
 			for language in languages_id:
@@ -1715,11 +1735,11 @@ class Database:
 			
 			#register collaborator
 			for collaborator in collaborators:
-				add_relation_collaborator_release(collaborator['id'], release_id, collaborator['function_type_id'], 'collaborator')
+				self.add_relation_collaborator_release(collaborator['id'], release_id, collaborator['function_type_id'], 'collaborator')
 				
 			#register collaborator members
 			for member in collaborator_members:
-				add_relation_collaborator_release(member['id'], release_id, member['function_type_id'], 'collaborator_member', 'produces')
+				self.add_relation_collaborator_release(member['id'], release_id, member['function_type_id'], 'collaborator_member', 'produces')
 			
 			for image in images:
 				self.add_image_to_release(image['url'], image['extension'], image['name'], release_id)
@@ -1893,6 +1913,7 @@ class Database:
 		self.check_id_exists('persona', persona_id)
 		
 		table = 'persona_' + item_table
+		
 		where_values = []
 		where_values.append(name)
 		where_values.append(persona_id)

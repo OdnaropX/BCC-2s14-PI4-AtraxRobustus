@@ -7,6 +7,7 @@ from scrapy import log
 
 pattern_last_newline = re.compile(ur'\n$')
 pattern_last_bracket = re.compile(ur'\[$')
+pattern_number_range = re.compile(ur'^[0-9-]{1,}')
 		
 """
 	Class for connection and manipulation of database.
@@ -57,14 +58,22 @@ def PrintException():
 	
 def Log(url, message):
 	#Save Log
-	message = url + ": " + message
+	message = "Error on " + url + ": " + message
 	log.msg(message, level=log.INFO)
+	
+def concatene_content(title, join_string = ' '):
+	if not title:
+		return None
+		
+	if(isinstance(title, collections.Iterable) and not isinstance(title, types.StringTypes)):
+		title = join_string.join(title)
+		
+	return title
 	
 def sanitize_title(title):
 	#remove type from title.
-			
-	if(isinstance(title, collections.Iterable) and not isinstance(title, types.StringTypes)):
-		title = " ".join(title)
+	title = concatene_content(title)
+	
 	#remove last newline with sub
 	title = re.sub(pattern_last_newline, '', title)
 	title = title.strip()
@@ -76,9 +85,8 @@ def sanitize_content(description):
 	if not description:
 		return None
 		
-	#if description is list join.
-	if(isinstance(description, collections.Iterable) and not isinstance(description, types.StringTypes)):
-		description = "\n".join(description)
+	description = concatene_content(title, "\n")	
+
 	#remove extra space. 
 	description = description.strip()
 	#remove last \n with sub.
@@ -88,3 +96,25 @@ def sanitize_content(description):
 	if(description == 'N/A'):
 		return None
 	return description
+	
+def get_formatted_number(number):
+	numbers = []
+	#if is number or number range:
+	if(re.search(pattern_number_range, number) != None):
+		range = number.split("-")
+		if not isinstance(volume, types.StringTypes) and len(range) > 1:
+			for n in range(convert_to_number(range[0]), convert_to_number(range[1])):
+				numbers.append(n)
+		else:
+			numbers.append(range[0])
+	else:#if is text return text
+		numbers.append(number)
+		
+	return numbers
+
+def convert_to_number(string):
+	try:
+        return int(string)
+    except ValueError:
+        return float(string)
+		

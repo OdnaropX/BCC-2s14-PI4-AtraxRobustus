@@ -267,6 +267,7 @@ INSERT INTO collaborator_type ( id, name) VALUES (2, 'Fansub');
 INSERT INTO collaborator_type ( id, name) VALUES (3, 'Translator');
 INSERT INTO collaborator_type ( id, name) VALUES (4, 'Game Modder');
 INSERT INTO collaborator_type ( id, name) VALUES (5, 'Game Releaser');
+INSERT INTO collaborator_type ( id, name) VALUES (6, 'Raw provider');
 
 INSERT INTO media_type ( id, name ) VALUES(1,'Disk Floppy');
 INSERT INTO media_type ( id, name ) VALUES(2,'CD');
@@ -984,12 +985,13 @@ INSERT INTO currency ( id, name, symbol, code, number) VALUES(180,'Zambian kwach
 INSERT INTO currency ( id, name, symbol, code, number) VALUES(181,'Zimbabwe dollar',NULL,'ZWD','932');
 
 INSERT INTO based_type ( id, name) VALUES(1,'Doujinshi');
-INSERT INTO based_type ( id, name) VALUES(2,'Spin-off');
+INSERT INTO based_type ( id, name) VALUES(2,'Spin-Off');
 INSERT INTO based_type ( id, name) VALUES(3,'Prequel');
 INSERT INTO based_type ( id, name) VALUES(4,'Sequel');
+INSERT INTO based_type ( id, name) VALUES(5,'Adapted From');
 /* Relation that may not be part of the collection */
-INSERT INTO based_type ( id, name) VALUES(5,'Fan composition');
-INSERT INTO based_type ( id, name) VALUES(6,'Lousy based');
+INSERT INTO based_type ( id, name) VALUES(6,'Fan composition');
+INSERT INTO based_type ( id, name) VALUES(7,'Lousy based');
 
 INSERT INTO stage_developer_type ( id, name) VALUES(1,'Pre Alpha');
 INSERT INTO stage_developer_type ( id, name) VALUES(2,'Alpha');

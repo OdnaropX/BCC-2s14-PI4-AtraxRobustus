@@ -239,7 +239,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 				
 			try:
-				for index in range(len(series)):
+				for index, serie in enumerate(series):
 					#Get series id from spider_item, if there isn't create dummy.
 					series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
 					if not series_id:
@@ -252,7 +252,7 @@ class MangaUpdatesSpider(CrawlSpider):
 						
 					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'tag')
 					
-					#Change type to Web Novel if there category is Web Novel
+					#Change type to Webtoons if there category is Webtoons
 					#if 'Web Novel' in category:
 			
 			except ValueError as e:

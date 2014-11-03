@@ -367,7 +367,7 @@ class MangaUpdatesSpider(CrawlSpider):
 				if birth_place:
 					country = []
 					country.append(birth_place)
-					country_id = self.dbase.get_var('country', ['id'], "%s LIKE name = '%' || name || '%'", country)
+					country_id = self.dbase.get_var('country', ['id'], "%s LIKE '%' || name || '%'", country)
 					if(country_id == None):
 						#check native name.
 						if natives:
