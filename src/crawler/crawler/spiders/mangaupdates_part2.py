@@ -19,8 +19,8 @@ import calendar
 class MangaUpdatesSpider(CrawlSpider):
 		name = "mangaupdates_part2"
 		allowed_domains = ["www.mangaupdates.com"]
-		start_urls = [#"http://www.mangaupdates.com/series.html?page=1&"
-		"https://www.mangaupdates.com/releases.html?search=4757&stype=series"
+		start_urls = ["http://www.mangaupdates.com/series.html?page=1&"
+		#"https://www.mangaupdates.com/releases.html?search=4757&stype=series"#line for test only.
 		]
 		dbase = None
 		login_page = 'http://www.mangaupdates.com/login.html'
@@ -252,7 +252,7 @@ class MangaUpdatesSpider(CrawlSpider):
 				elif(type == 'Manhua'):
 					entity_type_id = self.dbase.entity_type_manhua
 					country_id = self.dbase.country_cn
-					language_id = self.dbase.language_zn
+					language_id = self.dbase.language_zh
 				elif(type == 'Novel'):
 					new_status = " ".join(status)
 						
@@ -521,7 +521,7 @@ class MangaUpdatesSpider(CrawlSpider):
 							language_test['ja'] += 1
 						elif title['language_id'] == self.dbase.language_ko:
 							language_test['ko'] += 1
-						elif title['language_id'] == self.dbase.language_zn:
+						elif title['language_id'] == self.dbase.language_zh:
 							language_test['zn'] += 1
 					
 					if(language_test['ja'] == language_test['ko'] and language_test['ko'] == language_test['zn']):
@@ -533,7 +533,7 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				if not language_id:
 					if language:
-						languages = {'ja': self.dbase.language_ja, 'ko': self.dbase.language_ko, 'zn': self.dbase.language_zn}
+						languages = {'ja': self.dbase.language_ja, 'ko': self.dbase.language_ko, 'zn': self.dbase.language_zh}
 						language_id = languages[language]
 					else:
 						language_id = self.dbase.language_ja
@@ -644,7 +644,7 @@ class MangaUpdatesSpider(CrawlSpider):
 					#Check if name is similar to another collection already registered. Only check if name is larger then 3 characters.
 					#This method can have mismatch collection names and collections will need to be check after all items was crawled using get_related_item.
 					if(len(romanized_title) > 3):
-						collection_id = self.dbase.get_col('collection', 'id', "%s LIKE '%' || name || '%'", series_name)
+						collection_id = self.dbase.get_col('collection', 'id', "%s LIKE '%%' || name || '%%'", series_name)
 					
 						if not collection_id:
 							#create new collection with the first name type, get firstname part using regex.
@@ -753,10 +753,10 @@ class MangaUpdatesSpider(CrawlSpider):
 				release = {}
 				
 				#Get release date from row
-				date = row.css('td:nth-child(1)::text').extract()
-				if date:
-					date = date[0]
-				release['date'] = date
+				release_date = row.css('td:nth-child(1)::text').extract()
+				if release_date:
+					release_date = release_date[0]
+				release['date'] = release_date
 				
 				#Get release series from row
 				url = row.css('td:nth-child(2) a::attr(href)').extract()
@@ -793,7 +793,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			
 			try:
 				#Format and save releases
-				
+				self.dbase.set_auto_transaction(False)
+			
 				for index, release in enumerate(releases):
 					
 					#Format entity_id
@@ -801,7 +802,7 @@ class MangaUpdatesSpider(CrawlSpider):
 					
 					if release['serie_url']:
 						#get id from spider_item
-						dummy_id = self.dbase.get_spider_item(release['serie_url'], 'entity')
+						dummy_id = self.dbase.get_spider_item_id(release['serie_url'], 'entity')
 						
 					if not dummy_id:
 						dummy_name = util.sanitize_title(release['serie_url_text'])
@@ -809,13 +810,13 @@ class MangaUpdatesSpider(CrawlSpider):
 							dummy_name = util.sanitize_title(release['serie_text'])
 							
 						if not dummy_name:
-							util.Log(response.url, "Cannot get name of release line %" % (index + 1))
+							util.Log(response.url, "Cannot get name of release line %s" % (index + 1))
 							return
 						else:
 							#get id from name
 							where_values = []
 							where_values.append(dummy_name)
-							dummy_id = self.get_var('entity_alias', ['entity_id'], "name = %s", where_values)
+							dummy_id = self.dbase.get_var('entity_alias', ['entity_id'], "name = %s", where_values)
 						
 						if not dummy_id:
 							if(re.search(self.pattern_doujin,dummy_name) != None):
@@ -870,90 +871,70 @@ class MangaUpdatesSpider(CrawlSpider):
 						collaborators.append(collaborator)
 						
 					#Format release date
+					new_date = []
 					if release['date']:
-						date = release['date'].split("/")
-						if len(date) == 3:
-							new_date = []
-							new_date[0] = date[1]
-							new_date[1] = date[0]
-							new_date[2] = "20" + date[2]
-						else:
-							new_date = "01/01/1999".split("/")
-					else:
-						new_date = "01/01/1999".split("/")
+						ndate = release['date'].split("/")
+						if len(ndate) == 3:
+							new_date.append(2000 + util.convert_to_number(ndate[2]))
+							new_date.append(util.convert_to_number(ndate[0]))
+							new_date.append(util.convert_to_number(ndate[1]))
+						
+					if not new_date:
+						new_date.append(1999)
+						new_date.append(1)
+						new_date.append(1)
 					
-					date_object = date(*map(int, reversed(new_date)))
+					date_object = date(new_date[0],new_date[1], new_date[2])
 					timestamp = calendar.timegm(date_object.timetuple())
-
-
+					
 					saved = False
 					#Format release number. Probability is higher that the chapter and volume is not null. 
 					numbers = []
-					if release['chapter_number'] and release['volume_number']:
-						volumes = release['volume_number'].split(' ')
-						chapters = release['chapter_number'].split(' ')
-						
-						if len(volumes) != len(chapters):
-						
-						else:
-							for index, vol in enumerate(volumes):
-								volume = util.get_formatted_number(vol)
-								
-							
-							not isinstance(volume, types.StringTypes) and len(volumes) > 1:
-							#will need to make a release for each volume and get release separate by space.
-							volumes = get_formatted_number(volumes)
-							for vol in volumes:
-								#Save volumes and the volumes chapter.
-							saved = True
-						else:
-							#Only a release for one volume if there ins't space on chapters.
-							
-										
-					elif release['chapter_number'] and not release['volume_number']:
-						 chapters = release['chapter_number'].split(' ')
-						 if not isinstance(volume, types.StringTypes) and len(volume) > 1:
-							#will need to make a release for each chapter
-						
-						#will need to make a release for each chapter
-						saved = True
 					
-					
-					elif not release['chapter_number'] and release['volume_number']:
-						#if there is space, can be more then one volume. One release per volume.
-						
-						#If volume is equal to number or range
-						if(re.seach()):
-						
-						else:
-							
-							if(release['volume_number'] == "Oneshot"):
-					
-					#else: #Release has not number, usually doujinshi has no number.
-						
+					if release['chapter_number']:
 						number = {}
-						number['parent'] = None
-						number['parent_type'] = #Volume
-						number['child'] = [] #list of itens
-						number['child_type'] = number_type_id
+						number['parent'] = release['volume_number']
+						number['parent_type'] = self.dbase.release_type_volume #1
+						number['child'] = util.get_formatted_number(release['chapter_number']) #list of itens
+						number['child_type'] = self.dbase.release_type_chapter						
 						numbers.append(number)
-					
+					elif release['volume_number']:
+						volumes = util.get_formatted_number(release['volume_number'])
+						for vol in volumes:
+							child = []
+							child.append(vol)
+							
+							number = {}
+							number['parent'] = None
+							number['child'] = child #list of itens
+							number['child_type'] = self.dbase.release_type_volume
+							
+							numbers = []
+							numbers.append(number)
+							
+							#Save release of volume.
+							self.dbase.create_release(entity_id, release_type_id, country_id, timestamp, None, None, numbers, languages, collaborators)
+							saved = True
+					#else: #Release has not number, usually doujinshi has no number, so this will be in blank so numbers is equal to empty [].				
+
 					if not saved:
 						#Save releases
-						self.dbase.create_release(entity_id, release_type_id, country_id, None, timestamp, None, numbers, languages, collaborators, [], [])
+						self.dbase.create_release(entity_id, release_type_id, country_id, timestamp, None, None, numbers, languages, collaborators)
 				
-				print "Success"
 				self.dbase.commit()
-				
+				print "Success"
 			except ValueError as e:
-				print self.dbase.last_error
-				print self.dbase.status_message
-				print self.dbase.last_query
+				self.dbase.rollback()
+				print "Error on save Release", e.message
+				util.PrintException()
+				util.Log(response.url, e.message)
 			except:
-				print "Unknown exception"
+				self.dbase.rollback()
+				print "Error on save Release", sys.exc_info()[0]
 				util.PrintException()
 				util.Log(response.url, sys.exc_info()[0])
+			finally:
+				self.dbase.set_auto_transaction(True)
 				
 			if(next_url):
-				print "Next url", next_url[0]
-				Request(url=next_url[0],callback=self.parse_series_releases, meta=meta)
+				Request(url=next_url[0],callback=self.parse_series_releases)

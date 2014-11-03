@@ -23,9 +23,9 @@ class MangaUpdatesSpider(CrawlSpider):
 			Domain list that are allowed to be followed and parsed.
 		"""
 		allowed_domains = ["www.mangaupdates.com"]
-		start_urls = ["http://www.mangaupdates.com/groups.html?page=1&",
+		start_urls = [#"http://www.mangaupdates.com/groups.html?page=1&",
 		"http://www.mangaupdates.com/authors.html?page=1&",
-		"http://www.mangaupdates.com/publishers.html?page=1&",
+		#"http://www.mangaupdates.com/publishers.html?page=1&",
 		]
 		dbase = None
 		groups = None
@@ -41,7 +41,7 @@ class MangaUpdatesSpider(CrawlSpider):
 		#Follow
 		Rule(LinkExtractor(allow=['groups\.html\?page=[0-9]{1,}?'])),
 		#Follow
-		Rule(LinkExtractor(allow=('authors\.html\?page=[0-9]{1,}?'), deny=('genre'))),
+		Rule(LinkExtractor(allow=('authors\.html\?page=[0-9]{1,}?'), deny=('genre','orderby'))),
 		#Parse id.
 		Rule(LinkExtractor(allow=('id=',
 		), deny=('members')), callback='parse_items', follow=False)
@@ -201,7 +201,6 @@ class MangaUpdatesSpider(CrawlSpider):
 			try:
 				#Format name
 				name = util.sanitize_title(name[0])
-				print "Parse groups: ", name
 			
 				#Format country
 				country_id = self.dbase.country_us
@@ -324,7 +323,6 @@ class MangaUpdatesSpider(CrawlSpider):
 			website = response.css('#main_content > table table table table td:nth-child(3) > table tr:nth-child(14) > td a::attr(href)').extract()
 				
 			try:
-				print "Romanized", romanized_name[0]
 				#Format romanized_name
 				name = util.get_formatted_name(romanized_name[0])
 				
@@ -367,7 +365,7 @@ class MangaUpdatesSpider(CrawlSpider):
 				if birth_place:
 					country = []
 					country.append(birth_place)
-					country_id = self.dbase.get_var('country', ['id'], "%s LIKE '%' || name || '%'", country)
+					country_id = self.dbase.get_var('country', ['id'], "%s LIKE '%%' || name || '%%'", country)
 					if(country_id == None):
 						#check native name.
 						if natives:
@@ -423,7 +421,6 @@ class MangaUpdatesSpider(CrawlSpider):
 				if website:
 					website = website[0]
 				
-				print "Website", website
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Author", e.message
 				util.PrintException()
@@ -481,9 +478,9 @@ class MangaUpdatesSpider(CrawlSpider):
 	
 			#Get type for country origin
 			type = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(1) > table tr:nth-child(5) > td:nth-child(1)::text').extract()
-					
+			
 			#Get alternated names
-			alternate_name = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(1) > table tr:nth-child(2) > td:nth-child(1)').extract()
+			alternate_name = response.css('#main_content table table table table tr:nth-child(4) > td:nth-child(1) > table tr:nth-child(2) > td:nth-child(1)::text').extract()
 				
 			#Get website
 			website = response.css('#main_content table table table table table tr:nth-child(5) > td:nth-child(1) a::attr(href)').extract()
@@ -493,32 +490,40 @@ class MangaUpdatesSpider(CrawlSpider):
 			
 			try:
 				#Format romanized_name
-				name = util.sanitize_title(romanized_name[0])
-				print "Parse publisher: ", name
+				if romanized_name:
+					name = util.sanitize_title(romanized_name[0])
+				else:
+					util.Log(response.url, "Cannot save romanized name on publisher.")
+				#print "Parse publisher: ", name
 			
 				#Format alias
 				aliases = []
 				for alternate in alternate_name:
-					code = []
-					code.append(langid.classify(alternate)[0])
-					language = self.dbase.get_var('language', ['id'], "code = %s", code)
-					if(language == None):
-						language = self.dbase.language_ja
-					alias = {}
-					alias['name'] = util.sanitize_title(alternate)
-					alias['language_id'] = language
-					aliases.append(alias)
+					new_alias = util.sanitize_title(alternate)
+					if new_alias:
+						code = []
+						code.append(langid.classify(alternate)[0])
+						language = self.dbase.get_var('language', ['id'], "code = %s", code)
+						if(language == None):
+							language = self.dbase.language_ja
+						alias = {}
+						alias['name'] = new_alias
+						alias['language_id'] = language
+						aliases.append(alias)
 				
 				use_alias = False
 				
 				language_id = None
+				language = None
 				country_origin_id = None 
 				#Format country_origin_id
-				type = util.sanitize_title(type[0])
+				if type:
+					type = util.sanitize_title(type[0])
+					
 				if(type):
 					if 'English' in type:
 						country_origin_id = self.dbase.country_us
-						language_id - self.dbase.language_en
+						language_id = self.dbase.language_en
 					elif type != '--':						
 						lang = []
 						lang.append(type)
@@ -535,23 +540,27 @@ class MangaUpdatesSpider(CrawlSpider):
 							language_test['ja'] += 1
 						elif title['language_id'] == self.dbase.language_ko:
 							language_test['ko'] += 1
-						elif title['language_id'] == self.dbase.language_zn:
+						elif title['language_id'] == self.dbase.language_zh:
 							language_test['zn'] += 1
 					
 					if(language_test['ja'] == language_test['ko'] and language_test['ko'] == language_test['zn']):
 						language_id = language_country['ja']
 					else:
 						language, value = max(language_test.iteritems(), key=lambda x: x[1])
-						language_id =  self.dbase.get_var('language', ['id'], "code = %s", language)
+						code = []
+						code.append(language)
+						language_id =  self.dbase.get_var('language', ['id'], "code = %s", code)
 					
-					country_origin_id = language_country[language]
-					print "Here country id:", country_origin_id 
+					if language:
+						country_origin_id = language_country[language]
+					else:	
+						country_origin_id = self.dbase.get_country_from_language_id(language_id, self.dbase.country_jp)
 					
 				if not language_id:
 					language_id = self.dbase.get_language_from_country_id(country_origin_id, self.dbase.language_en)
 					
 				#Format website
-				if(website):
+				if website:
 					website = util.sanitize_title(website[0])
 						
 				#Format comments
@@ -569,8 +578,8 @@ class MangaUpdatesSpider(CrawlSpider):
 				return
 				
 			try:
-				print "Country id", country_origin_id
 				self.dbase.set_auto_transaction(False)
+				#print name, language_id, country_origin_id, website, aliases, update_id
 				company_id = self.dbase.create_company(name, language_id, country_origin_id, None, None, None, website, None, [], [], [], [], [], [], [], aliases, update_id)	
 				if comments:
 					self.dbase.add_comment('Crawler note', comments, 1, company_id, 'company')
@@ -587,7 +596,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			except:
 				self.dbase.rollback()
 				print "Error on save Publisher", sys.exc_info()[0]
-				util.PrintException()
+				print name, type, alternate_name, aliases, website, comments
+				#util.PrintException()
 				util.Log(response.url, sys.exc_info()[0])
 			finally:
 				self.dbase.set_auto_transaction(True)
