@@ -1328,7 +1328,7 @@ CREATE TABLE IF NOT EXISTS persona_related_persona (
   persona_id INTEGER  NOT NULL,
   another_persona_id INTEGER  NOT NULL,
   related_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(persona_id, another_persona_id),
+  PRIMARY KEY(persona_id, another_persona_id, related_type_id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
@@ -1348,7 +1348,7 @@ CREATE TABLE IF NOT EXISTS entity_based_entity (
   entity_id BIGINT  NOT NULL,
   another_entity_id INTEGER  NOT NULL,
   based_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(entity_id, another_entity_id),
+  PRIMARY KEY(entity_id, another_entity_id, based_type_id),
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE SET NULL
