@@ -1752,8 +1752,10 @@ class Database:
 			
 			#register collaborator
 			for collaborator in collaborators:
+				print "added", collaborator 
 				self.add_relation_collaborator_release(collaborator['id'], release_id, collaborator['function_type_id'], 'collaborator')
-				
+					
+			
 			#register collaborator members
 			for member in collaborator_members:
 				self.add_relation_collaborator_release(member['id'], release_id, member['function_type_id'], 'collaborator_member', 'produces')
@@ -3846,9 +3848,10 @@ class Database:
 		where_values = []
 		where_values.append(collaborator_id)
 		where_values.append(release_id)
-		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = %s and entity_release_id = %s".format(first_table=first_table), where_values)
+		where_values.append(function_type_id)
+		id = self.get_var(table, ['collaborator_id'], "{first_table}_id = %s and entity_release_id = %s and {first_table}_type_id = %s".format(first_table=first_table), where_values)
 		
-		if(id != None):
+		if(id == None):
 			columns = [first_table + '_id', 'entity_release_id', first_table + '_type_id']
 			value = []
 			value.append(collaborator_id)
