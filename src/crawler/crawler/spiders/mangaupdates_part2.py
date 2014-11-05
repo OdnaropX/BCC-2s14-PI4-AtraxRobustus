@@ -21,14 +21,13 @@ class MangaUpdatesSpider(CrawlSpider):
 		name = "mangaupdates_part2"
 		allowed_domains = ["www.mangaupdates.com"]
 		start_urls = ["http://www.mangaupdates.com/series.html?page=1&"
-		#"https://www.mangaupdates.com/releases.html?search=4757&stype=series"#line for test only.
 		]
 		dbase = None
 		login_page = 'http://www.mangaupdates.com/login.html'
 		
 		rules = (
 		#Follow
-		Rule(LinkExtractor(allow=('series\.html\?page=[0-9]{1,}?'), deny=('letter', 'orderby', 'filter', 'categories', 'act'))),
+		Rule(LinkExtractor(allow=('series\.html\?page=[0-9]{1,}?'), deny=('method','members', 'orderby','asc=asc', 'letter', 'orderby', 'filter', 'categories', 'act'))),
 		#Parse id and series release. Series release page will be add from request on series parse. 
 		Rule(LinkExtractor(allow=('id=',
 		#Parse release from request on demand items
@@ -112,11 +111,11 @@ class MangaUpdatesSpider(CrawlSpider):
 			#print "Initialized database and parse"
 			if(re.search(self.pattern_series, response.url) != None):
 				#Parse Series.
-				self.parse_series(response)
+				return self.parse_series(response)
 		
 			elif(re.search(self.pattern_series_releases, response.url) != None):
 				#Parse Groups.
-				self.parse_series_releases(response)
+				return self.parse_series_releases(response)
 					
 
 		"""
@@ -189,7 +188,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			anime_start_end = response.css('div.sContainer:nth-child(3) > div:nth-child(1) > div:nth-child(26)::text').extract()
 
 			#Get releases
-			releases = response.css('div.sContainer:nth-child(3) > div:nth-child(1) > div:nth-child(17) [rel=nofollow]::attr(href)').extract()
+			releases = response.css('div.sContainer:nth-child(3) > div:nth-child(1) > div:nth-child(17) a[rel=nofollow]::attr(href)').extract()
 
 			#Get image
 			images = response.css('div.sContainer:nth-child(4) > div:nth-child(1) > div center img::attr(src)').extract()
@@ -197,7 +196,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			#Get partial categories
 			categories = response.css('li.tag_normal a::text').extract()
 			
-			try:		
+			try:	
+			
 				#format romanized title
 				romanized_title = util.sanitize_title(romanized_title[0])
 				
@@ -281,7 +281,11 @@ class MangaUpdatesSpider(CrawlSpider):
 					add_dummy = False
 					if 'add_author' in url:
 						#Add dummy author
-						people_name = util.get_formatted_name(util.sanitize_content(author_alias_text[index]))
+						try:
+							people_name = util.get_formatted_name(util.sanitize_content(author_alias_text[index]))
+						except IndexError as e:
+							people_name = None
+							
 						if people_name:
 							add_dummy = True
 						else:
@@ -336,7 +340,11 @@ class MangaUpdatesSpider(CrawlSpider):
 					add_dummy = False
 					if 'add_author' in url:
 						#Add dummy author
-						people_name = util.get_formatted_name(util.sanitize_content(artist_alias_text[index]))
+						try:
+							people_name = util.get_formatted_name(util.sanitize_content(artist_alias_text[index]))
+						except IndexError as e:
+							people_name = None
+						
 						if people_name:
 							add_dummy = True
 						else:
@@ -652,8 +660,8 @@ class MangaUpdatesSpider(CrawlSpider):
 				else:
 					#if there is related items
 					if relateds:
-						'''
-						TODO:
+						
+						#TODO:
 						#Get collection from related items (Get from database because some other spider could make other item related with this).
 						#Check if related is sequel, doujinshi or based on. If is there is a collection with the name of this entity. Collection will be the first part of the name.
 						#Check if related is prequel, if is the collection is the name of prequel if there inst a collection on the prequel.
@@ -662,7 +670,7 @@ class MangaUpdatesSpider(CrawlSpider):
 						#if none found create collection from most used name.
 						#Get name to make a new collection name.
 						#self.dbase.get_related_item(self, table, first_field, second_field, relation_type, type_id, entity_id, limit = None)
-						'''
+						
 						for item in relateds:
 							if item['collection_id']:
 								collection_id = item['collection_id']
@@ -685,9 +693,9 @@ class MangaUpdatesSpider(CrawlSpider):
 						elif(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 							#return the element most appear on list
 							collection_id = util.most_common_oneliner(collection_id)
-				'''
-					Change this to use a relation on database.
-				'''
+				
+				#	Change this to use a relation on database.
+				
 				#format status
 				status = util.sanitize_content(status)
 			
@@ -714,8 +722,9 @@ class MangaUpdatesSpider(CrawlSpider):
 				util.PrintException()
 				util.Log(response.url, sys.exc_info()[0])
 				return
-
+				
 			try:
+				
 				self.dbase.set_auto_transaction(False)
 				
 				entity_id = self.dbase.create_entity(romanized_title, entity_type_id, classification_type_id, language_id, country_id, year, collection_id, collection_started, titles, [], [], [], descriptions, [], [], [], [], companies, peoples, relateds, None, formatted_image, update_id)
@@ -752,11 +761,7 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				#Request release
 				if(releases):
-					meta = {}
-					meta['series_id'] = entity_id
-					meta['name'] = romanized_title
-					meta['url'] = response.url
-					Request(url=releases[0],callback=self.parse_series_releases,meta=meta)
+					return Request(url=releases[0], callback=self.parse_series_releases, dont_filter=True)
 					
 			except ValueError as e:
 				self.dbase.rollback()
@@ -973,4 +978,5 @@ class MangaUpdatesSpider(CrawlSpider):
 				self.dbase.set_auto_transaction(True)
 				
 			if(next_url):
-				Request(url=next_url[0],callback=self.parse_series_releases)
+				util.Log(response.url, "Has next url {}".format(next_url[0]), False)
+				return Request(url=next_url[0],callback=self.parse_series_releases)

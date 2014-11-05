@@ -2,12 +2,15 @@
 import scrapy
 import re
 import urlparse
+import sys
+
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.http import Request, FormRequest
 from scrapy.contrib.linkextractors import LinkExtractor
 from scrapy.selector import Selector
 from scrapy.utils.project import get_project_settings as Settings
 from .. import database
+from .. import util
 
 class MangaUpdatesSpider(CrawlSpider):
 		name = "mangaupdates_part3"
@@ -27,8 +30,8 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		rules = (
 		#Follow
-		Rule(LinkExtractor(allow=['categories\.html\?page=[0-9]{1,}&?'])),
-		#Parse series genre and categories. Series genre page will be add from request on genre parse. 
+		Rule(LinkExtractor(allow=['categories\.html\?page=[0-9]{1,}&?'], deny=('orderby', 'act', 'letter'))),
+		#Follow genre from genre.html page
 		#Follow
 		Rule(LinkExtractor(allow=(
 		#Parse genre
@@ -75,7 +78,6 @@ class MangaUpdatesSpider(CrawlSpider):
 		
 		"""
 		def after_login(self, response):
-			print "here3"
 			if "You are currently logged in as" in response.body:
 				self.log("Successfully logged in. Let's start crawling!")
 				print "Successfully logged in. Let's start crawling!"
@@ -108,21 +110,20 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_items(self, response):
 			self.instancialize_database()
-			print "Initialized database and parse"
-			if(re.search(self.pattern_categories_series, response.url) != None):
-				#Parse Series categories.
-				self.parse_categories_series(response)
-				
-			elif(re.search(self.pattern_genres_series, response.url) != None):
+
+			if(re.search(self.pattern_genres_series, response.url) != None):
 				#Parse Series genres.
-				self.parse_genres_series(response)
-			
+				return self.parse_genres_series(response)
+				
 			elif(re.search(self.pattern_genres, response.url) != None):
 				#Parse Genres.
-				self.parse_genres(response)
-				
+				return self.parse_genres(response)
+			
+			elif(re.search(self.pattern_categories_series, response.url) != None):
+				#Parse Series categories.
+				return self.parse_categories_series(response)
 			#Dont need to parse categories because it is handle by the rules.	
-		
+			
 
 		"""
 			Method used to save all genres on database and pass initial genre link to be crawled.
@@ -131,6 +132,7 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_genres(self, response):
 			print "Genres"
+			print "Response url: ", response.url
 			
 			#Get genre name
 			genres = response.css('.releasestitle b::text').extract()
@@ -140,12 +142,12 @@ class MangaUpdatesSpider(CrawlSpider):
 			
 			try:
 				for genre in genres:
-					print genre
 					genre = genre.replace('+',' ')
+					genre = genre.replace('%2F',"'")
+					print genre
 					self.dbase.add_name_to_table(genre, 'genre')
-				for	link in genres_links:
-					if 'series' in link:
-						Request(url=link,callback=self.parse_genres_series)
+				print "Success"
+				
 			except ValueError as e:
 				util.PrintException()
 				util.Log(response.url, e.message)
@@ -161,10 +163,13 @@ class MangaUpdatesSpider(CrawlSpider):
 		"""
 		def parse_genres_series(self, response):
 			print "Genre series"
-			genre = res = re.sub('.*genre=','', response.url)
-			genre = util.sanitize_title(genre.replace('+',' '))
-			genre_id = self.dbase.add_name_to_table(genre, 'genre')
+			print "Response url: ", response.url
 			
+			#Get genre
+			genre = res = re.sub('.*genre=','', response.url)
+			genre = res = re.sub('&.*','', genre)
+			
+			#Get series
 			series = response.css('td.text.col1 a::text').extract()
 			series_url = response.css('td.text.col1 a::attr(href)').extract()
 			
@@ -172,66 +177,84 @@ class MangaUpdatesSpider(CrawlSpider):
 			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 			
 			
-			adult_content = False
-			value = []
-			value.append(self.dbase.classification_type_18)
-			
-			#check if content is adult.
-			if "Adult" in genre:
-				adult_content = True
-			elif "Hentai" in genre:
-				adult_content = True
-			elif "Doujin" in genre:
-				adult_content = True
-			
-			if(adult_content == False and "Seinen" in genre):
-				value[0] = self.dbase.classification_type_16
-			
 			try:
+				self.dbase.set_auto_transaction(False)
 				
-				for index, serie in enumerate(series):
-					#Get series id from spider_item, if there isn't create dummy.
-					series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
-					if not series_id:
-						if index < lenght_related_text:
-							dummy_name = util.sanitize_title(serie)
-						else:
-							dummy_name = None
-						series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
-						self.dbase.add_spider_item('entity', series_id, series_url[index])
-
-					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'genre')
+				#Format genre
+				genre = util.sanitize_title(genre.replace('+',' '))
+				genre_id = self.dbase.add_name_to_table(genre, 'genre')
+			
+				if genre_id:
+					#Format classification
+					adult_content = False
+					value = []
+					value.append(self.dbase.classification_type_18)
 					
-					if(adult_content):
-						#if genre is Hentai, Doujinshi or Adult change classification for 18+ on Series.
-						where_value = []
-						where_value.append(series_id)
-						self.dbase.update('entity',value,['classification_type_id'], "id = %s", where_value)
+					#check if content is adult.
+					if "Adult" in genre:
+						adult_content = True
+					elif "Hentai" in genre:
+						adult_content = True
+					elif "Doujin" in genre:
+						adult_content = True
+					
+					if(not adult_content and "Seinen" in genre):
+						value[0] = self.dbase.classification_type_16
+					elif(not adult_content):
+						value[0] = self.dbase.classification_type_12
+				
+					for index, serie in enumerate(series):
+						#Get series id from spider_item, if there isn't create dummy.
+						series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
+						if not series_id:
+							dummy_name = util.sanitize_title(serie)
+							series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
+							self.dbase.add_spider_item('entity', series_id, series_url[index])
 
+						self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'genre')
+						
+						if(adult_content):
+							#if genre is Hentai, Doujinshi or Adult change classification for 18+ on Series.
+							where_value = []
+							where_value.append(series_id)
+							self.dbase.update('entity',value,['classification_type_id'], "id = %s", where_value)
+					
+				self.dbase.commit()
+				
+				print "Success"
+				
 			except ValueError as e:
+				self.dbase.rollback()
 				print e.message
 				util.PrintException()
 				util.Log(response.url, e.message)
 			except:
+				self.dbase.rollback()
 				print "Error on parse series genre", sys.exc_info()[0]
 				util.PrintException()
 				util.Log(response.url, sys.exc_info()[0])
-			
-			if(next_url):
-				Request(url=next_url[0],callback=self.parse_genres_series)
+			finally:
+				self.dbase.set_auto_transaction(True)
 				
-			
+			if(next_url):
+				#print "Next: ", next_url
+				util.Log(response.url, "Has next url {}".format(next_url[0]), False)
+				return Request(url=next_url[0],callback=self.parse_genres_series)
+				
 		"""
 			Method to parse the series.html that have category on URL.
 			The entities must be already save on database in order for this method to work, else a unknown exception is returned.
 		"""
 		def parse_categories_series(self, response):			
 			print "Categories series"
+			print "Response url: ", response.url
 			
-			category = res = re.sub('.*category=','', response.url)
-			category = util.sanitize_title(category.replace('+',' '))
-			category_id = self.dbase.add_name_to_table(category, 'tag')
+			#Get category name 
+			category = re.sub('.*category=','', response.url)
+			category = re.sub('&.*','', category)
 			
+			
+			#Get series
 			series = response.css('td.text.col1 a::text').extract()
 			series_url = response.css('td.text.col1 a::attr(href)').extract()
 			
@@ -239,30 +262,48 @@ class MangaUpdatesSpider(CrawlSpider):
 			next_url = response.css("td.specialtext[align='right'] a::attr(href)").extract()
 				
 			try:
-				for index, serie in enumerate(series):
-					#Get series id from spider_item, if there isn't create dummy.
-					series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
-					if not series_id:
-						if index < lenght_related_text:
+				self.dbase.set_auto_transaction(False)
+				
+				#Format category 
+				category = category.replace('%2F',"'")
+				category = util.sanitize_title(category.replace('+',' '))
+				
+				#Format category id
+				category_id = self.dbase.add_name_to_table(category, 'tag')
+				
+				if category_id:
+					for index, serie in enumerate(series):
+						#Get series id from spider_item, if there isn't create dummy.
+						series_id = self.dbase.get_spider_item_id(series_url[index], 'entity')
+						if not series_id:
 							dummy_name = util.sanitize_title(serie)
-						else:
-							dummy_name = None
-						series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
-						self.dbase.add_spider_item('entity', series_id, series_url[index])
-						
-					self.dbase.add_multi_relation(series_id, genre_id, 'entity', 'tag')
+							series_id = self.dbase.create_entity(dummy_name, self.dbase.entity_type_manga, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
+							self.dbase.add_spider_item('entity', series_id, series_url[index])
+							
+						self.dbase.add_multi_relation(series_id, category_id, 'entity', 'tag')
 					
-					#Change type to Webtoons if there category is Webtoons
-					#if 'Web Novel' in category:
-			
+						#Change type to Webtoons if there category is Webtoons
+						#if 'Web Novel' in category:
+				
+				self.dbase.commit()
+				print "Success"
+				
 			except ValueError as e:
+				self.dbase.rollback()
 				print e.message
 				util.PrintException()
 				util.Log(response.url, e.message)
 			except:
+				self.dbase.rollback()
 				print "Unknown exception"
 				util.PrintException()
 				util.Log(response.url, sys.exc_info()[0])
+			finally:
+				self.dbase.set_auto_transaction(True)
+			
 			
 			if(next_url):
-				Request(url=next_url[0],callback=self.parse_categories_series)
+				#print "Next: ", next_url
+				util.Log(response.url, "Has next url {}".format(next_url[0]), False)
+				return Request(url=next_url[0],callback=self.parse_categories_series)
+			
