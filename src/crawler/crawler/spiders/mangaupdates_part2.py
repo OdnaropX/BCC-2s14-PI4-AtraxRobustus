@@ -219,10 +219,8 @@ class MangaUpdatesSpider(CrawlSpider):
 					if(new_name):
 						language = langid.classify(new_name)
 						language_titles.append(language[0])
-						code = []
-						code.append(language[0])
 						
-						language_id = self.dbase.get_var('language', ['id'], "code = %s", code)
+						language_id = self.dbase.get_language_id_from_code(language[0])
 						
 						new_title = {}
 						new_title['title'] = new_name
