@@ -7,6 +7,11 @@ INSERT INTO audio_channels ( id, name ) VALUES (2, '4');
 INSERT INTO audio_channels ( id, name ) VALUES (3, '6');
 INSERT INTO audio_channels ( id, name ) VALUES (4, '8');
 
+INSERT INTO taste_type ( id, name) VALUES(1, 'Like');
+INSERT INTO taste_type ( id, name) VALUES(2, 'Dislike');
+INSERT INTO taste_type ( id, name) VALUES(3, 'Hate');
+INSERT INTO taste_type ( id, name) VALUES(4, 'Love');
+
 INSERT INTO scale ( id, name ) VALUES (1, '1/1');
 INSERT INTO scale ( id, name ) VALUES (2, '1/2');
 INSERT INTO scale ( id, name ) VALUES (3, '1/3');
@@ -260,6 +265,15 @@ INSERT INTO entity_type ( id, name) VALUES(13, 'Software');
 INSERT INTO entity_type ( id, name) VALUES(14, 'Card Game');
 INSERT INTO entity_type ( id, name) VALUES(15, 'Fan Art');
 INSERT INTO entity_type ( id, name) VALUES(16, 'Doujinshi');
+INSERT INTO entity_type ( id, name) VALUES(17, 'OEL')
+INSERT INTO entity_type ( id, name) VALUES(18, 'Drama CD');
+INSERT INTO entity_type ( id, name) VALUES(19, 'Animated Movie');
+INSERT INTO entity_type ( id, name) VALUES(20, 'Movie');
+INSERT INTO entity_type ( id, name) VALUES(21, 'Video Game');
+INSERT INTO entity_type ( id, name) VALUES(22, 'Ero Game');
+INSERT INTO entity_type ( id, name) VALUES(23, 'OVA - Original Video Animation');
+INSERT INTO entity_type ( id, name) VALUES(24, 'Drama');
+INSERT INTO entity_type ( id, name) VALUES(25, 'ONA - Original Net Animation');
 
 
 INSERT INTO collaborator_type ( id, name) VALUES (1, 'Scanlator');
@@ -2004,6 +2018,8 @@ INSERT INTO box_condition_type (
 );
 VALUES();
 
+INSERT INTO favorite_type (id, name ) VALUES (1, 'Food')
+INSERT INTO favorite_type (id, name ) VALUES (2, 'Color')
 
 
 INSERT INTO soundtrack_type (
@@ -2101,3 +2117,9 @@ VALUES();
 select 'ALTER TABLE ' || table_name || ' OWNER TO teste;' from information_schema.tables where table_schema = 'public';
 select 'ALTER SEQUENCE ' || sequence_name || ' OWNER TO teste;' from information_schema.sequences where sequence_schema = 'public';
 insert into users VALUES (1, 'teste','123', 'Male', NULL, '1989/04/13', now(), True)
+
+Autores sem nenhuma produção:
+
+select people.id, people_id, url from people left join people_produces_entity on people.id = people_id
+left join spider_item as s on people.id = s.id 
+ where people_id is NULL and table_name = 'people'

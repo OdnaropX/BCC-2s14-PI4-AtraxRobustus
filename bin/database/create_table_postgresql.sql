@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS scale (
 )
 ;
 
+CREATE TABLE IF NOT EXISTS taste_type (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+;
+
 CREATE TABLE IF NOT EXISTS material (
   id SERIAL,
   name VARCHAR UNIQUE NOT NULL,
@@ -53,6 +60,17 @@ CREATE TABLE IF NOT EXISTS hash_type (
   PRIMARY KEY(id)
 )
 ;
+
+CREATE TABLE IF NOT EXISTS chinese_sign (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY(id)
+);
+CREATE TABLE IF NOT EXISTS zodiac_sign (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY(id)
+);
 
 CREATE TABLE IF NOT EXISTS release_edition_read_status_type (
   id SERIAL,
@@ -347,10 +365,22 @@ CREATE TABLE IF NOT EXISTS lyric_type (
 
 CREATE TABLE IF NOT EXISTS goods_type (
   id SERIAL,
-  name VARCHAR NOT NULL,
+  name VARCHAR UNIQUE NOT NULL,
   PRIMARY KEY(id)
 )
 ;
+
+CREATE TABLE IF NOT EXISTS favorite_type (
+	id SERIAL,
+	name VARCHAR UNIQUE NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS weapon_type (
+	id SERIAL,
+	name VARCHAR UNIQUE NOT NULL,
+	PRIMARY KEY(id)
+);
 
 /* Not the same structure as table_type */
 
@@ -1084,7 +1114,7 @@ CREATE TABLE IF NOT EXISTS entity (
   collection_id INTEGER NULL,
   language_id INTEGER  NOT NULL,
   country_id INTEGER  NOT NULL,
-  launch_year CHAR(4) NULL,
+  launch_year VARCHAR NULL,
   collection_started BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY(id),
   FOREIGN KEY(country_id)
@@ -1134,7 +1164,6 @@ CREATE TABLE IF NOT EXISTS entity_description (
       ON UPDATE NO ACTION
 )
 ;
-
 
 CREATE TABLE IF NOT EXISTS goods (
   id BIGSERIAL,
@@ -1206,7 +1235,7 @@ CREATE TABLE IF NOT EXISTS entity_synopsis (
 )
 ;
 
-CREATE TABLE IF NOT EXISTS people_alias(
+CREATE TABLE IF NOT EXISTS people_alias (
   id SERIAL,
   alias_type_id INTEGER  NOT NULL,
   people_id BIGINT  NOT NULL,
@@ -1229,22 +1258,117 @@ CREATE TABLE IF NOT EXISTS persona (
   blood_type_id INTEGER NULL,
   blood_rh_type_id INTEGER NULL,
   gender gender NOT NULL,
-  birthday DATE NULL,
+  birthday VARCHAR NULL,
+  birthyear VARCHAR NULL,
+  age VARCHAR NULL,
+  apparent_age VARCHAR NULL,
   height INTEGER  NULL,
   weight DECIMAL NULL,
   eyes_color VARCHAR NULL,
   hair_color VARCHAR NULL,
+  hair_lenght VARCHAR NULL,
+  exact_hair_color VARCHAR NULL,
+  bust_size VARCHAR NULL,
+  waist_size VARCHAR NULL,
+  butt_size VARCHAR NULL,
+  element VARCHAR NULL,
+  chinese_sign_id INTEGER NULL,
+  zodiac_sign_id INTEGER NULL,
   PRIMARY KEY(id),
   FOREIGN KEY(blood_type_id)
     REFERENCES blood_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(blood_rh_type_id)
     REFERENCES blood_rh_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE,
+  FOREIGN KEY(chinese_sign_id)
+    REFERENCES chinese_sign(id)
+      ON DELETE SET NULL
+      ON UPDATE CASCADE,
+ FOREIGN KEY(zodiac_sign_id)
+    REFERENCES zodiac_sign(id)
+      ON DELETE SET NULL
+      ON UPDATE CASCADE,
 )
 ;
+
+
+
+CREATE TABLE IF NOT EXISTS persona_weakness (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS persona_power (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS persona_taste (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	taste_type_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+	FOREIGN KEY(taste_type_id)
+    REFERENCES taste_type(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS persona_favorite (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	favorite_type_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+	FOREIGN KEY(favorite_type_id)
+    REFERENCES favorite_type(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS persona_weapon (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	weapon_type_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+	FOREIGN KEY(weapon_type_id)
+    REFERENCES weapon_type(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
+
 
 CREATE TABLE IF NOT EXISTS soundtrack_has_audio (
   soundtrack_id INTEGER  NOT NULL,
@@ -1351,11 +1475,11 @@ CREATE TABLE IF NOT EXISTS entity_based_entity (
   PRIMARY KEY(entity_id, another_entity_id, based_type_id),
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
-      ON DELETE SET NULL
+      ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(another_entity_id)
     REFERENCES entity(id)
-      ON DELETE SET NULL
+      ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(based_type_id)
     REFERENCES based_type(id)
@@ -1385,6 +1509,8 @@ CREATE TABLE IF NOT EXISTS entity_alias (
       ON UPDATE NO ACTION
 )
 ;
+
+
 
 CREATE TABLE IF NOT EXISTS entity_edition (
   id SERIAL,
@@ -1604,6 +1730,7 @@ CREATE TABLE IF NOT EXISTS persona_alias (
   persona_id INTEGER  NOT NULL,
   alias_type_id INTEGER  NOT NULL,
   name VARCHAR NOT NULL,
+  last_name VARCHAR NOT NULL DEFAULT "NO LAST NAME",
   PRIMARY KEY(id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
@@ -1619,7 +1746,7 @@ CREATE TABLE IF NOT EXISTS persona_alias (
 CREATE TABLE IF NOT EXISTS persona_occupation (
   id SERIAL,
   persona_id INTEGER  NOT NULL,
-  occupation VARCHAR NOT NULL,
+  name VARCHAR NOT NULL,
   PRIMARY KEY(id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
@@ -1682,7 +1809,7 @@ CREATE TABLE IF NOT EXISTS software_edition_has_version (
 CREATE TABLE IF NOT EXISTS read_edition (
   entity_edition_id INTEGER  NOT NULL,
   print_type_id INTEGER  NOT NULL,
-  pages_number SERIAL,
+  pages_number INTEGER,
   chapters_number INTEGER  NULL,
   PRIMARY KEY(entity_edition_id),
   FOREIGN KEY(entity_edition_id)
@@ -2031,6 +2158,9 @@ CREATE TABLE IF NOT EXISTS soundtrack_comments (
 )
 ;
 
+
+
+
 CREATE TABLE IF NOT EXISTS audio_comments (
   id SERIAL,
   audio_id INTEGER  NOT NULL,
@@ -2211,15 +2341,14 @@ CREATE TABLE IF NOT EXISTS entity_comments (
 )
 ;
 
-
 CREATE TABLE IF NOT EXISTS people_voice_persona (
-  persona_id INTEGER  NOT NULL,
-  people_id BIGINT  NOT NULL,
-  language_id INTEGER  NOT NULL,
-  entity_id BIGINT  NOT NULL,
-  entity_edition_id INTEGER  NOT NULL,
+  persona_id INTEGER NOT NULL,
+  people_id BIGINT NOT NULL,
+  language_id INTEGER NOT NULL,
+  entity_id BIGINT NOT NULL,
+  entity_edition_id INTEGER NULL,
   observation TEXT NULL,
-  PRIMARY KEY(persona_id, people_id, language_id),
+  PRIMARY KEY(persona_id, people_id, language_id, entity_id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
@@ -2292,7 +2421,7 @@ CREATE TABLE IF NOT EXISTS persona_appear_on_entity (
   entity_id BIGINT  NOT NULL,
   persona_alias_id BIGINT  NOT NULL,
   first_appear BOOL NOT NULL,
-  PRIMARY KEY(persona_id, entity_id),
+  PRIMARY KEY(persona_id, entity_id, persona_alias_id),
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
@@ -2347,10 +2476,11 @@ CREATE TABLE IF NOT EXISTS people_voice_persona_on_number_edition (
   people_voice_persona_language_id INTEGER  NOT NULL,
   people_voice_persona_people_id BIGINT  NOT NULL,
   people_voice_persona_persona_id INTEGER  NOT NULL,
+  people_voice_persona_entity_id INTEGER  NOT NULL,
   number_edition_id INTEGER  NOT NULL,
-  PRIMARY KEY(people_voice_persona_language_id, people_voice_persona_people_id, people_voice_persona_persona_id, number_edition_id),
-  FOREIGN KEY(people_voice_persona_persona_id, people_voice_persona_people_id, people_voice_persona_language_id)
-    REFERENCES people_voice_persona(persona_id, people_id, language_id)
+  PRIMARY KEY(people_voice_persona_language_id, people_voice_persona_people_id, people_voice_persona_persona_id, people_voice_persona_entity_id, number_edition_id),
+  FOREIGN KEY(people_voice_persona_persona_id, people_voice_persona_people_id, people_voice_persona_language_id, people_voice_persona_entity_id)
+    REFERENCES people_voice_persona(persona_id, people_id, language_id, entity_id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(number_edition_id)
@@ -2494,7 +2624,6 @@ CREATE TABLE IF NOT EXISTS video_release_has_audio_codec (
       ON UPDATE NO ACTION
 )
 ;
-
 
 CREATE TABLE IF NOT EXISTS goods_alias (
   id SERIAL,
@@ -2752,6 +2881,66 @@ CREATE TABLE IF NOT EXISTS company_alias (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
+      ON UPDATE NO ACTION
+)
+;
+
+CREATE TABLE IF NOT EXISTS collection_alias (
+  id SERIAL,
+  alias_type_id INTEGER  NOT NULL,
+  collection_id BIGINT  NOT NULL,
+  language_id INTEGER  NOT NULL,
+  name VARCHAR NOT NULL,
+  PRIMARY KEY(id),
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
+      ON DELETE SET NULL
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(collection_id)
+    REFERENCES collection(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(alias_type_id)
+    REFERENCES alias_type(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+)
+;
+
+CREATE TABLE IF NOT EXISTS collection_wiki (
+  id SERIAL,
+  language_id INTEGER  NOT NULL,
+  collection_id BIGINT  NOT NULL,
+  name VARCHAR NOT NULL,
+  url VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id, language_id),
+  FOREIGN KEY(collection_id)
+    REFERENCES collection(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(language_id)
+    REFERENCES language(id)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+)
+;
+
+CREATE TABLE IF NOT EXISTS persona_comments (
+  id SERIAL,
+  persona_id INTEGER  NOT NULL,
+  user_id INTEGER  NOT NULL,
+  content TEXT NOT NULL,
+  title VARCHAR NOT NULL,
+  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  PRIMARY KEY(id),
+  FOREIGN KEY(user_id)
+    REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
       ON UPDATE NO ACTION
 )
 ;
