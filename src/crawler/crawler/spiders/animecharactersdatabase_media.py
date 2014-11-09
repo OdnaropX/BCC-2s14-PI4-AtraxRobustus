@@ -106,17 +106,19 @@ class AnimeCharactersSpider(CrawlSpider):
 			if(re.search(self.pattern_series, response.url) != None):
 				search_title = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > h3::text').extract()
 				search_title = util.sanitize_content(search_title)
-					
+				
+				
 				if "Franchise" in search_title:
 					self.parse_franchise(response)
 				else:
 					#Parse Series.
 					self.parse_series(response)
-			
+				
 
 		def parse_franchise(self, response):
 			print "Franchise"
 			
+			return
 			update_id = None
 			try:
 				#Check if there is a dummy, if there is update only. If there inst the id will be none
@@ -316,8 +318,12 @@ class AnimeCharactersSpider(CrawlSpider):
 			type = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > h3::text').extract()
 			#Get series ID
 			
+			#Get details table.
+			table_details = response.css('#bt tr')
+
 			#Get english title
 			english_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)::text').extract()
+			english_title = table_details[1].css('td:nth-child(2)::text').extract()
 			
 			#Get romaji title
 			romanji_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2)::text').extract()
@@ -327,6 +333,14 @@ class AnimeCharactersSpider(CrawlSpider):
 			
 			#Get japanese title
 			japanese_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2)::text').extract()
+			
+			
+			print english_title
+			print table_details[2].css('td:nth-child(2)::text').extract()
+			print table_details[3].css('td:nth-child(2)::text').extract()
+			
+			
+			return
 			
 			#Get japanese studio name
 			japanese_studio_name_url = response.css('#bt > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2) a::attr(href)').extract()
@@ -413,8 +427,7 @@ class AnimeCharactersSpider(CrawlSpider):
 
 				
 				#Format alias. Separe alias by /
-				
-				
+								
 				english_title = util.sanitize_title(english_title)
 				if english_title:
 					new_nme = english_title.split('/')
@@ -452,6 +465,47 @@ class AnimeCharactersSpider(CrawlSpider):
 						aliases.append(new_title)
 				
 				
+				#Format table details
+				
+				for item in table_details[:]:
+					new_item = util.sanitize_title(item.css('th::text').extract())
+					if not new_item:
+						new_item = util.sanitize_title(item.css('th a::text').extract())
+					
+					new_content_url_text = item.css('td a::text').extract()
+					new_content_url = item.css('td a::attr(href)').extract()
+					new_content_text = item.css('td::text').extract()
+				
+					if new_item and (new_content or new_content_text):
+						print "teste"
+						#Check release date
+						
+						#Check studios
+							#Check publisher
+						
+						
+							#Check Developer
+						#Check ratings
+						
+						#Check genre
+					
+						#Check links
+						
+						
+						#Check episodes number (Epidoses, OVA)
+						
+						
+						#Check origin
+						
+						
+						#Check people (Director, Author, Artist, Writer, Composer, ADR Director, Character Design, Illustrator, Scenario
+						
+						
+						#Check twitter
+						
+						
+						
+						
 				#Format date
 				release_date = util.sanitize_title(release_date)
 				if not release_date:

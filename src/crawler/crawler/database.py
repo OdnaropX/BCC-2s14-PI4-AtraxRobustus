@@ -55,6 +55,7 @@ class Database:
 	alias_type_subtitle = 6
 	alias_type_romanized = 7 #Alias Romanized Title
 	alias_type_subromanized = 8 #Alias Romanized Subtitle
+	alias_type_romanized_name = 9
 	
 	entity_type_manga = 3
 	entity_type_lightnovel = 9
@@ -77,6 +78,7 @@ class Database:
 	country_jp = 112
 	country_kr = 211
 	country_cn = 47
+	country_br = 32
 	
 	language_ja = 74
 	language_en = 42
@@ -95,7 +97,10 @@ class Database:
 	entity_type_ova = 23
 	entity_type_anime = 1
 	
-	
+	"""
+		Entity only create to allow persona be related with people, because entity_id is required.
+	"""
+	entity_null = 1
 	
 	company_function_type_publisher = 1
 	company_function_type_translator = 1
@@ -760,8 +765,8 @@ class Database:
 		company_owner_collection, company_has_country, people_has_image, genre_type_has_audio, entity_has_category, entity_has_tag, entity_has_gender,
 		soundtrack_for_entity_edition, entity_edition_has_language, entity_edition_has_currency, goods_from_persona, goods_has_category,
 		entity_release_has_version, entity_release_has_language, goods_has_material, goods_has_shop_location, goods_has_tag, mod_release_has_image,
-		shops_operate_on_country, people_nacionalization_on_country, entity_has_tag, entity_edition_has_subtitle, software_edition_has_version,
-		genre_has_filter_type, persona_has_image, requirements_has_driver, entity_has_image
+		shops_operate_on_country, people_nacionalization_on_country, entity_edition_has_subtitle, software_edition_has_version,
+		genre_has_filter_type, persona_has_image, requirements_has_driver, entity_has_image, persona_has_tag
 		
 		The table name to be used will be assembly by first_table + relation_type + second_table. 
 		By default relation_type is equal to has, but can be overwrite.
@@ -1922,11 +1927,7 @@ class Database:
 				
 		if butt_size:
 			columns.append('butt_size')
-			value.append(butt_size)	
-			
-		if element:
-			columns.append('element')
-			value.append(element)		
+			value.append(butt_size)		
 			
 		if chinese_sign_id:
 			columns.append('chinese_sign_id')
@@ -1989,7 +1990,7 @@ class Database:
 		Method used to insert data related with persona.
 		This method can be use to insert on the follow tables:
 		persona_occupation, persona_unusual_features, persona_affiliation, persona_race,
-		persona_weakness, persona_power, 
+		persona_weakness, persona_power, persona_element
 	"""
 	def add_persona_items(self, name, persona_id, item_table):
 		if(not name):
@@ -2109,7 +2110,7 @@ class Database:
 	def add_image_to_persona(self, url, extension, name, persona_id):
 		try:
 			image_id = self.add_image(url, extension, name)
-			return add_multi_relation(persona_id, image_id, 'persona', 'image')
+			return self.add_multi_relation(persona_id, image_id, 'persona', 'image')
 		except ValueError as e:
 			print e.message
 			raise ValueError(e.message)
@@ -2163,8 +2164,8 @@ class Database:
 	def create_persona(self, name, last_name, gender, age = None, apparent_age = None, exact_hair_color = None, 
 	bust_size = None, waist_size = None, butt_size = None, chinese_sign_id = None, zodiac_sign_id = None, birthyear = None, 
 	birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_lenght = None, hair_color = None,
-	unusual_features = [], aliases = [], nicknames = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
-	relationship = [], images = [], favorites = [], tastes = [], weapons = [], powers = [], weaknesses = [], update_id = None):
+	unusual_features = [], aliases = [], nicknames = [], romanizeds = [], natives = [], titles = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
+	relationship = [], images = [], favorites = [], tastes = [], weapons = [], powers = [], weaknesses = [], tags = [], elements = [], update_id = None):
 		if(not name):
 			raise ValueError("Name cannot be empty on create_persona method.")
 	
@@ -2178,23 +2179,34 @@ class Database:
 			self.add_persona_alias(name, last_name, persona_id, self.alias_type_main)
 			#register alias
 			for alias in aliases:
-				self.add_persona_alias(alias['name'], alias['last_name'], persona_id, self.alias_type_alias)
+				self.add_persona_alias(alias['name'], alias['lastname'], persona_id, self.alias_type_alias)
 			
 			#register nicknames
 			for nick in nicknames:
-				self.add_persona_alias(nick['name'], nick['last_name'], persona_id, self.alias_type_nickname)
+				self.add_persona_alias(nick['name'], nick['lastname'], persona_id, self.alias_type_nickname)
 			
+			#add titles
+			for title in titles:
+				self.add_persona_alias(title['name'], title['lastname'], persona_id, self.alias_type_title)
+
+			#add native names
+			for native in natives:
+				self.add_persona_alias(native['name'], native['lastname'], persona_id, self.alias_type_nativename)
+				
+			for romanized in romanizeds:
+				self.add_persona_alias(romanized['name'], romanized['lastname'], persona_id, self.alias_type_romanized_name)
+
 			#add voices
 			for people in voices_actor:
 				self.add_relation_people_voice_persona(people['id'], persona_id, people['language_id'], people['entity_id'], people['entity_edition_id'], people['observation'], people['numbers_edition_id'])
 				
 			#add entity
 			for entity in entities_appear_on:
-				self.add_persona_to_entity(self, entity['id'], persona_id, entity['alias_used_id'], entity['first_appear'])
+				self.add_persona_to_entity(entity['id'], persona_id, entity['alias_used_id'], entity['first_appear'])
 				
 			#add relationship with another persona
 			for unusual_feature in unusual_features:
-				self.add_persona_items(unsual_feature, persona_id, 'unusual_features')
+				self.add_persona_items(unusual_feature, persona_id, 'unusual_features')
 				
 			for occupation in occupations:
 				self.add_persona_items(occupation, persona_id, 'occupation')
@@ -2226,7 +2238,12 @@ class Database:
 			for weakness in weaknesses:
 				self.add_persona_items(weakness['name'], persona_id, 'weakness')
 			
+			for tag_id in tags:
+				self.add_multi_relation(persona_id, tag_id, 'persona', 'tag')
 			
+			for element in elements:
+				self.add_persona_items(element, persona_id, 'element')
+				
 			self.commit()
 			return persona_id
 		except ValueError as e:
@@ -2768,6 +2785,16 @@ class Database:
 			self.set_auto_transaction(True)
 		
 			
+	def get_people_id_from_alias(self, name, last_name):
+		if not name:
+			return None
+			
+		where_values = []
+		where_values.append(name)
+		where_values.append(last_name)
+		return self.get_var('people_alias', ['people_id'], "name = %s and lastname = %s", where_values)
+		
+	
 	################################ Archive Methods ##############################
 	
 	"""
@@ -4896,9 +4923,28 @@ class Database:
 			
 		code = []
 		code.append(language_code)
-		#print "Language code", language_code
+		
 		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
 		countries = self.get_col('country_has_language as c', 'c.country_id', "language.code = %s", code, ['language'], ['c.language_id = language.id'])
+		if(countries != None):
+			length_country = len(countries)
+			if(length_country > 1 or length_country < 1):
+				country_id = default_country
+			else:
+				country_id = countries[0]
+			return country_id
+		
+		return default_country
+	
+	def get_country_id_from_code(self, code, default_country = None):
+		if not code:
+			return default_country
+	
+		where_values = []
+		where_values.append(code)
+		
+		countries = self.get_col('country', 'id', "code = %s", code)
+		
 		if(countries != None):
 			length_country = len(countries)
 			if(length_country > 1 or length_country < 1):
@@ -4994,10 +5040,10 @@ class Database:
 		code = []
 		code.append(language)
 		if like:
-			where = "name like %% || %s || %%"
+			where = "name like '%%' || %s || '%%'"
 		else:
 			where = "name = %s"
-		language_id = self.get_var('language', ['id'], , code)
+		language_id = self.get_var('language', ['id'], where, code)
 		if not language_id:
 			return default
 

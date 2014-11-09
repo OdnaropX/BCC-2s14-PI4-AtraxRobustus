@@ -14,13 +14,18 @@ SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
 LOG_FILE = 'logs.txt'
 
-DBNAME = 'crawler'
+DBNAME = 'te'
 DBUSERNAME = 'teste'
 DBPASSWORD = '123456'
 DBHOST = 'localhost'
 DBPORT = '5432'
 MUUSERNAME = 'Teste2352'
 MUPASSWORD = '=QWZ;=w)WZ;=w)@!)G'
+
+#Delay used on animecharactersdatabase.
+CONCURRENT_REQUESTS_PER_IP = 5
+DOWNLOAD_DELAY = 0.5
+#DUPEFILTER_DEBUG = True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'crawler (+http://www.yourdomain.com)'

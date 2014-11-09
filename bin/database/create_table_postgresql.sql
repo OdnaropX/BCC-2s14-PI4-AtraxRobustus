@@ -1262,7 +1262,7 @@ CREATE TABLE IF NOT EXISTS persona (
   birthyear VARCHAR NULL,
   age VARCHAR NULL,
   apparent_age VARCHAR NULL,
-  height INTEGER  NULL,
+  height DECIMAL NULL,
   weight DECIMAL NULL,
   eyes_color VARCHAR NULL,
   hair_color VARCHAR NULL,
@@ -1271,7 +1271,6 @@ CREATE TABLE IF NOT EXISTS persona (
   bust_size VARCHAR NULL,
   waist_size VARCHAR NULL,
   butt_size VARCHAR NULL,
-  element VARCHAR NULL,
   chinese_sign_id INTEGER NULL,
   zodiac_sign_id INTEGER NULL,
   PRIMARY KEY(id),
@@ -1295,6 +1294,17 @@ CREATE TABLE IF NOT EXISTS persona (
 ;
 
 
+
+CREATE TABLE IF NOT EXISTS persona_element (
+	id SERIAL,
+	name VARCHAR NOT NULL,
+	persona_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS persona_weakness (
 	id SERIAL,
@@ -1449,7 +1459,7 @@ CREATE TABLE IF NOT EXISTS hash (
 ;
 
 CREATE TABLE IF NOT EXISTS persona_related_persona (
-  persona_id INTEGER  NOT NULL,
+  persona_id INTEGER NOT NULL,
   another_persona_id INTEGER  NOT NULL,
   related_type_id INTEGER  NOT NULL,
   PRIMARY KEY(persona_id, another_persona_id, related_type_id),
@@ -2936,6 +2946,21 @@ CREATE TABLE IF NOT EXISTS persona_comments (
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(persona_id)
+    REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+)
+;
+
+CREATE TABLE IF NOT EXISTS persona_has_tag (
+  tag_id INTEGER  NOT NULL,
+  persona_id BIGINT  NOT NULL,
+  PRIMARY KEY(tag_id, persona_id),
+  FOREIGN KEY(tag_id)
+    REFERENCES tag(id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
   FOREIGN KEY(persona_id)

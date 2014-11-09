@@ -8,8 +8,10 @@ from itertools import groupby
 
 pattern_last_newline = re.compile(ur'\n$')
 pattern_last_bracket = re.compile(ur'\[$')
+pattern_first_newline = re.compile(ur'^\n')
 pattern_number_range = re.compile(ur'^[^a-zA-Z .][0-9-]{1,}$')
-		
+pattern_replace_name = re.compile(ur'(:.*|\bdj\b.*|\(.*\)|\[.*\]|- .*)')
+
 """
 	Class for connection and manipulation of database.
 	Have methods for delete, update and insert on any table. 
@@ -27,26 +29,23 @@ def get_formatted_name(name, name_first = False):
 		
 	names = name.split(" ")
 	
-	name = {}
-	name['name'] = ""
-	name['lastname'] = ""
-			
-	length_names = len(names)
-	if(length_names > 1):
-		if(name_first):
-			name['name'] = names[0] 
-			names.remove[0]
-			name['lastname'] = " ".join(names) 
+	new_name = {}
+	
+	if not isinstance(names, types.StringTypes):
+		if name_first:
+			new_name['name'] = names.pop(0)
 		else:
-			name['name'] = names.pop()
-			name['lastname'] = " ".join(names)
-	elif(length_names == 1):
-		name['name'] = names[0]
-		name['lastname'] = "NO LAST NAME"
+			new_name['name'] = names.pop()
 		
-	name['name'] = name['name'].strip()
-	name['lastname'] = name['lastname'].strip()
-	return name;
+		if names:
+			new_name['lastname'] = " ".join(names)
+		else:
+			new_name['lastname'] = "NO LAST NAME"
+	else:
+		new_name['name'] = names
+		new_name['lastname'] = "NO LAST NAME"
+	
+	return new_name;
 	
 def get_line_exception():
 	exc_type, exc_obj, tb = sys.exc_info()
@@ -62,7 +61,9 @@ def PrintException():
 	
 def Log(url, message, print_exception = True):
 	#Save Log
-	message = "Error on " + url + ": " +  str(message)
+	message = url + ": " +  str(message)
+	if print_exception:
+		message = "Error on " + message
 	
 	if print_exception:
 		message += " " + get_line_exception()
@@ -87,10 +88,11 @@ def sanitize_title(title):
 		
 	#remove last newline with sub
 	title = re.sub(pattern_last_newline, '', title)
+	#remove first newline with sub
+	title = re.sub(pattern_first_newline, '', title)
+	
 	title = title.strip()
-	if 'N/A' in title:
-		return None
-	if '\r\n' == title:
+	if 'N/A' in title or '\r\n' == title or not title:
 		return None
 	return title
 			
@@ -105,8 +107,12 @@ def sanitize_content(description):
 	#remove last \n with sub.
 	description = re.sub(pattern_last_newline, '', description)
 	description = re.sub(pattern_last_bracket, '', description)
-			
-	if(description == 'N/A'):
+	#remove first newline with sub
+	description = re.sub(pattern_first_newline, '', description)
+	description = description.strip()
+	
+	
+	if description == 'N/A' or not description:
 		return None
 	return description
 	
@@ -144,3 +150,14 @@ def most_common_oneliner(L):
 		return result[0]
 	return None
 	
+def normalize_collection_name(name):
+	if not name:
+		return None
+	name = re.sub(pattern_replace_name,'',name)
+	return name
+
+def convert_to_cm(value):
+	return value
+
+def convert_to_kg(value):
+	return value

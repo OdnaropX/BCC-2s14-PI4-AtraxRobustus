@@ -12,6 +12,9 @@ INSERT INTO taste_type ( id, name) VALUES(2, 'Dislike');
 INSERT INTO taste_type ( id, name) VALUES(3, 'Hate');
 INSERT INTO taste_type ( id, name) VALUES(4, 'Love');
 
+INSERT INTO weapon_type (id,name) VALUES (1, 'Fighting Machine');
+INSERT INTO weapon_type (id,name) VALUES (2, 'Sword');
+
 INSERT INTO scale ( id, name ) VALUES (1, '1/1');
 INSERT INTO scale ( id, name ) VALUES (2, '1/2');
 INSERT INTO scale ( id, name ) VALUES (3, '1/3');
@@ -309,7 +312,7 @@ INSERT INTO alias_type ( id, name ) VALUES(5, 'Title');
 INSERT INTO alias_type ( id, name ) VALUES(6, 'Subtitle');
 INSERT INTO alias_type ( id, name ) VALUES(7, 'Romanized Title');
 INSERT INTO alias_type ( id, name ) VALUES(8, 'Romanized Subtitle');
-
+INSERT INTO alias_type ( id, name ) VALUES(9, 'Romanized Name');
 
 INSERT INTO mod_type ( id, name ) VALUES(1, 'Abodes - Player homes');
 INSERT INTO mod_type ( id, name ) VALUES(2, 'Animals, creatures, mounts & horses');
@@ -1028,7 +1031,7 @@ INSERT INTO image_soundtrack_type ( id, name ) VALUES(5, 'Info');
 INSERT INTO image_user_type ( id, name ) VALUES( 1, 'profile');
 
 INSERT INTO lyric_type ( id, name) VALUES(1,'Original');
-INSERT INTO lyric_type ( id, name) VALUES(2,'Transalation');
+INSERT INTO lyric_type ( id, name) VALUES(2,'Translation');
 
 INSERT INTO figure_version ( id, name) VALUES (1,'Limited');
 INSERT INTO figure_version ( id, name) VALUES (2,'Game Prize');
@@ -2012,11 +2015,7 @@ INSERT INTO archive_container (
 );
 
 
-INSERT INTO box_condition_type (
-  id
-  name 
-);
-VALUES();
+INSERT INTO box_condition_type ( id, name) VALUES();
 
 INSERT INTO favorite_type (id, name ) VALUES (1, 'Food')
 INSERT INTO favorite_type (id, name ) VALUES (2, 'Color')
@@ -2055,11 +2054,7 @@ VALUES();
 
 INSERT INTO paper_type ( id, name) VALUES(9,'Inkjet');
 
-INSERT INTO related_type (
-  id
-  name 
-);
-VALUES();
+INSERT INTO related_type ( id , name ) VALUES();
 
 
 INSERT INTO edition_type (
@@ -2123,3 +2118,11 @@ Autores sem nenhuma produção:
 select people.id, people_id, url from people left join people_produces_entity on people.id = people_id
 left join spider_item as s on people.id = s.id 
  where people_id is NULL and table_name = 'people'
+ 
+ Entity null:
+insert into entity (  id,entity_type_id, classification_type_id,language_id,country_id, collection_started)
+ VALUES (1, 1, 1, 1, 1, False ) 
+ 
+ Remove persona relationship
+ delete from persona_related_persona;
+delete from related_type
