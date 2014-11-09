@@ -20,7 +20,9 @@ import types
 class AnimeCharactersSpider(CrawlSpider):
 		name = "animecharacter_media"
 		allowed_domains = ["www.animecharactersdatabase.com"]
-		start_urls = ["http://www.animecharactersdatabase.com/allseries.php?x=0",
+		start_urls = [#"http://www.animecharactersdatabase.com/allseries.php?x=0",
+		#"http://www.animecharactersdatabase.com/source.php?id=100797",
+		"http://www.animecharactersdatabase.com/source.php?id=102662",
 		]
 		dbase = None
 		login_page = 'http://www.animecharactersdatabase.com/newforum.php'
@@ -132,6 +134,9 @@ class AnimeCharactersSpider(CrawlSpider):
 			#Get collection name
 			name = response.css('div.middleframe:nth-child(3) > h1:nth-child(1)::text').extract()
 				
+			#Get details table
+			table_details = response.css('')
+			
 			#Get name english
 			english_name = response.css('#bt > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)::text').extract()
 			
@@ -158,6 +163,13 @@ class AnimeCharactersSpider(CrawlSpider):
 			
 			#Get description
 			description = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > div:nth-child(12) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)::text').extract()
+			
+			#Get associated entities.
+			entities = response.css('')
+			
+			print description, name
+			
+			return
 			
 			try:
 				#Format name
@@ -221,6 +233,14 @@ class AnimeCharactersSpider(CrawlSpider):
 						new_title['language_id'] = self.dbase.language_ja
 						aliases.append(new_title)
 					
+				#Format table details
+				for item in table_details[]:
+					
+					
+					
+					
+				
+				
 				#Format owner
 				aliases_company = []
 				
@@ -315,57 +335,27 @@ class AnimeCharactersSpider(CrawlSpider):
 			search_title = response.css('div.middleframe:nth-child(3) > h1:nth-child(1)::text').extract()
 		
 			#Get type
-			type = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > h3::text').extract()
+			type = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > h3:nth-child(6)::text').extract()
+			if not type:
+				type = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > h3:nth-child(7)::text').extract()
+				
 			#Get series ID
 			
 			#Get details table.
 			table_details = response.css('#bt tr')
 
 			#Get english title
-			english_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)::text').extract()
 			english_title = table_details[1].css('td:nth-child(2)::text').extract()
 			
 			#Get romaji title
-			romanji_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2)::text').extract()
+			romanji_title = table_details[2].css('td:nth-child(2)::text').extract()
 			
 			#Get furigana title
-			furigana_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2)::text').extract()
+			furigana_title = table_details[3].css('td:nth-child(2)::text').extract()
 			
 			#Get japanese title
-			japanese_title = response.css('#bt > tbody:nth-child(1) > tr:nth-child(5) > td:nth-child(2)::text').extract()
-			
-			
-			print english_title
-			print table_details[2].css('td:nth-child(2)::text').extract()
-			print table_details[3].css('td:nth-child(2)::text').extract()
-			
-			
-			return
-			
-			#Get japanese studio name
-			japanese_studio_name_url = response.css('#bt > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2) a::attr(href)').extract()
-			japanese_studio_name_url_text = response.css('#bt > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2) a::text').extract()
-			japanese_studio_name_text = response.css('#bt > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(2)::text').extract()
-			
-			#Get english studio name
-			english_studio_name_url = response.css('#bt > tbody:nth-child(1) > tr:nth-child(7) > td:nth-child(2) a::attr(href)').extract()
-			english_studio_name_url_text = response.css('#bt > tbody:nth-child(1) > tr:nth-child(7) > td:nth-child(2) a::text').extract()
-			english_studio_name_text = response.css('#bt > tbody:nth-child(1) > tr:nth-child(7) > td:nth-child(2)::text').extract()
-			
-			#Get ratings
-			ratings = response.css('#bt > tbody:nth-child(1) > tr:nth-child(8) > td:nth-child(2)::text').extract()
-			
-			#Get genre
-			genres = response.css('#bt > tbody:nth-child(1) > tr:nth-child(9) > td:nth-child(2) a::text').extract()
-
-			#Get release date
-			release_date = response.css('#bt > tbody:nth-child(1) > tr:nth-child(10) > td:nth-child(2) a::text').extract()
-			release_date_text = response.css('#bt > tbody:nth-child(1) > tr:nth-child(10) > td:nth-child(2)::text').extract()
-			
-			#Get links.
-			links = response.css('#bt > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) a::attr(href)').extract()
-			links_name = response.css('#bt > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) a::text').extract()
-			
+			japanese_title = table_details[4].css('td:nth-child(2)::text').extract()
+						
 			#Get related work
 			related_url = response.css('#tile > ul:nth-child(1) li a::attr(href)').extract()
 			
@@ -374,13 +364,22 @@ class AnimeCharactersSpider(CrawlSpider):
 			notice_name = response.css('.notice_inner > a:nth-child(2)::text').extract()
 			notice_url = response.css('.notice_inner > a:nth-child(2)::attr(href)').extract()
 
-			#Others links will be get from others url. Like director, author.
 			
-			#synopse
-			synopsis = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > div:nth-child(14) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1)::text').extract()
+			#Get synopse
+			synopsis = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > div:nth-child(14) table tbody div::text').extract()
+			synopsis = util.sanitize_content(synopsis)
 			
-			#images
-			images = response.css('img::attr(src)').extract()
+			if not synopsis:
+				synopsis = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > div:nth-child(13) table tbody td::text').extract()
+				synopsis = util.sanitize_content(synopsis)
+			if not synopsis:
+				synopsis = response.css('div.middleframe:nth-child(3) > div:nth-child(2) > div:nth-child(14) table tbody tr td::text').extract()
+
+			#Get images
+			images = response.css('div.middleframe:nth-child(6) > div:nth-child(2) img::attr(src)').extract()
+			front_image = response.css('.vector table tr > td:nth-child(4) > a:nth-child(1) > img:nth-child(1)::attr(src)').extract()
+						
+			print related_url
 			
 			try:
 				search_title = util.sanitize_title(search_title)
@@ -465,9 +464,22 @@ class AnimeCharactersSpider(CrawlSpider):
 						aliases.append(new_title)
 				
 				
-				#Format table details
+				print len(aliases), type_id, len(table_details)
 				
-				for item in table_details[:]:
+				
+				
+				
+				#Format table details
+				episodes = 0
+				ova_episodes = 0
+				release_date, origin_entity_id, origin_type_id = None, None, None
+				classification_type_id = self.dbase.classification_type_12
+				genres_id = []
+				wikies = []
+				companies_id = []
+				aliases_company = []
+				
+				for item in table_details[5:]:
 					new_item = util.sanitize_title(item.css('th::text').extract())
 					if not new_item:
 						new_item = util.sanitize_title(item.css('th a::text').extract())
@@ -476,62 +488,144 @@ class AnimeCharactersSpider(CrawlSpider):
 					new_content_url = item.css('td a::attr(href)').extract()
 					new_content_text = item.css('td::text').extract()
 				
-					if new_item and (new_content or new_content_text):
+					if new_item and (new_content_url_text or new_content_text):
+						print new_item
 						print "teste"
+						
 						#Check release date
-						
+						if new_item == "Release Date":
+							release_date = util.sanitize_title(new_content_url_text)
+							if not release_date:
+								release_date = util.sanitize_title(new_content_text)
+								
 						#Check studios
+						elif "Studio Name" in new_item:# or re.search():
+							if new_item == "English Studio Name" or new_item == "Japanese Studio Name":
+								if new_item == "Japanese Studio Name":
+									language_company = self.dbase.language_ja
+								else:
+									language_company = self.dbase.language_en
+								
+								for index, url in enumerate(new_content_url):
+									company_name = util.sanitize_title(new_content_url_text[index])
+									if company_name:
+										new_alias = {}
+										new_alias['url'] = url
+										new_alias['name'] = company_name
+										new_alias['language_id'] = language_company
+										aliases_company.append(new_alias)
+							'''elif()
+								
+								
+								
 							#Check publisher
-						
+							elif re.search() != None:
+								company_type = 
 						
 							#Check Developer
+							elif re.search() != None:
+								company_type = 
+							else:
+								company_type = self.dbase.company_function_type_creator
+								'''
+								
+								
+							
 						#Check ratings
-						
+						elif new_item == "Content Rating":
+							#Format rating
+							ratings = util.sanitize_title(new_content_text)
+							if not ratings:
+								ratings = util.sanitize_title(new_content_url_text)
+								if ratings:
+									if "Mature" in ratings:
+										classification_type_id = self.dbase.classification_type_17
+									elif "Everyone" in ratings:
+										classification_type_id = self.dbase.classification_type_free
+									elif "Child" in ratings:
+										classification_type_id = self.dbase.classification_type_3
+									elif "10+" in ratings:
+										classification_type_id = self.dbase.classification_type_10
+									elif "Teen" in ratings:
+										classification_type_id = self.dbase.classification_type_13
+									elif "Adult" in ratings:
+										classification_type_id = self.dbase.classification_type_18
+				
 						#Check genre
-					
+						elif new_item == "Genre Tags":
+							#Format genre
+							genres = new_content_url_text
+							for genre in genres:
+								new_genre = util.sanitize_title(genre)
+								if new_genre:
+									#Create genre
+									genre_id = self.dbase.add_name_to_table(new_genre.title(), 'genre')
+									#if genre_id: Dont need to check, if not save will raise a valueerror.
+									genres_id.append(genre_id)
+							
 						#Check links
-						
+						elif new_item == "Links":
+							#Format wikis
+							for index, link in enumerate(new_content_url):
+							
+								if re.search(ur'\bjp\b', link) != None:
+									link_language = self.dbase.language_ja
+								elif re.search(ur'\bpt\b', link) != None:
+									link_language = self.dbase.language_pt
+								else:
+									link_language = self.dbase.language_en
+									
+								wiki = {}
+								wiki['name'] = new_content_url_text[index]
+								wiki['url'] = link
+								wiki['language_id'] = link_language
+								wikies.append(wiki)
 						
 						#Check episodes number (Epidoses, OVA)
-						
-						
+						elif re.search(ur'\b[eE]pisodes?\b', new_item) != None:
+							#check if OVA
+							if re.search(ur'\b[OovVAa]{3}\b', new_item) != None:
+								
+							else:
+					
 						#Check origin
-						
-						
+						elif re.search(ur'[Oo]rig[ie][nm]?', new_item) != None:
+							#If Origin in manga
+							origin_type = util.sanitize_title(new_contet_text)
+							if not origin_type:
+								origin_type = util.sanitize_title(new_contet_url_text)
+							
+							found_origin = False
+							if origin_type:
+								where_values = []
+								where_values.append(origin_type.title())
+								origin_type_id = self.dbase.get_var('entity_type', ['id'], "name = %s", where_values)
+								if origin_type_id:
+									found_origin = True
+									origin_entity_id = self.dbase.get_var('entity', ['entity.id'], "entity.entity_type_id = %s and entity_alias.name = %s", where_values, ['entity_alias'], ["entity_alias.entity_id = entity.id"])
+									
+							if not found_origin:
+								util.Log(response.url, "not found origin type", False)
+								
 						#Check people (Director, Author, Artist, Writer, Composer, ADR Director, Character Design, Illustrator, Scenario
+						elif re.search(ur'((ADR|ARD)? ?([Dd]irect|[Aa]uth|[Ii][l]{1,2}ustrat)or|[Aa]rtist|[Ss]cenar(io|y)|[Cc]haracter[ _-]?[Dd]esign|([cC]ompos|[Ww]rit)er)', new_item) != None:
 						
 						
 						#Check twitter
+						elif re.search(ur'[Tt]wi[t]{1,2}er', new_item) != None:
+							#Add twitter as comment.
 						
-						
-						
-						
-				#Format date
-				release_date = util.sanitize_title(release_date)
-				if not release_date:
-					release_date = util.sanitize_title(release_date_text)
-					
-				#Format companies
-				#Get company id from alias				
-				aliases_company = []
+						else:
+							#save comment
+				print len(aliases_company)
+				return		
+
 				
-				for index, url in enumerate(japanese_studio_name_url_text):
-					company_name = util.sanitize_title(japanese_studio_name_url_text[index])
-					new_alias = {}
-					new_alias['url'] = url
-					new_alias['name'] = company_name
-					new_alias['language_id'] = self.dbase.language_ja
-					aliases_company.append(new_alias)
-					
-				for index, url in enumerate(english_studio_name_url):
-					company_name = util.sanitize_title(english_studio_name_url_text[index])
-					new_alias = {}
-					new_alias['url'] = url
-					new_alias['name'] = company_name
-					new_alias['language_id'] = self.dbase.language_en
-					aliases_company.append(new_alias)
-					
-				companies_id = []
+				
+				
+				#Format companies creator
+				#Get company id from alias				
+				
 				for item in aliases_company:
 					#Create dummy. This method return the company ID and add new aliases if the company already exists. The new alias will be named as romanized type.
 					company_id = self.dbase.create_company(item['name'], item['language_id'], self.dbase.country_jp)
@@ -542,42 +636,12 @@ class AnimeCharactersSpider(CrawlSpider):
 						companies_id.append(new_company)
 						self.dbase.add_spider_item('company', company_id, item['url'], False)
 						
-				#Format rating
-				ratings = util.sanitize_title(ratings)
-				classification_type_id = self.dbase.classification_type_12
-				if ratings:
-					if "Mature" in ratings:
-						classification_type_id = self.dbase.classification_type_17
-					elif "Everyone" in ratings:
-						classification_type_id = self.dbase.classification_type_free
-					elif "Child" in ratings:
-						classification_type_id = self.dbase.classification_type_3
-					elif "10+" in ratings:
-						classification_type_id = self.dbase.classification_type_10
-					elif "Teen" in ratings:
-						classification_type_id = self.dbase.classification_type_13
-					elif "Adult" in ratings:
-						classification_type_id = self.dbase.classification_type_18
+
 				
-				#Format wikis
-				wikies = []
-				for index, link in enumerate(links):
-					wiki = {}
-					wiki['name'] = links_name[index]
-					wiki['url'] = link
-					wiki['language_id'] = self.dbase.language_en
-					wikies.append(wiki)
+				
 				 
 				 
-				#Format genre
-				genres_id = []
-				for genre in genres:
-					new_genre = util.sanitize_title(genre)
-					if new_genre:
-						#Create genre
-						genre_id = self.dbase.add_name_to_table(new_genre.title(), 'genre')
-						if genre_id:
-							genres_id.append(genre_id)
+				
 				
 				#Format related work
 				relateds = []
@@ -595,8 +659,9 @@ class AnimeCharactersSpider(CrawlSpider):
 					
 					relateds.append(new_related)
 					
-				new_images = []
 				#Format images
+				new_images = []
+				
 				for image in images:
 					image_array = image.split('.')
 					new_image = {}
@@ -607,6 +672,16 @@ class AnimeCharactersSpider(CrawlSpider):
 					new_image['name'] = new_image_name.pop()
 					new_images.append(new_image)
 					
+				for image in front_image:
+					image_array = image.split('.')
+					new_image = {}
+					new_image['url'] = image
+					new_image['extension'] = image_array.pop()
+					new_image_name = image_array.pop()
+					new_image_name = new_image_name.split('/')
+					new_image['name'] = new_image_name.pop()
+					new_images.append(new_image)
+				
 				#Format collection
 				collection_id = None
 				collection_started = 'False'
@@ -652,6 +727,9 @@ class AnimeCharactersSpider(CrawlSpider):
 						elif(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 							#return the element most appear on list
 							collection_id = util.most_common_oneliner(collection_id)
+				
+				
+				#Format language and country
 				if type_id == self.dbase.entity_type_manhaw:
 					language_id = self.dbase.language_ko
 					country_id = self.dbase.country_kr
@@ -664,15 +742,23 @@ class AnimeCharactersSpider(CrawlSpider):
 					#Format country
 					country_id = self.dbase.country_jp
 				
+				#Format origin
+				if not origin_entity_id and found_origin:
+					#Create dummy origin.
+					if aliases:
+						
+					new_title = aliases[0]
+					origin_entity_id = self.dbase.create_entity(search_title, origin_type_id, classification_type_id, language_id, country_id)
 				
 				#Format synopsis
 				synopses = []
-				synops = {}
-				synops['language_id'] = self.dbase.language_en
-				synops['content'] = util.sanitize_content(synopsis)
+				if synopsis:
+					synops = {}
+					synops['language_id'] = self.dbase.language_en
+					synops['content'] = util.sanitize_content(synopsis)
+					synopses.append(synops)
 				
-				synopses.append(synops)
-				
+				return 
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Series", e.message
 				util.PrintException()
@@ -689,6 +775,9 @@ class AnimeCharactersSpider(CrawlSpider):
 				
 				entity_id = self.dbase.create_entity(search_title, type_id, classification_type_id, language_id, country_id, release_date, collection_id, collection_started, aliases, [], synopsis, wikies, [], [], [], genres, [], companies_id, [], relateds, None, new_images, update_id)
 				
+				if origin_entity_id:
+					self.add_relation_with_type('entity', 'entity', origin_entity_id, entity_id, 'based', self.dbase.based_type_adapted_from)
+					
 				self.dbase.add_spider_item('entity', entity_id, response.url, True)
 				self.dbase.commit()
 				print "Success"
