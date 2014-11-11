@@ -3677,12 +3677,9 @@ class Database:
 		This method require a goods_id to register, if you would like to add a goods and a figure with 
 		the same method use create_figure method instead.
 	"""
-	def add_figure(self, goods_id, figure_version_id, scale_id):
+	def add_figure(self, goods_id, scale_id):
 		if(not goods_id):
 			raise ValueError("goods id cannot be empty on add_figure method.")
-		
-		if(not figure_version_id):
-			raise ValueError("figure_version_id cannot be empty on add_figure method.")
 		
 		if(not scale_id):
 			raise ValueError("scale_id cannot be empty on add_figure method.")
@@ -3696,11 +3693,10 @@ class Database:
 		where_values.append(goods_id)
 		id = self.get_var(table, ['goods_id'], "goods_id = %s",where_values)
 		if(id == None):
-			columns = ['goods_id', 'figure_version_id', 'scale_id']
+			columns = ['goods_id', 'scale_id']
 			value = []
 			value.append(goods_id)
 			value.append(scale_id)
-			value.append(figure_version_id)
 				
 			self.insert(table, value, columns)
 			id = self.get_last_insert_id(table)
@@ -3744,7 +3740,7 @@ class Database:
 		The parameters goods must have elements that are dictionary. 
 	"""
 	def create_goods(self, romanize_title, language_id, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], update_id = None):
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], update_id = None):
 		if(not romanize_title):
 			raise ValueError("romanize_title cannot be empty on create_goods method.")
 		
@@ -3805,6 +3801,10 @@ class Database:
 			for image in images:
 				self.add_image_to_goods(image['url'], image['extension'], image['name'], goods_id, image['image_type_id'])
 		
+			#versions
+			for version in versions:
+				self.add_multi_relation(goods_id, version, 'goods', 'goods_version')
+				
 			#commit changes
 			self.commit()
 			
@@ -3820,16 +3820,16 @@ class Database:
 		Method used to create a figure that is a specialization of goods.
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
-	def create_figure(self, figure_version_id, scale_id, romanize_title, language_id, goods_type_id, height, 
+	def create_figure(self, scale_id, romanize_title, language_id, goods_type_id, height, 
 	collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = []):
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], update_id = None):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images)
-			self.add_figure(goods_id, figure_version_id, scale_id)
+			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images, versions, update_id)
+			self.add_figure(goods_id, scale_id)
 			
 			#commit changes
 			self.commit()

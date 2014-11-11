@@ -1033,10 +1033,10 @@ INSERT INTO image_user_type ( id, name ) VALUES( 1, 'profile');
 INSERT INTO lyric_type ( id, name) VALUES(1,'Original');
 INSERT INTO lyric_type ( id, name) VALUES(2,'Translation');
 
-INSERT INTO figure_version ( id, name) VALUES (1,'Limited');
-INSERT INTO figure_version ( id, name) VALUES (2,'Game Prize');
-INSERT INTO figure_version ( id, name) VALUES (3,'Enumerated');
-INSERT INTO figure_version ( id, name) VALUES (4,'Standard');
+INSERT INTO goods_version ( id, name) VALUES (1,'Limited');
+INSERT INTO goods_version ( id, name) VALUES (2,'Game Prize');
+INSERT INTO goods_version ( id, name) VALUES (3,'Enumerated');
+INSERT INTO goods_version ( id, name) VALUES (4,'Standard');
 
 INSERT INTO release_ownership_type ( id, name) VALUES(1, 'Downloaded');
 INSERT INTO release_ownership_type ( id, name) VALUES(2, 'CD Save');
@@ -1086,7 +1086,7 @@ INSERT INTO company_function_type ( id, name) VALUES(8,'Illustrate');
 INSERT INTO company_function_type ( id, name) VALUES(9,'Print');
 INSERT INTO company_function_type ( id, name) VALUES(10,'Diagram');
 INSERT INTO company_function_type ( id, name) VALUES(11,'Program');
-INSERT INTO company_function_type ( id, name) VALUES(12,'Develop');
+INSERT INTO company_function_type ( id, name) VALUES(12,'Developer');
 INSERT INTO company_function_type ( id, name) VALUES(13,'Motion Capture');
 INSERT INTO company_function_type ( id, name) VALUES(14,'Stuntmen');
 INSERT INTO company_function_type ( id, name) VALUES(15,'Distribute');
@@ -2126,3 +2126,7 @@ insert into entity (  id,entity_type_id, classification_type_id,language_id,coun
  Remove persona relationship
  delete from persona_related_persona;
 delete from related_type
+
+
+Atualizar collection first item
+Atualizar company name, mover para company_alias

@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS product_condition_type (
 )
 ;
 
-CREATE TABLE IF NOT EXISTS figure_version (
+CREATE TABLE IF NOT EXISTS goods_version (
   id SERIAL,
   name VARCHAR UNIQUE NOT NULL,
   PRIMARY KEY(id)
@@ -470,7 +470,7 @@ CREATE TABLE IF NOT EXISTS collaborator (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
   
 )
 ;
@@ -542,7 +542,7 @@ CREATE TABLE IF NOT EXISTS lists_goods (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_email (
@@ -571,7 +571,7 @@ CREATE TABLE IF NOT EXISTS company (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -582,7 +582,7 @@ CREATE TABLE IF NOT EXISTS collaborator_website (
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -597,11 +597,11 @@ CREATE TABLE IF NOT EXISTS soundtrack (
   FOREIGN KEY(soundtrack_type_id)
     REFERENCES soundtrack_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -613,7 +613,7 @@ CREATE TABLE IF NOT EXISTS social (
   FOREIGN KEY(social_type_id)
     REFERENCES social_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -631,7 +631,7 @@ CREATE TABLE IF NOT EXISTS event (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -644,7 +644,7 @@ CREATE TABLE IF NOT EXISTS version (
   FOREIGN KEY(stage_developer_type_id)
     REFERENCES stage_developer_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -659,7 +659,7 @@ CREATE TABLE IF NOT EXISTS requirements (
   FOREIGN KEY(version_id)
     REFERENCES version(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -672,11 +672,11 @@ CREATE TABLE IF NOT EXISTS user_filter (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(user_filter_type_id)
     REFERENCES user_filter_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -694,15 +694,15 @@ CREATE TABLE IF NOT EXISTS people (
   FOREIGN KEY(blood_type_id)
     REFERENCES blood_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
 FOREIGN KEY(blood_rh_type_id)
     REFERENCES blood_rh_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -715,11 +715,11 @@ CREATE TABLE IF NOT EXISTS users_has_social (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(social_id)
     REFERENCES social(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -730,11 +730,11 @@ CREATE TABLE IF NOT EXISTS tag_has_filter_type (
   FOREIGN KEY(filter_type_id)
     REFERENCES filter_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -747,11 +747,11 @@ CREATE TABLE IF NOT EXISTS people_has_social (
   FOREIGN KEY(social_id)
     REFERENCES social(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -764,11 +764,11 @@ CREATE TABLE IF NOT EXISTS collaborator_has_social (
   FOREIGN KEY(social_id)
     REFERENCES social(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -779,11 +779,11 @@ CREATE TABLE IF NOT EXISTS shops_operate_on_country (
   FOREIGN KEY(shops_id)
     REFERENCES shops(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -794,11 +794,11 @@ CREATE TABLE IF NOT EXISTS people_nacionalization_on_country (
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS country_has_language (
@@ -808,11 +808,11 @@ CREATE TABLE IF NOT EXISTS country_has_language (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -824,11 +824,11 @@ CREATE TABLE IF NOT EXISTS collaborator_has_collaborator_member (
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collaborator_member_id)
     REFERENCES collaborator_member(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS soundtrack_integrate_collection (
@@ -838,11 +838,11 @@ CREATE TABLE IF NOT EXISTS soundtrack_integrate_collection (
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -853,11 +853,11 @@ CREATE TABLE IF NOT EXISTS category_has_filter_type (
   FOREIGN KEY(category_id)
     REFERENCES category(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(filter_type_id)
     REFERENCES filter_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -868,11 +868,11 @@ CREATE TABLE IF NOT EXISTS genre_has_filter_type (
   FOREIGN KEY(genre_id)
     REFERENCES category(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(filter_type_id)
     REFERENCES filter_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -888,15 +888,15 @@ CREATE TABLE IF NOT EXISTS audio (
   FOREIGN KEY(audio_codec_id)
     REFERENCES audio_codec(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(audio_channels_id)
     REFERENCES audio_channels(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -907,11 +907,11 @@ CREATE TABLE IF NOT EXISTS audio_has_language (
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -922,11 +922,11 @@ CREATE TABLE IF NOT EXISTS company_sponsors_event (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(event_id)
     REFERENCES event(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -938,11 +938,11 @@ CREATE TABLE IF NOT EXISTS country_has_currency (
   FOREIGN KEY(currency_id)
     REFERENCES currency(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -953,11 +953,11 @@ CREATE TABLE IF NOT EXISTS company_owner_collection (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -968,11 +968,11 @@ CREATE TABLE IF NOT EXISTS company_has_country (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -985,11 +985,11 @@ CREATE TABLE IF NOT EXISTS company_has_social (
   FOREIGN KEY(social_id)
     REFERENCES social(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1000,11 +1000,11 @@ CREATE TABLE IF NOT EXISTS people_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1018,11 +1018,11 @@ CREATE TABLE IF NOT EXISTS lists_edition (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_type_id)
     REFERENCES entity_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1036,11 +1036,11 @@ CREATE TABLE IF NOT EXISTS lists_release (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_type_id)
     REFERENCES entity_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1051,11 +1051,11 @@ CREATE TABLE IF NOT EXISTS audio_has_genre (
   FOREIGN KEY(genre_id)
     REFERENCES genre(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1067,15 +1067,15 @@ CREATE TABLE IF NOT EXISTS soundtrack_has_image (
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_soundtrack_type_id)
     REFERENCES image_soundtrack_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1091,19 +1091,19 @@ CREATE TABLE IF NOT EXISTS lyric (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(lyric_type_id)
     REFERENCES lyric_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1120,23 +1120,23 @@ CREATE TABLE IF NOT EXISTS entity (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(classification_type_id)
     REFERENCES classification_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_type_id)
     REFERENCES entity_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1157,11 +1157,11 @@ CREATE TABLE IF NOT EXISTS entity_description (
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1179,11 +1179,11 @@ CREATE TABLE IF NOT EXISTS goods (
   FOREIGN KEY(goods_type_id)
     REFERENCES goods_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1197,11 +1197,11 @@ CREATE TABLE IF NOT EXISTS entity_wiki (
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1215,7 +1215,7 @@ CREATE TABLE IF NOT EXISTS archive (
   FOREIGN KEY(version_id)
     REFERENCES version(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1227,11 +1227,11 @@ CREATE TABLE IF NOT EXISTS entity_synopsis (
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1245,11 +1245,11 @@ CREATE TABLE IF NOT EXISTS people_alias (
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1388,11 +1388,11 @@ CREATE TABLE IF NOT EXISTS soundtrack_has_audio (
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS entity_has_category (
@@ -1402,11 +1402,11 @@ CREATE TABLE IF NOT EXISTS entity_has_category (
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(category_id)
     REFERENCES category(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1417,11 +1417,11 @@ CREATE TABLE IF NOT EXISTS entity_has_tag (
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1432,11 +1432,11 @@ CREATE TABLE IF NOT EXISTS entity_has_genre (
   FOREIGN KEY(genre_id)
     REFERENCES genre(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1450,11 +1450,11 @@ CREATE TABLE IF NOT EXISTS hash (
   FOREIGN KEY(archive_id)
     REFERENCES archive(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(hash_type_id)
     REFERENCES hash_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1466,15 +1466,15 @@ CREATE TABLE IF NOT EXISTS persona_related_persona (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(another_persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(related_type_id)
     REFERENCES related_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1486,15 +1486,15 @@ CREATE TABLE IF NOT EXISTS entity_based_entity (
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(another_entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(based_type_id)
     REFERENCES based_type(id)
       ON DELETE SET DEFAULT
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1508,15 +1508,15 @@ CREATE TABLE IF NOT EXISTS entity_alias (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1546,11 +1546,11 @@ CREATE TABLE IF NOT EXISTS entity_edition (
   FOREIGN KEY(event_id)
     REFERENCES event(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(edition_type_id)
     REFERENCES edition_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS entity_release (
@@ -1565,19 +1565,19 @@ CREATE TABLE IF NOT EXISTS entity_release (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(release_type_id)
     REFERENCES release_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1591,23 +1591,23 @@ CREATE TABLE IF NOT EXISTS software_edition (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(media_type_id)
     REFERENCES media_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(software_type_id)
     REFERENCES software_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(plataform_type_id)
     REFERENCES plataform_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(visual_type_id)
     REFERENCES visual_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1620,19 +1620,19 @@ CREATE TABLE IF NOT EXISTS people_compose_audio (
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(compose_type_id)
     REFERENCES compose_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_alias_id)
     REFERENCES people_alias(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1645,19 +1645,19 @@ CREATE TABLE IF NOT EXISTS people_produces_entity (
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(produces_type_id)
     REFERENCES produces_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_alias_id)
     REFERENCES people_alias(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1672,23 +1672,23 @@ CREATE TABLE IF NOT EXISTS lists_edition_list_entity_edition (
   FOREIGN KEY(lists_edition_id)
     REFERENCES lists_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(edition_read_status_type_id)
     REFERENCES edition_read_status_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(condition_type_id)
     REFERENCES condition_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(ownership_status_id)
     REFERENCES ownership_status(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1703,23 +1703,23 @@ CREATE TABLE IF NOT EXISTS lists_goods_list_goods (
   FOREIGN KEY(lists_goods_id)
     REFERENCES lists_goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(product_condition_type_id)
     REFERENCES product_condition_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(box_condition_type_id)
     REFERENCES box_condition_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(ownership_status_id)
     REFERENCES ownership_status(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1731,7 +1731,7 @@ CREATE TABLE IF NOT EXISTS persona_unusual_features (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1745,11 +1745,11 @@ CREATE TABLE IF NOT EXISTS persona_alias (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1761,7 +1761,7 @@ CREATE TABLE IF NOT EXISTS persona_occupation (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1773,7 +1773,7 @@ CREATE TABLE IF NOT EXISTS game_release (
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1785,7 +1785,7 @@ CREATE TABLE IF NOT EXISTS persona_affiliation (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1797,7 +1797,7 @@ CREATE TABLE IF NOT EXISTS persona_race (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1808,11 +1808,11 @@ CREATE TABLE IF NOT EXISTS software_edition_has_version (
   FOREIGN KEY(software_edition_id)
     REFERENCES software_edition(entity_edition_id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(version_id)
     REFERENCES version(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1825,11 +1825,11 @@ CREATE TABLE IF NOT EXISTS read_edition (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(print_type_id)
     REFERENCES print_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS soundtrack_for_entity_edition (
@@ -1839,11 +1839,11 @@ CREATE TABLE IF NOT EXISTS soundtrack_for_entity_edition (
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
  
@@ -1858,15 +1858,15 @@ CREATE TABLE IF NOT EXISTS entity_edition_launch_country (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION, 
+      ON UPDATE CASCADE, 
 	FOREIGN KEY(currency_id)
     REFERENCES currency(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1881,7 +1881,7 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_subtitle (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1892,11 +1892,11 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_language (
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1907,11 +1907,11 @@ CREATE TABLE IF NOT EXISTS entity_release_has_version (
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(version_id)
     REFERENCES version(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1922,11 +1922,11 @@ CREATE TABLE IF NOT EXISTS entity_release_has_language (
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1945,11 +1945,11 @@ CREATE TABLE IF NOT EXISTS mod_release (
   FOREIGN KEY(mod_type_id)
     REFERENCES mod_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1960,11 +1960,11 @@ CREATE TABLE IF NOT EXISTS mod_release_has_image (
   FOREIGN KEY(mod_release_id)
     REFERENCES mod_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1976,15 +1976,15 @@ CREATE TABLE IF NOT EXISTS collaborator_provides_entity_release (
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collaborator_type_id)
     REFERENCES collaborator_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -1996,15 +1996,15 @@ CREATE TABLE IF NOT EXISTS collaborator_member_produces_entity_release (
   FOREIGN KEY(collaborator_member_id)
     REFERENCES collaborator_member(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collaborator_member_type_id)
     REFERENCES function_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2016,15 +2016,15 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_company (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_function_type_id)
     REFERENCES company_function_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2036,15 +2036,15 @@ CREATE TABLE IF NOT EXISTS entity_has_company (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_function_type_id)
     REFERENCES company_function_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2056,15 +2056,15 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_entity_edition_type_id)
     REFERENCES image_entity_edition_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2076,11 +2076,11 @@ CREATE TABLE IF NOT EXISTS entity_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2093,11 +2093,11 @@ CREATE TABLE IF NOT EXISTS number_edition (
   FOREIGN KEY(number_type_id)
     REFERENCES number_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS number_release (
@@ -2110,15 +2110,15 @@ CREATE TABLE IF NOT EXISTS number_release (
   FOREIGN KEY(number_type_id)
     REFERENCES number_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(number_release_id)
     REFERENCES number_release(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2132,19 +2132,19 @@ CREATE TABLE IF NOT EXISTS lists_release_list_entity_release (
   FOREIGN KEY(lists_release_id)
     REFERENCES lists_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(release_ownership_type_id)
     REFERENCES release_ownership_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(release_edition_read_status_type_id)
     REFERENCES release_edition_read_status_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2160,11 +2160,11 @@ CREATE TABLE IF NOT EXISTS soundtrack_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2183,11 +2183,11 @@ CREATE TABLE IF NOT EXISTS audio_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2203,11 +2203,11 @@ CREATE TABLE IF NOT EXISTS company_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2223,11 +2223,11 @@ CREATE TABLE IF NOT EXISTS people_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2243,11 +2243,11 @@ CREATE TABLE IF NOT EXISTS goods_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2263,11 +2263,11 @@ CREATE TABLE IF NOT EXISTS collaborator_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2283,11 +2283,11 @@ CREATE TABLE IF NOT EXISTS entity_edition_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2303,11 +2303,11 @@ CREATE TABLE IF NOT EXISTS collection_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2323,11 +2323,11 @@ CREATE TABLE IF NOT EXISTS entity_release_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2343,11 +2343,11 @@ CREATE TABLE IF NOT EXISTS entity_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2362,23 +2362,23 @@ CREATE TABLE IF NOT EXISTS people_voice_persona (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tag_user_filter (
@@ -2388,11 +2388,11 @@ CREATE TABLE IF NOT EXISTS tag_user_filter (
   FOREIGN KEY(user_filter_id)
     REFERENCES user_filter(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2403,11 +2403,11 @@ CREATE TABLE IF NOT EXISTS classification_user_filter (
   FOREIGN KEY(user_filter_id)
     REFERENCES user_filter(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(classification_id)
     REFERENCES classification_type(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2418,11 +2418,11 @@ CREATE TABLE IF NOT EXISTS category_user_filter (
   FOREIGN KEY(user_filter_id)
     REFERENCES user_filter(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(category_id)
     REFERENCES category(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2435,15 +2435,15 @@ CREATE TABLE IF NOT EXISTS persona_appear_on_entity (
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(entity_id)
     REFERENCES entity(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
 	 FOREIGN KEY(persona_alias_id)
     REFERENCES persona_alias(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2454,11 +2454,11 @@ CREATE TABLE IF NOT EXISTS persona_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2470,15 +2470,15 @@ CREATE TABLE IF NOT EXISTS company_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_company_type_id)
     REFERENCES image_company_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2492,11 +2492,11 @@ CREATE TABLE IF NOT EXISTS people_voice_persona_on_number_edition (
   FOREIGN KEY(people_voice_persona_persona_id, people_voice_persona_people_id, people_voice_persona_language_id, people_voice_persona_entity_id)
     REFERENCES people_voice_persona(persona_id, people_id, language_id, entity_id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(number_edition_id)
     REFERENCES number_edition(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2507,11 +2507,11 @@ CREATE TABLE IF NOT EXISTS requirements_has_driver (
   FOREIGN KEY(requirements_id)
     REFERENCES requirements(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(driver_id)
     REFERENCES driver(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2523,15 +2523,15 @@ CREATE TABLE IF NOT EXISTS audio_has_image (
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_audio_type_id)
     REFERENCES image_audio_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2543,15 +2543,15 @@ CREATE TABLE IF NOT EXISTS collaborator_has_image (
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_collaborator_type_id)
     REFERENCES image_collaborator_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2563,15 +2563,15 @@ CREATE TABLE IF NOT EXISTS user_has_image (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_user_type_id)
     REFERENCES image_user_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2584,11 +2584,11 @@ CREATE TABLE IF NOT EXISTS archive_url (
   FOREIGN KEY(archive_id)
     REFERENCES archive(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(url_type_id)
     REFERENCES url_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2603,15 +2603,15 @@ CREATE TABLE IF NOT EXISTS video_release (
   FOREIGN KEY(entity_release_id)
     REFERENCES entity_release(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(archive_container_id)
     REFERENCES archive_container(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(video_codec_id)
     REFERENCES video_codec(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2623,15 +2623,15 @@ CREATE TABLE IF NOT EXISTS video_release_has_audio_codec (
   FOREIGN KEY(audio_codec_id)
     REFERENCES audio_codec(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(video_release_entity_release_id)
     REFERENCES video_release(entity_release_id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2645,15 +2645,15 @@ CREATE TABLE IF NOT EXISTS goods_alias (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2665,15 +2665,15 @@ CREATE TABLE IF NOT EXISTS figure (
   FOREIGN KEY(scale_id)
     REFERENCES scale(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(figure_version_id)
     REFERENCES figure_version(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2686,11 +2686,11 @@ CREATE TABLE IF NOT EXISTS goods_description (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
 FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2704,15 +2704,15 @@ CREATE TABLE IF NOT EXISTS goods_launch_country (
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(currency_id)
     REFERENCES currency(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2725,19 +2725,19 @@ CREATE TABLE IF NOT EXISTS people_create_goods (
   FOREIGN KEY(people_id)
     REFERENCES people(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(create_type_id)
     REFERENCES create_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(people_alias_id)
     REFERENCES people_alias(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2749,15 +2749,15 @@ CREATE TABLE IF NOT EXISTS goods_has_image (
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(image_goods_type_id)
     REFERENCES image_goods_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2768,11 +2768,11 @@ CREATE TABLE IF NOT EXISTS goods_has_shop_location (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(shop_location_id)
     REFERENCES shop_location(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2783,11 +2783,11 @@ CREATE TABLE IF NOT EXISTS goods_has_tag (
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2800,11 +2800,11 @@ CREATE TABLE IF NOT EXISTS goods_has_shops (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(shops_id)
     REFERENCES shops(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2815,11 +2815,11 @@ CREATE TABLE IF NOT EXISTS goods_from_persona (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2830,11 +2830,11 @@ CREATE TABLE IF NOT EXISTS goods_has_category (
   FOREIGN KEY(category_id)
     REFERENCES category(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2845,11 +2845,11 @@ CREATE TABLE IF NOT EXISTS goods_has_material (
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(material_id)
     REFERENCES material(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2861,17 +2861,33 @@ CREATE TABLE IF NOT EXISTS goods_has_company (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(company_function_type_id)
     REFERENCES company_function_type(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
+
+CREATE TABLE IF NOT EXISTS goods_has_goods_version (
+  goods_version_id INTEGER  NOT NULL,
+  goods_id BIGINT  NOT NULL,
+  PRIMARY KEY(goods_version_id, goods_id),
+  FOREIGN KEY(goods_version_id)
+    REFERENCES goods_version(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+)
+;
+
 
 CREATE TABLE IF NOT EXISTS company_alias (
   id SERIAL,
@@ -2883,15 +2899,15 @@ CREATE TABLE IF NOT EXISTS company_alias (
   FOREIGN KEY(company_id)
     REFERENCES company(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(alias_type_id)
     REFERENCES alias_type(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2905,7 +2921,7 @@ CREATE TABLE IF NOT EXISTS collection_alias (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE SET NULL
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(collection_id)
     REFERENCES collection(id)
       ON DELETE CASCADE
@@ -2931,7 +2947,7 @@ CREATE TABLE IF NOT EXISTS collection_wiki (
   FOREIGN KEY(language_id)
     REFERENCES language(id)
       ON DELETE NO ACTION
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2947,11 +2963,11 @@ CREATE TABLE IF NOT EXISTS persona_comments (
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
 
@@ -2962,10 +2978,10 @@ CREATE TABLE IF NOT EXISTS persona_has_tag (
   FOREIGN KEY(tag_id)
     REFERENCES tag(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION,
+      ON UPDATE CASCADE,
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
       ON DELETE CASCADE
-      ON UPDATE NO ACTION
+      ON UPDATE CASCADE
 )
 ;
