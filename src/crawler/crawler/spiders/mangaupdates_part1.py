@@ -232,8 +232,9 @@ class MangaUpdatesSpider(CrawlSpider):
 					socials.append(social_facebook)
 				
 				#Format comments
-				if(comments != None):
+				if comments:
 					comments = util.sanitize_content(comments)
+					
 			except ValueError as e:
 				print "Error on formatting and getting IDs to save Group", e.message
 				util.PrintException()

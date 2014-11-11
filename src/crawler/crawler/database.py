@@ -1164,52 +1164,67 @@ class Database:
 		try:
 			entity_id = self.add_entity(entity_type_id, classification_type_id, language_id, country_id, launch_year, collection_id, collection_started, update_id)
 			
+			#print 1
 			if romanized_title:
 				#register main name (Romanize title and Romanized Subtitle)
 				self.add_alias(romanized_title, entity_id, language_id, 'entity', self.alias_type_romanized)
 			
+			#print 2
 			if romanize_subtitle:
 				self.add_alias(romanize_subtitle, entity_id, language_id, 'entity', self.alias_type_subromanized)
 			
+			#print 3
 			for title in titles:
 				self.add_alias(title['title'], entity_id, title['language_id'], 'entity', self.alias_type_title)
 			
+			#print 4
 			for subtitle in subtitles:	
 				self.add_alias(subtitle['title'], entity_id, subtitle['language_id'], 'entity', self.alias_type_subtitle)
 			
+			#print 5
 			#register synopsis
 			for synops in synopsis:	
 				self.add_entity_synopsis(entity_id, synops['language_id'], synops['content'])
 			
+			#print 6
 			for description in descriptions:
 				self.add_entity_description(entity_id, description['language_id'], description['content'])
 			
+			#print 7
 			for category in categories:
 				self.add_multi_relation(entity_id, category['id'], 'entity', 'category')
 
+			#print 8
 			for tag in tags:
 				self.add_multi_relation(entity_id, tag['id'], 'entity', 'tag')
-	
+
+			#print 9
 			for wiki in wikis:
 				self.add_wiki(entity_id, wiki['name'], wiki['url'], wiki['language_id'])
 			
+			#print 10
 			for persona in personas:
 				#persona first_appear is 0 or 1.
 				self.add_persona_to_entity(entity_id, persona['id'], persona['alias_id'], persona['first_appear'])
 			
+			#print 11
 			for company in companies:
 				#print company
 				self.add_relation_company(company['id'], entity_id, company['function_type_id'], 'entity')
 			
+			#print 12
 			for people in peoples:
 				self.add_relation_people(people['id'], people['alias_used_id'], entity_id, 'entity', people['relation_type_id'])
 			
+			#print 13
 			for related in relateds:
 				self.add_relation_with_type('entity', 'entity', entity_id, related['id'], 'based', related['type_id'])
 			
+			#print 14
 			for genre in genres:
 				self.add_multi_relation(entity_id, genre['id'], 'entity', 'genre')
 			
+			#print 15
 			for image in images:
 				self.add_image_to_entity(image['url'], image['extension'], image['name'], entity_id)
 			
@@ -1224,6 +1239,28 @@ class Database:
 		finally:
 			self.set_auto_transaction(True)
 	
+	def update_entity_collection_id(self, entity_id, collection_id):
+		if not entity_id:
+			raise ValueError("entity_id cannot be empty on update_entity_collection_id method.")
+		if not collection_id:
+			raise ValueError("collection_id cannot be empty on update_entity_collection_id method.")
+		
+		self.check_id_exists('entity', entity_id)
+		self.check_id_exists('collection', collection_id)
+		
+		table = 'entity'
+		
+		columns = ['collection_id']
+		values = []
+		values.append(collection_id)
+		
+		where_values = []
+		where_values.append(entity_id)
+
+		if(self.update(table, values, columns, "id = %s", where_values) == False):
+			raise ValueError("An error occurred when trying to update on update_entity_collection_id(%s, %s)." % (entity_id, collection_id))
+		return True
+		
 	############################### Edition Methods ###############################
 	
 	"""
@@ -2265,8 +2302,8 @@ class Database:
 	"""
 	def add_company(self, name, country_origin_id, description = None, social_name = None, start_year = None, website = None, foundation_date = None, update_id = None):
 		#print name, country_origin_id, description, social_name, start_year, website, foundation_date, update_id
-		if(not name):
-			raise ValueError("Name cannot be empty on add_company method.")
+		#if(not name):
+		#	raise ValueError("Name cannot be empty on add_company method.")
 		
 		if(not country_origin_id):
 			raise ValueError("country_origin_id cannot be empty on add_company method.")
@@ -2281,9 +2318,12 @@ class Database:
 		id = self.get_var(table, ['company.id'], "alias.name = %s and company.country_id = %s", where_values, ['company_alias as alias'], ['company.id = alias.company_id'])
 		
 		if(id == None or update_id):
-			columns = ['name']
+			columns = []
 			value = []
-			value.append(name)
+			
+			if name:
+				columns.append('name')
+				value.append(name)
 			
 			if country_origin_id:
 				columns.append('country_id')
@@ -3127,7 +3167,7 @@ class Database:
 		There is no entities to register with collection because a collection is already registered with entity. 
 		Because that a collection must be create previous the insertion of entity.
 	"""
-	def create_collection(self, name, description = None, soundtracks = [], owners = [], aliases = [], language = None, update_id = None):
+	def create_collection(self, name, description = None, soundtracks = [], owners = [], aliases = [], language = None, update_id = None, entities = []):
 		#set commit to false.
 		self.set_auto_transaction(False)
 		try:
@@ -3141,11 +3181,14 @@ class Database:
 			for soundtrack_id in soundtracks:
 				self.add_multi_relation(id, soundtrack_id, 'soundtrack', 'collection', 'integrate')
 			
-			for owner in owners:
-				self.add_multi_relation(owner_id, id, 'company', 'collection', 'owner')
+			for owner_id in owners:
+				self.add_multi_relation(owner_id, collection_id, 'company', 'collection', 'owner')
 			
 			for alias in aliases:
 				self.add_alias(alias['title'], collection_id, alias['language_id'], 'collection', self.alias_type_alias)
+				
+			for entity in entities:
+				self.update_entity_collection_id(entity, collection_id)
 				
 			#commit changes
 			self.commit()
