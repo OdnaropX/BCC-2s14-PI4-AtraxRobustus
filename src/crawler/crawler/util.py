@@ -18,6 +18,63 @@ pattern_replace_name = re.compile(ur'(:.*|\bdj\b.*|\(.*\)|\[.*\]|- .*)')
 	Have also methods for insert on specified table following it own logic.
 """
 
+def get_formatted_date(date):
+	if not date:
+		return '1900-01-01'
+	if '-' in date:
+		split_type = '-'
+	elif '/' in date:
+		split_type = '/'
+	else:
+		return '1900-01-01'
+		
+	new_date = date.split(split_type)
+	day, month, year = '28', '01', '1900' 
+	next = None
+	
+	if len(new_date) == 2:
+		if len(new_date[1]) == 4:
+			year = new_date[1]
+			next = new_date[0]
+			number = convert_to_number(new_date[0])
+		else:
+			year = new_date[0]
+			next = new_date[1]
+			number = convert_to_number(new_date[1])
+			
+		if number > 12:
+			month = next
+		else:
+			day = next
+		
+	elif len(new_date) == 3:
+		month = new_date[1]
+		if len(new_date[0]) == 4:
+			year = new_date[0]
+			day = new_date[2]
+		else:
+			year = new_date[2]
+			day = new_date[0]
+		
+		if convert_to_number(month) > 12:
+			new_day = month
+			month = day
+			day = new_day
+		
+	else:#1 date format.
+		if len(new_date[0]) == 4:
+			year = new_date[0].strip()
+		else:
+			number = convert_to_number(new_date[0])
+			if number < 20:
+				year = number + 2000
+			else:
+				year = number + 1900
+			
+	n_date = "{0}-{1}-{2}".format(year, month, day)
+	
+	return n_date
+	
 """
 	Method used to format the name.
 """
@@ -75,7 +132,13 @@ def concatene_content(title, join_string = ' '):
 		return None
 		
 	if(isinstance(title, collections.Iterable) and not isinstance(title, types.StringTypes)):
-		title = join_string.join(title)
+		new_title = ""
+		for item in title:
+			if isinstance(item, types.StringTypes):
+				new_title = new_title + join_string + item
+			else:
+				new_title = new_title + join_string + str(item)
+		return new_title
 		
 	return title
 	
@@ -154,10 +217,24 @@ def normalize_collection_name(name):
 	if not name:
 		return None
 	name = re.sub(pattern_replace_name,'',name)
-	return name
+	if name:
+		return name.title()
+	return None
 
 def convert_to_cm(value):
 	return value
 
 def convert_to_kg(value):
 	return value
+
+def get_formatted_tag(tag):
+	if not tag:
+		return None
+	
+	tag = sanitize_title(tag)
+	
+	if not tag:
+		return None
+		
+	tag = tag.replace('_', ' ')
+	return tag.title()
