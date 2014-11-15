@@ -87,6 +87,10 @@ class Database:
 	language_pt = 130
 	language_ru = 135
 	
+	currency_yen = 74
+	
+	figure_version_standard = 4
+	
 	entity_type_manga = 3
 	entity_type_manhaw = 4
 	entity_type_manhua = 5
@@ -113,13 +117,18 @@ class Database:
 	people_relation_type_illustrator = 1 #artist
 	people_relation_type_voice_actor = 20
 	
+	people_create_type_sculptor = 3
 	
 	release_type_chapter = 3
 	release_type_volume = 4
 	
 	weapon_fighting_machine = 1
 	
-	pattern_remove_function = re.compile(ur'[a-zA-Z ]{1,}\(.*\)')
+	scale_non_scale = 1
+	
+	image_good_type_main = 20
+	
+	pattern_remove_function = re.compile(ur'[a-zA-Z _]{1,}\(.*\)')
 	
 	def __init__(self, dbname, dbuser, dbpass,dbhost,dbport, load_types = True):
 		self.dbname = dbname
@@ -472,10 +481,7 @@ class Database:
 
 		if(isinstance(columns, types.StringTypes)):
 			raise ValueError("columns must be a list on get_with_recursive method.")
-			
-		if(len(columns) < 2):
-			raise ValueError("columns cannot have less than 2 items on get_with_recursive method.")
-			
+
 		if(isinstance(recursive_columns, types.StringTypes)):
 			raise ValueError("recursive_columns must be a list on get_with_recursive method.")
 			
@@ -491,9 +497,10 @@ class Database:
 		
 		if join_type is None:
 			join_type = ["INNER"]
-			cls
+		
 		#where = "based_type_id = 3 and entity_id = 1"
 		columns_filtered = [i for i in columns if not self.pattern_remove_function.search(i)]
+		
 		
 		sql = "WITH RECURSIVE recursive_table({columns}) AS (SELECT {columns} FROM {table}".format(columns=", ".join(recursive_columns),table=table)
 		
@@ -509,6 +516,8 @@ class Database:
 		
 		if recursive_alias:
 			recursive_alias = "as " + recursive_alias
+		else:
+			recursive_alias = ""
 			
 		if(len(joins) != 0 and len(joins) != len(join_columns)):
 			raise ValueError("Join and column join on cannot have a length different.")		
@@ -745,8 +754,8 @@ class Database:
 		where_values = []
 		where_values.append(image_id)
 		where_values.append(second_id)
-		where_values.append(image_id)
-		id = self.get_var(table, ['image_id'], "image_id = %s and {relation_table}_id = %s".format(relation_table=relation_table), where_values)
+		where_values.append(type_id)
+		id = self.get_var(table, ['image_id'], "image_id = %s and {relation_table}_id = %s and image_{relation_table}_type_id = %s".format(relation_table=relation_table), where_values)
 		
 		if(id == None):
 			columns = ['image_id', relation_table + '_id', 'image_' + relation_table + '_type_id']
@@ -980,7 +989,7 @@ class Database:
 		entity_edition_launch_country, goods_launch_country.
 		
 	"""
-	def add_to_launch_country(self, entity_id, country_id, launch_date, launch_price, launch_currency_id, launch_for = 'entity_edition'):
+	def add_to_launch_country(self, entity_id, country_id, launch_date, launch_price, launch_currency_id, launch_for = 'entity_edition', type_id = None):
 		if(not entity_id):
 			raise ValueError("Entity id cannot be empty on add_to_launch_country method.")
 		
@@ -995,7 +1004,18 @@ class Database:
 		where_values.append(entity_id)
 		where_values.append(country_id)
 		where_values.append(launch_currency_id)
-		id = self.get_var(table, [launch_for + '_id'], "{launch_for}_id = %s and country_id = %s and currency_id = %s".format(launch_for=launch_for), where_values)
+		where = []
+		where.append("{launch_for}_id = %s".format(launch_for=launch_for))
+		where.append("country_id = %s")
+		where.append("currency_id = %s")
+		
+		if type_id:
+			where_values.append(type_id)
+			where.append("launch_type_id = %s")
+			
+		where = " and ".join(where)
+
+		id = self.get_var(table, [launch_for + '_id'], where, where_values)
 		if(id == None):
 			columns = [launch_for + '_id', 'country_id' , 'launch_date', 'launch_price', 'currency_id']
 			value = []
@@ -1005,6 +1025,10 @@ class Database:
 			value.append(launch_price)
 			value.append(launch_currency_id)
 			
+			if type_id:
+				value.append(type_id)
+				columns.append("launch_type_id")
+				
 			if(self.insert(table, value, columns) == False):
 				raise ValueError("An error occurred when trying to insert on add_to_launch_country(%s, %s, %s, %s, %s, %s)." % (entity_id, country_id, launch_date, launch_price, launch_currency_id, launch_for))
 		return True
@@ -1269,7 +1293,7 @@ class Database:
 		
 		The parameter subtitle refers to subheading and not a caption.
 	"""
-	def add_edition(self, edition_type_id, entity_id, title, free = 0, censored = 0, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None, update_id = None):
+	def add_edition(self, edition_type_id, entity_id, title, free = False, censored = False, subtitle = None, code = None, complement_code = None, release_description = None, height = None, width = None, depth = None, weight = None, event_id = None, update_id = None):
 		if(not title):
 			raise ValueError("Name cannot be empty on add_edition method.")
 		
@@ -1930,7 +1954,7 @@ class Database:
 	def add_persona(self, gender, age = None, apparent_age = None, exact_hair_color = None, 
 	bust_size = None, waist_size = None, butt_size = None, chinese_sign_id = None, zodiac_sign_id = None, birthyear = None,
 	birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, 
-	hair_lenght = None, hair_color = None, update_id = None):
+	hair_length = None, hair_color = None, update_id = None):
 		if(not gender):
 			raise ValueError("Gender cannot be empty on add_persona method.")	
 		
@@ -2006,9 +2030,9 @@ class Database:
 			columns.append('hair_color')
 			value.append(hair_color)
 			
-		if hair_lenght:
-			columns.append('hair_lenght')
-			value.append(hair_lenght)
+		if hair_length:
+			columns.append('hair_length')
+			value.append(hair_length)
 		
 		if update_id:
 			where_values = []
@@ -2200,7 +2224,7 @@ class Database:
 	"""
 	def create_persona(self, name, last_name, gender, age = None, apparent_age = None, exact_hair_color = None, 
 	bust_size = None, waist_size = None, butt_size = None, chinese_sign_id = None, zodiac_sign_id = None, birthyear = None, 
-	birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_lenght = None, hair_color = None,
+	birthday = None, blood_type_id = None, blood_rh_type_id = None, height = None, weight = None, eyes_color = None, hair_length = None, hair_color = None,
 	unusual_features = [], aliases = [], nicknames = [], romanizeds = [], natives = [], titles = [], occupations = [], affiliations = [], races = [], goods = [], voices_actor = [], entities_appear_on = [],
 	relationship = [], images = [], favorites = [], tastes = [], weapons = [], powers = [], weaknesses = [], tags = [], elements = [], update_id = None):
 		if(not name):
@@ -2210,7 +2234,7 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			persona_id = self.add_persona(gender, age, apparent_age, exact_hair_color, bust_size, waist_size, butt_size, chinese_sign_id, zodiac_sign_id, birthyear, birthday, blood_type_id, blood_rh_type_id, height, weight, eyes_color, hair_lenght, hair_color, update_id)
+			persona_id = self.add_persona(gender, age, apparent_age, exact_hair_color, bust_size, waist_size, butt_size, chinese_sign_id, zodiac_sign_id, birthyear, birthday, blood_type_id, blood_rh_type_id, height, weight, eyes_color, hair_length, hair_color, update_id)
 			
 			#register main name
 			self.add_persona_alias(name, last_name, persona_id, self.alias_type_main)
@@ -3517,21 +3541,26 @@ class Database:
 		This method can be used to insert on goods table. Figure is specialization from Goods.
 		
 	"""
-	def add_goods(self, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0, update_id = None):
+	def add_goods(self, goods_type_id, height = None, collection_id = None, width = None, length = None, weight = None, observation = None, has_counterfeit = False, collection_started = False, draft = False, update_id = None):
 		if(not goods_type_id):
 			raise ValueError("goods_type_id cannot be empty on add_goods method.")
-			
-		if(not height):
-			raise ValueError("Height cannot be empty on add_goods method.")
 		
 		table = 'goods'
 		
-		columns = [ 'goods_type_id', 'height', 'has_counterfeit', 'collection_started']
+		columns = [ 'goods_type_id', 'has_counterfeit', 'collection_started', 'draft']
 		value = []
 		value.append(goods_type_id)
-		value.append(height)
 		value.append(has_counterfeit)
 		value.append(collection_started)
+		value.append(draft)
+			
+		if height:
+			columns.append('height')
+			value.append(height)
+				
+		if length:
+			columns.append('length')
+			value.append(length)
 			
 		if collection_id:
 			columns.append('collection_id')
@@ -3677,7 +3706,7 @@ class Database:
 		This method require a goods_id to register, if you would like to add a goods and a figure with 
 		the same method use create_figure method instead.
 	"""
-	def add_figure(self, goods_id, scale_id):
+	def add_figure(self, goods_id, scale_id, cast_off = False):
 		if(not goods_id):
 			raise ValueError("goods id cannot be empty on add_figure method.")
 		
@@ -3693,14 +3722,13 @@ class Database:
 		where_values.append(goods_id)
 		id = self.get_var(table, ['goods_id'], "goods_id = %s",where_values)
 		if(id == None):
-			columns = ['goods_id', 'scale_id']
+			columns = ['goods_id', 'scale_id', 'cast_off']
 			value = []
 			value.append(goods_id)
 			value.append(scale_id)
+			value.append(cast_off)
 				
-			self.insert(table, value, columns)
-			id = self.get_last_insert_id(table)
-			if(id == 0):
+			if(self.insert(table, value, columns) == False):
 				raise ValueError("There is no last insert id to return on add_figure(%s, %s, %s)." % ( goods_id, figure_version_id, scale_id))
 		return id
 
@@ -3739,11 +3767,8 @@ class Database:
 		To use this method the types must be already registered on database.
 		The parameters goods must have elements that are dictionary. 
 	"""
-	def create_goods(self, romanize_title, language_id, goods_type_id, height, collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], update_id = None):
-		if(not romanize_title):
-			raise ValueError("romanize_title cannot be empty on create_goods method.")
-		
+	def create_goods(self, romanize_title, language_id, goods_type_id, height = None, collection_id = None, width = None, length = None, weight = None, observation = None, has_counterfeit = False, collection_started = False,
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], associateds = [], draft = False, update_id = None):
 		if(not language_id):
 			raise ValueError("Language id cannot be empty on create_goods method.")
 		
@@ -3751,10 +3776,11 @@ class Database:
 		self.set_auto_transaction(False)
 		
 		try:
-			goods_id = self.add_goods(goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, update_id)
+			goods_id = self.add_goods(goods_type_id, height, collection_id, width, length, weight, observation, has_counterfeit, collection_started, draft, update_id)
 			
 			#romanized name
-			self.add_alias(romanize_title, goods_id, language_id, 'goods', self.alias_type_romanized)
+			if romanize_title:
+				self.add_alias(romanize_title, goods_id, language_id, 'goods', self.alias_type_romanized)
 			
 			#alias
 			for alias in aliases:
@@ -3786,7 +3812,7 @@ class Database:
 			
 			#Add launch countries
 			for launch in countries:
-				self.add_to_launch_country(goods_id, launch['country_id'], launch['date'], launch['price'], launch['currency_id'], 'goods')
+				self.add_to_launch_country(goods_id, launch['country_id'], launch['date'], launch['price'], launch['currency_id'], 'goods', launch['launch_type_id'])
 				
 			
 			#shop location (local de compra)
@@ -3805,6 +3831,10 @@ class Database:
 			for version in versions:
 				self.add_multi_relation(goods_id, version, 'goods', 'goods_version')
 				
+			#associateds
+			for associated in associateds:
+				self.add_relation_with_type('goods', 'goods', goods_id, associated['id'], 'associated', associated['type_id'])
+				
 			#commit changes
 			self.commit()
 			
@@ -3820,16 +3850,16 @@ class Database:
 		Method used to create a figure that is a specialization of goods.
 		This method as well all other create method will only commit the transaction after all be run successful. 
 	"""
-	def create_figure(self, scale_id, romanize_title, language_id, goods_type_id, height, 
-	collection_id = None, width = None, weight = None, observation = None, has_counterfeit = 0, collection_started = 0,
-	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], update_id = None):
+	def create_figure(self, cast_off, scale_id, romanize_title, language_id, goods_type_id, height = None, 
+	collection_id = None, width = None, length = None, weight = None, observation = None, has_counterfeit = False, collection_started = False,
+	aliases = [], descriptions = [], categories = [], tags = [], materials = [], personas = [], companies = [], countries = [], shops_location =[], peoples = [], images = [], versions = [], associateds = [], draft = False, update_id = None):
 		
 		#set commit to false.
 		self.set_auto_transaction(False)
 		
 		try:
-			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images, versions, update_id)
-			self.add_figure(goods_id, scale_id)
+			goods_id = self.create_goods(romanize_title, language_id, goods_type_id, height, collection_id, width, length, weight, observation, has_counterfeit, collection_started, aliases, descriptions, categories, tags, materials, personas, companies, countries, shops_location, peoples, images, versions, associateds, draft, update_id)
+			self.add_figure(goods_id, scale_id, cast_off)
 			
 			#commit changes
 			self.commit()
@@ -3841,6 +3871,34 @@ class Database:
 		finally:
 			self.set_auto_transaction(True)
 			
+	def update_figure(self, goods_id, scale_id, cast_off):
+		if not goods_id:
+			raise ValueError("goods id cannot be empty on update_figure method.")
+		if not scale_id:
+			raise ValueError("scale id cannot be empty on update_figure method.")
+		if not cast_off and cast_off != False:
+			raise ValueError("cast_off cannot be empty on update_figure method.")
+		
+		table = 'figure'
+		
+		where_values = []
+		where_values.append(goods_id)
+		id = self.get_var(table, ['goods_id'], "goods_id = %s", where_values)
+		if id:
+			#Update
+			columns = ['scale_id', 'cast_off']
+			value = []
+			value.append(scale_id)
+			value.append(cast_off)
+			if(self.update(table, value, columns, "goods_id = %s", where_values) == False):
+				raise ValueError("An error occurred when trying to update on update_figure(%s, %s, %s)." % (goods_id, scale_id, cast_off))
+		else:
+			#Check if id exists
+			self.check_id_exists('goods', goods_id)
+			self.add_figure(goods_id, scale_id, cast_off)
+		return True
+	
+	
 	################################# Event methods ###############################
 		
 	"""
@@ -4949,13 +5007,35 @@ class Database:
 		where = "{relation_type}_type_id = %s and {first_field} = %s".format(relation_type=relation_type,first_field=first_field)
 		
 		where_values = []
-		where_values.append(entity_id)
 		where_values.append(type_id)
+		where_values.append(entity_id)
 		
 		return self.select_with_recursive(table, recursive_columns, columns, where, None, where_values, join, join_columns, None, 'r', limit)
 	
-	#def get_related_item_collection()
+	def get_related_item_collection(self, entity_id, relation_type_id = None, limit = None):
+		if not entity_id:
+			raise ValueError("entity_id cannot be empty on get_related_item_collection method.")
+			
+		table = 'entity_based_entity'
 		
+		recursive_columns = ['entity_id', 'another_entity_id']
+		
+		columns = ['distinct entity.collection_id']
+		
+		join = ['entity']
+		join_columns = [' entity.id = r.another_entity_id ']
+		where_values = []
+		
+		if relation_type_id:
+			where = "based_type_id = %s and entity_id = %s"
+			where_values.append(relation_type_id)
+		else:
+			where = "entity_id = %s"
+		
+		where_values.append(entity_id)
+	
+		return self.select_with_recursive(table, recursive_columns, columns, where, None, where_values, join, join_columns, None, 'r', limit)
+	
 	
 	"""
 		Method used to get a country id from a given language code.
@@ -5146,5 +5226,11 @@ class Database:
 		table_join = []
 		table_join.append(table)
 		
-		return self.get_var('spider_item', ['spider_item.id'], "spider_item.url = %s and spider_item.table_name = %s and {table}.id IS NOT NULL;".format(table=table), where_values, table_join, ["spider_item.id = {table}.id".format(table=table)])
+		return self.get_var('spider_item', ['spider_item.id'], "spider_item.url = %s and spider_item.table_name = %s and {table}.id IS NOT NULL".format(table=table), where_values, table_join, ["spider_item.id = {table}.id".format(table=table)])
+		
+	def get_spider_item_id_from_url(self, url):
+		where_values = []
+		where_values.append(url)
+		
+		return self.get_var('spider_item', ['spider_item.id'], "spider_item.url = %s", where_values)
 		

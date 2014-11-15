@@ -580,9 +580,9 @@ class AnimeCharactersSpider(CrawlSpider):
 					new_images = []
 					
 					for image in images:
-						image_array = image.split('.')
+						image_array = self.get_formatted_link(image).split('.')
 						new_image = {}
-						new_image['url'] = image
+						new_image['url'] = self.get_formatted_link(image)
 						new_image['extension'] = image_array.pop()
 						new_image_name = image_array.pop()
 						new_image_name = new_image_name.split('/')
@@ -590,9 +590,9 @@ class AnimeCharactersSpider(CrawlSpider):
 						new_images.append(new_image)
 						
 					for image in front_image:
-						image_array = image.split('.')
+						image_array = self.get_formatted_link(image).split('.')
 						new_image = {}
-						new_image['url'] = image
+						new_image['url'] = self.get_formatted_link(image)
 						new_image['extension'] = image_array.pop()
 						new_image_name = image_array.pop()
 						new_image_name = new_image_name.split('/')

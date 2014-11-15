@@ -14,6 +14,26 @@ CREATE TABLE IF NOT EXISTS scale (
   PRIMARY KEY(id)
 )
 ;
+CREATE TABLE IF NOT EXISTS figure_version (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+;
+
+CREATE TABLE IF NOT EXISTS associated_type (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+;
+
+CREATE TABLE IF NOT EXISTS launch_type (
+  id SERIAL,
+  name VARCHAR UNIQUE NOT NULL,
+  PRIMARY KEY(id)
+)
+;
 
 CREATE TABLE IF NOT EXISTS taste_type (
   id SERIAL,
@@ -1169,12 +1189,14 @@ CREATE TABLE IF NOT EXISTS goods (
   id BIGSERIAL,
   collection_id INTEGER  NULL,
   goods_type_id INTEGER  NOT NULL,
-  height SMALLINT  NOT NULL,
-  width SMALLINT  NULL,
+  height DECIMAL  NULL,
+  width DECIMAL  NULL,
+  length DECIMAL NULL,
   weight DECIMAL NULL,
   observation TEXT NULL,
-  has_counterfeit BOOL NOT NULL,
-  collection_started BOOL NOT NULL,
+  has_counterfeit BOOLEAN NOT NULL,
+  collection_started BOOLEAN NOT NULL,
+  draft BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY(id),
   FOREIGN KEY(goods_type_id)
     REFERENCES goods_type(id)
@@ -1266,7 +1288,7 @@ CREATE TABLE IF NOT EXISTS persona (
   weight DECIMAL NULL,
   eyes_color VARCHAR NULL,
   hair_color VARCHAR NULL,
-  hair_lenght VARCHAR NULL,
+  hair_length VARCHAR NULL,
   exact_hair_color VARCHAR NULL,
   bust_size VARCHAR NULL,
   waist_size VARCHAR NULL,
@@ -1480,7 +1502,7 @@ CREATE TABLE IF NOT EXISTS persona_related_persona (
 
 CREATE TABLE IF NOT EXISTS entity_based_entity (
   entity_id BIGINT  NOT NULL,
-  another_entity_id INTEGER  NOT NULL,
+  another_entity_id BIGINT NOT NULL,
   based_type_id INTEGER  NOT NULL,
   PRIMARY KEY(entity_id, another_entity_id, based_type_id),
   FOREIGN KEY(entity_id)
@@ -2659,8 +2681,8 @@ CREATE TABLE IF NOT EXISTS goods_alias (
 
 CREATE TABLE IF NOT EXISTS figure (
   goods_id BIGINT  NOT NULL,
-  figure_version_id INTEGER  NOT NULL,
   scale_id INTEGER  NOT NULL,
+  cast_off BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY(goods_id),
   FOREIGN KEY(scale_id)
     REFERENCES scale(id)
@@ -2694,13 +2716,16 @@ FOREIGN KEY(language_id)
 )
 ;
 
+--Check normalization
+
 CREATE TABLE IF NOT EXISTS goods_launch_country (
   country_id INTEGER  NOT NULL,
   goods_id BIGINT  NOT NULL,
   currency_id INTEGER  NOT NULL,
   launch_date DATE NOT NULL,
+  launch_type_id INTEGER NOT NULL,
   launch_price DECIMAL NOT NULL,
-  PRIMARY KEY(country_id, goods_id, currency_id),
+  PRIMARY KEY(country_id, goods_id, currency_id, launch_type_id),
   FOREIGN KEY(country_id)
     REFERENCES country(id)
       ON DELETE CASCADE
@@ -2712,9 +2737,14 @@ CREATE TABLE IF NOT EXISTS goods_launch_country (
   FOREIGN KEY(currency_id)
     REFERENCES currency(id)
       ON DELETE SET NULL
+      ON UPDATE CASCADE,
+  FOREIGN KEY(launch_type_id)
+    REFERENCES launch_type(id)
+      ON DELETE SET NULL
       ON UPDATE CASCADE
 )
 ;
+
 
 CREATE TABLE IF NOT EXISTS people_create_goods (
   people_id BIGINT  NOT NULL,
@@ -2981,6 +3011,26 @@ CREATE TABLE IF NOT EXISTS persona_has_tag (
       ON UPDATE CASCADE,
   FOREIGN KEY(persona_id)
     REFERENCES persona(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+)
+;
+
+CREATE TABLE IF NOT EXISTS goods_associated_goods (
+  goods_id INTEGER NOT NULL,
+  another_goods_id INTEGER  NOT NULL,
+  associated_type_id INTEGER  NOT NULL,
+  PRIMARY KEY(goods_id, another_goods_id, associated_type_id),
+  FOREIGN KEY(goods_id)
+    REFERENCES goods(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(another_goods_id)
+    REFERENCES goods(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY(associated_type_id)
+    REFERENCES associated_type(id)
       ON DELETE CASCADE
       ON UPDATE CASCADE
 )
