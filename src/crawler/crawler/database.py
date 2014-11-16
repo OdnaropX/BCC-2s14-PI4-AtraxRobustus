@@ -5234,3 +5234,16 @@ class Database:
 		
 		return self.get_var('spider_item', ['spider_item.id'], "spider_item.url = %s", where_values)
 		
+	def check_spider_item_crawled(self, url):
+		where_values = []
+		where_values.append(url)
+		
+		status = self.get_var('spider_item', ['complete_crawled'], "url = %s", where_values)
+		if status == None:
+			return False
+		else:
+			if status == "True" or status == True:
+				return True
+			else:
+				return False
+			
