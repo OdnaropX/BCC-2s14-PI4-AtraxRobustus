@@ -70,7 +70,7 @@ class MyFigureCollectionSpider(CrawlSpider):
 			This method gets the user name and password from settings.
 		"""
 		def login(self, response):
-			print "login"
+			print "Login"
 			return FormRequest.from_response(response,
 					formname= 'tbf_signin',
                     formdata={'username': Settings().get('MUUSERNAME'), 'password': Settings().get('MUPASSWORD')},
@@ -904,7 +904,7 @@ class MyFigureCollectionSpider(CrawlSpider):
 
 				#Request image page:
 				if id:
-					request_image_page = "http://myfigurecollection.net/pictures.php?mode=list&cid=5&view=gallery&sort=date&order=desc&poll=0&p=1&search=item:{item}".format(item=id)
+					request_image_page = "http://myfigurecollection.net/pictures.php?mode=listview=gallery&sort=date&order=desc&poll=0&p=1&search=item:{item}".format(item=id)
 					return Request(url=request_image_page, callback=self.parse_goods_image, dont_filter=True)
 				
 			except ValueError as e:
@@ -938,21 +938,17 @@ class MyFigureCollectionSpider(CrawlSpider):
 			if not self.check_logged(response):
 				return self.log_in(response)
 				
-			next_type, next_page = None, None
+			next_page = None
 			
 			#Get image number
 			number = response.css('.num::text').extract()
 			number = re.sub(ur'[Pp]ictures?', '', number[0])
 			number = util.convert_to_number(number)
 			
-			print number
+			print "Numbers: ", number
 			
 			url = urlparse.urlparse(response.url)
 			qs = urlparse.parse_qs(url[4])
-			
-				
-			#Get current image type.
-			type = qs['cid'][0]
 				
 			if number > 0:
 				#Get item id.
@@ -967,10 +963,14 @@ class MyFigureCollectionSpider(CrawlSpider):
 					p = util.convert_to_number(p)
 					number_pages = math.ceil(number / 60)
 					
+				print "Page numbers: ", number_pages
+				print "Current page: ", p 
+				
 				#Get list images
 				images = response.css('a.picture img::attr(src)').extract()
+				styles = response.css('a.picture img::attr(style)').extract()
 				
-				if images:
+				if images and styles:
 					try:
 						#Format goods or media entity_id from url id.
 						where_values = []
@@ -979,12 +979,13 @@ class MyFigureCollectionSpider(CrawlSpider):
 						item_id = self.dbase.get_var('spider_item', ['id'], "url like '%%item/' || %s", where_values)
 						
 						if table_type == 'goods':
-							#Format type
-							type = self.get_type_id(type)
 							
 							new_images = []
 							#Format list images
-							for image in images:
+							for index, image in enumerate(images):
+								#Format type
+								type = self.get_type_id_from_color(styles[0])
+								
 								url = image.replace('thumbnails/', '')
 								image_array = url.split('.')
 								extension = image_array.pop()
@@ -994,14 +995,13 @@ class MyFigureCollectionSpider(CrawlSpider):
 								#Add image to database 
 								self.dbase.add_image_to_goods(url, extension, name, item_id, type)
 									
-
 							self.dbase.add_spider_item('goods_has_image', item_id, response.url, True)
 							
 							#Format next page link
 							if number_pages > p:
 								next_page = re.sub(ur'\bp=[0-9]{1,}\b', "p={0}".format(p + 1), response.url)
-								if self.dbase.check_spider_item_crawled(next_page):
-									next_page = None
+								#if self.dbase.check_spider_item_crawled(next_page):
+								#	next_page = None
 								
 						print "Success"
 					except:
@@ -1009,21 +1009,6 @@ class MyFigureCollectionSpider(CrawlSpider):
 						util.PrintException()
 						util.Log(response.url, sys.exc_info()[0])
 
-				else:
-					#Format next url type
-					next_type = self.next_url_type(type)
-					if next_type:
-						next_page = re.sub(ur'\bp=[0-9]{1,}\b', "p=1", response.url)
-						next_page = re.sub(ur'\bcid=[0-9]{1,}\b', "cid={0}".format(next_type), next_page)
-					
-			else:
-				#Pass to next page. The first link is 5.
-				next_type = self.next_url_type(type)
-				
-				if next_type:
-					next_page = re.sub(ur'\bp=[0-9]{1,}\b', "p=1", response.url)
-					next_page = re.sub(ur'\bcid=[0-9]{1,}\b', "cid={0}".format(next_type), next_page)
-				
 			#Request next page. If there inst one pass to next image type (if official next is bootleg page).	
 			if next_page:
 				return Request(url=next_page, callback=self.parse_goods_image)
@@ -1063,32 +1048,69 @@ class MyFigureCollectionSpider(CrawlSpider):
 			if not type:
 				return 11#Official
 				
-			next_type = None
+			type_id = None
 			if type == '5':#Official
-				next_type = 11
+				type_id = 11
 			elif type == '3':#Bootleg 
-				next_type = 2
+				type_id = 2
 			elif type == '1':#Figures
-				next_type = 10 
+				type_id = 10 
 			elif type == '12':#Items
-				next_type = 12
+				type_id = 12
 			elif type == '4':#Collections
-				next_type = 13
+				type_id = 13
 			elif type == '6':#Space
-				next_type = 14
+				type_id = 14
 			elif type == '8': #Loots&Boxes
-				next_type = 15
+				type_id = 15
 			elif type == '11':#Kit&Customs 
-				next_type = 16
+				type_id = 16
 			elif type == '14':#Expositions 
-				next_type = 17
+				type_id = 17
 			elif type == '2':#Various 
-				next_type = 18
+				type_id = 18
 			elif type == '7':#Chan 
-				next_type = 19
+				type_id = 19
 			
-			if not next_type:
+			if not type_id:
 				return 18
 				
 			return next_type
+		
+		def get_type_id_from_color(self, style):
+			color = util.sanitize_title(style)
+			
+			type_id = None
+			
+			if "#808080" in color:#Official
+				type_id = 11
+			elif re.search(ur'#[fF]{2}[0]{4}', color) != None:#Bootleg 
+				type_id = 2
+			elif "#008000" in color:#Figures
+				type_id = 10 
+			elif "#004000" in color:#Items
+				type_id = 12
+			elif re.search(ur'#[Ff]{2}8[0]{3}', color) != None:#Collections
+				type_id = 13
+			elif "#000080" in color:#Space
+				type_id = 14
+			elif  re.search(ur'#4040[fF]{2}', color) != None: #Loots&Boxes
+				type_id = 15
+			elif  re.search(ur'[Cc]{2}80[Cc]{2}', color) != None:#Kit&Customs 
+				type_id = 16
+			elif  re.search(ur'#[0]{6}', color) != None:#Expositions 
+				type_id = 17
+			elif "#800080" in color:#Various 
+				type_id = 18
+			elif  re.search(ur'#[Ff]{2}[0]{2}[Ff]{2}',color) != None:#Chan 
+				type_id = 19
+			elif  re.search(ur'#8[0]{5}', color) != None:#Banners
+				type_id = 21
+			
+			if not type_id:
+				type_id = 18
+				
+			print type_id
+			
+			return type_id
 			
