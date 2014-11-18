@@ -23,8 +23,8 @@ MUUSERNAME = 'Teste2352'
 MUPASSWORD = '=QWZ;=w)WZ;=w)@!)G'
 
 #Delay used on animecharactersdatabase.
-CONCURRENT_REQUESTS_PER_IP = 5
-DOWNLOAD_DELAY = 0.5
+#CONCURRENT_REQUESTS_PER_IP = 5
+#DOWNLOAD_DELAY = 0.5
 #DUPEFILTER_DEBUG = True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
