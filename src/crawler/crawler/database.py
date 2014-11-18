@@ -3148,6 +3148,7 @@ class Database:
 		This method can be used to insert on collection table.
 		
 		TODO: check with full text search a collection that have the a entity with similar name
+		TODO: Remove name from insertion, add id field to insert next sequel from serial.
 	"""
 	def add_collection(self, name, description = None, update_id = None):
 		if(not name):
@@ -5242,7 +5243,7 @@ class Database:
 		if status == None:
 			return False
 		else:
-			if status == "True" or status == True:
+			if status == True or status == "True" or status == "t" or status == "T":
 				return True
 			else:
 				return False

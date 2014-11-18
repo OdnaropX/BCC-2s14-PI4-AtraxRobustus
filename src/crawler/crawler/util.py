@@ -12,11 +12,6 @@ pattern_first_newline = re.compile(ur'^\n')
 pattern_number_range = re.compile(ur'^[^a-zA-Z .][0-9-]{1,}$')
 pattern_replace_name = re.compile(ur'(:.*|\bdj\b.*|\(.*\)|\[.*\]|- .*)')
 
-"""
-	Class for connection and manipulation of database.
-	Have methods for delete, update and insert on any table. 
-	Have also methods for insert on specified table following it own logic.
-"""
 
 def get_formatted_date(date):
 	if not date:
