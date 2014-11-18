@@ -984,7 +984,7 @@ class MyFigureCollectionSpider(CrawlSpider):
 							#Format list images
 							for index, image in enumerate(images):
 								#Format type
-								type = self.get_type_id_from_color(styles[0])
+								type = self.get_type_id_from_color(styles[index])
 								
 								url = image.replace('thumbnails/', '')
 								image_array = url.split('.')
