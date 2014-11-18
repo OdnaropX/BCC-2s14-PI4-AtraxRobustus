@@ -86,10 +86,13 @@ class AnimeCharactersSpider(CrawlSpider):
 			This method is used to request a login page.
 		"""
 		def start_requests(self):
+			meta = {}
+			meta['dont_start'] = False
 			yield Request(
 				url=self.login_page,
 				callback=self.login,
-				dont_filter=True
+				dont_filter=True,
+				meta=meta
 			)
 
 		"""
@@ -102,7 +105,7 @@ class AnimeCharactersSpider(CrawlSpider):
                     formdata={'username': Settings().get('MUUSERNAME'), 'userpass': Settings().get('MUPASSWORD')},
                     callback=self.after_login,
 					#dont forget dont_filter, without it the after_login will not be loaded.
-					dont_filter=True)
+					dont_filter=True, meta=response.meta)
 
 		"""
 			Method callback of login method.
@@ -110,11 +113,13 @@ class AnimeCharactersSpider(CrawlSpider):
 		
 		"""
 		def after_login(self, response):
-			print "..."
-			if "Logout" in response.body:
+			if self.check_logged(response):
 				self.log("Successfully logged in. Let's start crawling!")
 				print "Successfully logged in. Let's start crawling!"
-				return super(AnimeCharactersSpider, self).start_requests()
+				if not response.meta['dont_start']:
+					return super(AnimeCharactersSpider, self).start_requests()
+				else:
+					return Request(url=response.meta['current_url'],callback=self.parse_items,dont_filter=True)
 			else:
 				#self.log("Bad times :(")
 				print "Error login. Begin crawler without login."
@@ -138,10 +143,34 @@ class AnimeCharactersSpider(CrawlSpider):
 					raise SystemExit
 	
 		"""
+			Method used to log with the crawl running.
+			This method is using in combination with check_logged to re-log on the website.
+		"""
+		def log_in(self, response):
+				print "Re-logging"
+				new_meta = response.meta
+				new_meta['current_url'] = response.url
+				new_meta['dont_start'] = True
+				return Request(url=self.login_page, callback=self.login, dont_filter=True, meta = new_meta)
+				
+		"""
+			Method used to check if the user on settings is currently logged
+			on the website.
+		"""
+		def check_logged(self, response):
+			if "Logout" in response.body:
+				return True
+			return False
+			
+			
+		"""
 			Method called to parse link from extractor.
 		"""
 		def parse_items(self, response):
+			print "Response url: ", response.url
 			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
 	
 			#print "Initialized database and parse"
 			#if(re.search(self.pattern_voice, response.url) != None):
@@ -152,7 +181,9 @@ class AnimeCharactersSpider(CrawlSpider):
 
 		def parse_persona(self, response):
 			print "Persona"
-			print response.url
+			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
 			
 			update_id = None
 			try:
@@ -867,8 +898,11 @@ class AnimeCharactersSpider(CrawlSpider):
 			TODO: Change anime relation and series status on database so the information is relational. 
 		"""
 		def parse_voice_actor(self, response):
-			print "response url: ", response.url
 			print "Series"
+			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
+			
 			update_id = None
 			try:
 				#Check if there is a dummy, if there is update only. If there inst the id will be none

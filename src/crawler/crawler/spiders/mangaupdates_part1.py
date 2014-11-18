@@ -61,10 +61,13 @@ class MangaUpdatesSpider(CrawlSpider):
 			This method is used to request a login page.
 		"""
 		def start_requests(self):
+			meta = {}
+			meta['dont_start'] = False
 			yield Request(
 				url=self.login_page,
 				callback=self.login,
-				dont_filter=True
+				dont_filter=True,
+				meta=meta
 			)
 
 		"""
@@ -77,7 +80,7 @@ class MangaUpdatesSpider(CrawlSpider):
                     formdata={'username': Settings().get('MUUSERNAME'), 'password': Settings().get('MUPASSWORD')},
                     callback=self.after_login,
 					#dont forget dont_filter, without it the after_login will not be loaded.
-					dont_filter=True)
+					dont_filter=True, meta=response.meta)
 
 		"""
 			Method callback of login method.
@@ -85,10 +88,13 @@ class MangaUpdatesSpider(CrawlSpider):
 		
 		"""
 		def after_login(self, response):
-			if "You are currently logged in as" in response.body:
+			if self.check_logged(response):
 				self.log("Successfully logged in. Let's start crawling!")
 				print "Successfully logged in. Let's start crawling!"
-				return super(MangaUpdatesSpider, self).start_requests()
+				if not response.meta['dont_start']:
+					return super(MangaUpdatesSpider, self).start_requests()
+				else:
+					return Request(url=response.meta['current_url'],callback=self.parse_items,dont_filter=True)
 			else:
 				self.log("Bad times :(")
 				print "Error login"
@@ -112,6 +118,25 @@ class MangaUpdatesSpider(CrawlSpider):
 					self.dbase = None
 					raise SystemExit
 				
+		"""
+			Method used to log with the crawl running.
+			This method is using in combination with check_logged to re-log on the website.
+		"""
+		def log_in(self, response):
+				print "Re-logging"
+				new_meta = response.meta
+				new_meta['current_url'] = response.url
+				new_meta['dont_start'] = True
+				return Request(url=self.login_page, callback=self.login, dont_filter=True, meta = new_meta)
+				
+		"""
+			Method used to check if the user on settings is currently logged
+			on the website.
+		"""
+		def check_logged(self, response):
+			if "You are currently logged in as" in response.body:
+				return True
+			return False
 
 		"""
 			Method used to load the groups website
@@ -141,6 +166,7 @@ class MangaUpdatesSpider(CrawlSpider):
 			Method called to parse link from extractor.
 		"""
 		def parse_items(self, response):
+			print "Response url: ", response.url
 			self.instancialize_database()
 			
 			if(re.search(self.pattern_groups, response.url) != None):
@@ -161,7 +187,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			Method used to retrieve the scanlator information 
 		"""
 		def parse_groups(self, response):
-			print response.url
+			print "Groups"
+			self.instancialize_database()
 			
 			update_id = None
 			try:
@@ -276,7 +303,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			Method used to retrieve the author information.
 		"""
 		def parse_authors(self, response):
-			print response.url
+			print "Authors"
+			self.instancialize_database()
 			#Parse author content html and extract texts from TR. Why Table?!! Why!!!! 
 			
 			update_id = None
@@ -460,7 +488,8 @@ class MangaUpdatesSpider(CrawlSpider):
 			This method will not make any relationship between entity and company.
 		"""
 		def parse_publishers(self, response):
-			print response.url
+			print "Publisher"
+			self.instancialize_database()
 			#Parse publisher content html and extract texts from TR. Why Table?!! Why!!!! 
 			
 			update_id = None
