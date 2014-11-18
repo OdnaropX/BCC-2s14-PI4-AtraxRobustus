@@ -1,2 +1,4 @@
 *.log
 *.txt
+bin/images/*
+*.~vsdx
