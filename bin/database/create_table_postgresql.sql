@@ -521,7 +521,8 @@ CREATE TABLE IF NOT EXISTS spider_item (
   id BIGINT NOT NULL,
   table_name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
-  complete_crawled BOOLEAN NOT NULL DEFAULT False
+  complete_crawled BOOLEAN NOT NULL DEFAULT False,
+  date timestamp without time zone NOT NULL DEFAULT now(),
 );
 
 CREATE TABLE IF NOT EXISTS tag (
