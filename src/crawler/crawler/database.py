@@ -5210,7 +5210,7 @@ class Database:
 			#insert
 			if not self.insert(table_base, value, columns):
 				raise ValueError("An error occurred while trying to insert a URL on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
-		elif(complete_crawled and id_base == 'False'):
+		elif(complete_crawled and (id_base == 'False' or id_base == False)):
 			#Update to full crawled
 			if(not self.update(table_base, ['True'],['complete_crawled'], where, where_values)):
 				raise ValueError("An error occurred while trying to update complete_crawled on add_spider_item(%s, %s, %s, %s)." % ( table, id, url, complete_crawled))
