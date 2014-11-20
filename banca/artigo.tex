@@ -72,11 +72,13 @@ O tema escolhido é abrangente assim como possui diversos websites que poderíam
 
 Os websites escolhidos se encontram abaixo, a escolha de websites com informações reduntantes é proposital uma vez que não poderíamos garantir a conectividade com os sites durante o desenvolvimento deste trabalho. 
 
-\begin{enumerate}
+\begin{itemize}
+\item http://mangaupdates.com/ (Para extração de informação de Mangás e Light Novels)
+\item http://myfigurecollection.net/ (Para extração de informações de Mangás, "Figuras de Ação" e Outros Produtos)
+\item http://www.animecharactersdatabase.com/ (Para extração de informações de Jogos para computador, animes e personagens)
+\end{itemize}
 
-\end{enumerate}
-
-A maioria dos sites escolhidos possuem informações no idioma inglês mas também no idioma Japonês, como títulos de mangás e animes. Para aproveitar essas informações o Banco de Dados foi modelado a permitir múltiplos idiomas. 
+Os sites escolhidos possuem informações principalmente no idioma inglês mas também fornecem algumas informações em outros idiomas, como os títulos de mangás e animes em Japonês ou até mesmo Português. Para aproveitarmos essas informações o Banco de Dados foi modelado a permitir múltiplos idiomas. 
 
 \subsection{Modelagem do Banco de Dados}
 
@@ -97,39 +99,133 @@ O conceito inicial de armazenar informações relacionais sobre itens da Cultura
 
 Com a expansão do tipo de informação a ser salva no Banco de Dados a criação do Modelo Conceitual se tornou complexa, além do tradicional uso de atributos e relacionamentos foram utilizados conceito de especialização/generalização e associação. 
 
-Como a estrutura do Modelo Conceitual é complexa e grande dividimos sua ilustração em partes e para melhor compreensão antes de detalharmos cada parte apresentaremos um diagrama mais simples abrangendo as principais entidades do Modelo Conceitual:
+Como a estrutura do Modelo Conceitual é complexa e grande dividimos sua ilustração em partes e para melhor compreensão antes de apresentarmos cada parte mostraremos um diagrama mais simples abrangendo as principais entidades do Modelo Conceitual:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{Resumo_Conceitual.pdf}
+\includegraphics[width=.80\textwidth]{MER_-_General.pdf}
 \caption{Modelo Conceitual resumido com os nomes das principais entidades em português. Na implementação do Modelo Lógico foram utilizados nomes em inglês.} \label{hash}
 \end{figure}
 
 
+A seguir pode ser observado as entidades e seus relacionamentos de forma mais detalhada. As entidades na cor laranja serão detalhadas mais a frente.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Collection.pdf}
+\caption{Entidade responsável por armazenar informações de coleções.} \label{collection}
+\end{figure}
 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Entity.pdf}
+\caption{Entidade "Entity" é responsável por armazenar conteúdo como Vídeos, Livros e Jogos.} \label{entity}
+\end{figure}
 
-os principais recursossua organização mais árdua, portanto . No modelo além do tradicional uso de atributos e relacionamentos foram utilizados conceito de especialização/generalização e associação.
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Edition.pdf}
+\caption{Entidade "Edition" é responsável por armazenar informações de itens de "Entity" que possuem publicação física. "Edition" se especializa em "Software Edition" para armazenamento de informações especificas a softwares e "Read Edition" para armazenamento de informações de livros e revistas} \label{edition}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Collaborator_Social.pdf}
+\caption{Entidades com informações sobre Colaboradores que traduzem conteúdo Popular Japonês e suas redes sociais.} \label{collaborator}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Company.pdf}
+\caption{Entitidade "Company" é responsável por arzenar informações de empresas. A atividade que a empresa exerce é definida no relacionamento.} \label{company}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Country-Language-Currency.pdf}
+\caption{Entidades responsáveis pelo armazenamento de informações de Países, seus idiomas e suas moedas.} \label{hash}
+\end{figure}
 
 Como exemplo de especialização/generalização temos no Modelo Conceitual a entitidade Goods onde bens de consumo como braceletes, posters, chaveiros são armazenados. Essa entidade se especializa na entidade Figure que armazena informações de bens conhecidos como figures ou action figures, são artigos colecionáveis em Três Dimensões de Personagens de animes, mangás, video games e light novels,
  que possuem informações extras além das contidas em Goods como escala e versão de lançamento.
 
-Imagem da especialização.
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Goods.pdf}
+\caption{Entidade "Goods" se especializa em "Figure".} \label{hash}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_People.pdf}
+\caption{Entidades responsáveis pelo armazenamento de informações de pessoas. A atividade exercida por uma pessoa em um determinado trabalho é definida no relacionamento.} \label{hash}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Persona.pdf}
+\caption{} \label{Persona}
+\end{figure}
+
 
 Como exemplo de Associação temos o relacionamento entre pessoas que dublam animações, animações dubladas e edições dubladas que são associadas ao número da edição, para situações onde o dublador oficial não pode dublar um episodio ou uma lista de episodios por motivos fora de seu controle. 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Release.pdf}
+\caption{Entidades responsáveis pelo armazenamento de conteúdo disponibilizado na web como modificações de jogos, conhecidos pela abreviação Mod, e traduções não oficiais de conteúdo ainda não licenciado fora do Japão.} \label{Release}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Version.pdf}
+\caption{Entidades responsáveis pelo armazenamento de informações de versões existentes de softwares, animações e livros e seus respectivos arquivos disponibilizados na web.} \label{hash}
+\end{figure}
 
 
-\subsubsection{Erros na escolha das ferramentas}
+\begin{figure}[H]
+\centering
+\includegraphics[width=.80\textwidth]{MER_-_Spider_item.pdf}
+\caption{Entidade utilizada para se ter um controle das URL visitadas com as tabelas em que foram salvas as informações da URL e o ID correspondente nessas tabelas. Essa entidade não é utilizada para verificar se uma URL já foi visitada durante uma execução do Crawler e sim para verificar o ID relacionado e a última vez que as informações referentes ao ID foram atualizadas.} \label{hash}
+\end{figure}
 
-Para a modelagem da Banco de Dados foi escolhido o Microsoft Visio que permite a geração de diversos tipos de diagramas, possibilitando a criação de novos itens se necessários para uso nos diagramas. Alguns dos itens como Associação, Atributos Compostos não estão presentes por padrão na modelagem de dados que vem com o Microsoft Visio e tiveram que serem criadas.
+\subsubsection{Modelo Relacional}
 
-Para o Modelo Relacional foi utilizado o DBDesign na sua 4ª versão, que permite a migração do Modelo Relacional para código SQL do MySQL, porém o DBDesign se mostrou limitado ao não permitir o aumento na área útil em que as entidades poderiam ser adicionadas, para uma modelagem extensa como a do Banco de Dados desse projeto essa limitação dificultou a organização pela falta de espaço fazendo com que as entidades ficassem muito próximas umas das outras. 
-Além dessa limitação a própria implementação em JAVA do DB Design apresenta problemas com a hibernação no Sistema Operacional Windows, ao se hibernar e retornar quando se tenta salvar ou exportar um arquivo no DBDesign o programa trava sendo necessário reniciar o computador para voltar a utilizar essas opções.
+Após a criação do Modelo Conceitual foram criadas as tabelas e relacionamentos do Modelo Relacional seguindo as três Formas Normais, separando portando atributos multi-valorados, não relacionados a totalidade da chave primaria em tabelas próprias quando necessário.
 
-Portanto não recomendo o uso do DB Design para um modelo relacional extenso. 
+Também foram criadas chave-primarias não naturais, como índice numérico que serão auto incrementados na inserção de conteúdo, e definido valores padrões para atributos que armazenam Data e Hora.
 
-A conversão de SQL do MySQL para PostgreSQL não apresenta problemas, sendo necessário usar SERIAL e timestamp ao invés de utilizar respectivamente $auto_increment$ e DATETIME
+Para as entidades que possuem mais de um tipo de título ou descrição como "Entity", "Persona" e "People" que possuem o tipo de título principal e alias foram criadas entidades para armazenamento desses títulos ou descrições com atributos que definem também o idioma do título ou descrição.
+
+
+\subsubsection{Ferramentas Utilizadas para Modelagem}
+
+Modelagem Conceitual
+
+Para a modelagem do Banco de Dados e criação do Modelo Conceitual foi escolhido o Microsoft Visio que permite a geração de diversos tipos de diagramas, possibilitando a criação de novos itens se necessários para uso nos diagramas. Alguns dos itens como Associação, Atributos Compostos não estão presentes por padrão na modelagem de dados que vem com o Microsoft Visio e tiveram que serem criadas.
+
+Modelo Relacional
+
+Para o Modelo Relacional foi utilizado o DBDesign na sua 4ª versão, que permite a migração do Modelo Relacional para código SQL do MySQL, porém o DBDesign se mostrou limitado ao não permitir o aumento na área útil em que as entidades poderiam ser adicionadas, para uma modelagem extensa como a do Banco de Dados desse projeto essa limitação dificultou a organização pela falta de espaço fazendo com que as entidades ficassem muito próximas umas das outras. Além dessa limitação a própria implementação em JAVA do DB Design apresenta problemas com a hibernação no Sistema Operacional Windows, ao se hibernar e retornar quando se tenta salvar ou exportar um arquivo no DBDesign o programa trava sendo necessário reniciar o computador para voltar a utilizar essas opções. Portanto não é recomendo o uso do DB Design para um modelo relacional extenso. 
+
+Modelo Lógico
+
+Para criação do Modelo Lógico foi exportado do DB Design as queries SQL de criação de tabelas e índices, além da associação de chaves-estrangeiras. 
+
+Para execução do Modelo Lógico para o PostgreSQL foi utilizado o Pg Admin III, sendo necessário converter alguns atributos gerados pelo DB Design que são específicos para MySQL como "auto increment" e "DATETIME" que foram convertidos para "SERIAL" e "timestamp" respectivamente.
+
+
+\subsubsection{Detalhes da Implementação do Modelo Lógico}
+
+Ao exportar o código SQL e alterá-lo para os detalhes de implementação próprios do PostgreSQL, além da conversão de tipos de dados para os tipos utilizados pelo PostgreSQL também é possível criar novos tipos. Para armazenar as informações de gênero de pessoas criamos um tipo de atributo gender que recebe os valores "Feminino", "Masculino" ou "Indefinido".
+
+
+Os índices foram separados para serem executados apenas após a criação das tabelas e seus relacionamentos.
+
+Como nossa implementação utiliza muito a consulta aos campos do banco de dados além de criarmos índices para chaves estrangeiras também criamos índices para todos os campos em que poderíamos executar uma consulta, uma vez que espaço de armazenamento não possui uma limitação atualmente como possuia quando as formas Normais foram desenvolvidas.
+
+Nas tabelas que armazenam informações de tipos, como "entity\_type" que armazena os tipos de entidades (Mangá, Light Novel, Animação, etc) ou "blood\_type" que armazena o tipo sanguíneo após inserção de alguns tipos, antes da execução do crawler, com uma chave-primaria númerica prédeterminada foi necessário alterar o próximo valor da sequência para que não ocorresse erros de restrição de chave-primária.  
 
 
 \subsection{Crawler}
