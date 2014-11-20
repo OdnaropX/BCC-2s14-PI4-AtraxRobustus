@@ -230,10 +230,10 @@ Nas tabelas que armazenam informações de tipos, como "entity\_type" que armaze
 
 \subsection{Crawler}
 
-Um crawler é um programa que visitas websites segue seus links e extraí informações das páginas. Um crawler deve a partir de uma URL inicial seguir todas as URL presentes na página a fim de vasculhar o website, 
+Um crawler é um programa que visita websites, segue seus links e extrai informações das páginas. Um crawler deve a partir de uma URL inicial seguir todas as URL presentes na página a fim de vasculhar o website, 
 pode ser utilizados critérios para seguir essas URL, como por exemplo seguir URL apenas do domínio atual do site, excluindo websites externos de publicidade e redes sociais.
 
-O Crawler na URL inicial faz o download do código HTML da página e extraí a informação "href" do atributo <a> e os coloca numa pilha de processamento que será utilizada para analisar se o link deve ser seguido ou removido da pilha. 
+O Crawler na URL inicial faz o download do código HTML da página e extrai a informação "href" do atributo <a> e os coloca numa lista de processamento que será utilizada para analisar se o link deve ser seguido ou removido da lista. 
 Para evitar o problema de loops infinitos quando uma página A possui um link para uma página B e a página B possui link para a página A, deve-se criar uma pilha de links já visitados para verificação.   
  
 Neste projeto foi optado pelo uso de uma biblioteca de Crawler que permite o seguimento de URL de páginas e extração de informações sem ter que se preocupar em programar Request e Download de páginas da Web.
@@ -244,11 +244,46 @@ Como os websites a serem utilizados possuem conteúdo estático sem uso de Ajax 
 
 Scrapy assim como Python está disponível para Windows e Linux.
 
+\subsubsection{Links Duplicados}
 
-\subsubsection{Implementando acesso ao Banco de Dados pela biblioteca Psycopg2}
+Ao se desenvolver um crawler um dos problemas encontrados que deve ser evitado é o loop inesperado que ocorre quando uma página visitada possui uma URL para uma página anteriormente visitada. Para evitar situações como essa os links visitados devem ser armazenados, a cada link extraído pelo Crawler da página deve ser verificado se já não foi visitado antes de seguir ou não o link fazendo download da nova página. 
+A biblioteca Scrapy já lida com links duplicados, ela o faz criando uma "impressão digital" da URL visitada, ou seja, uma representação da URL e seus parâmetros, assim quando duas ou mais URLs com parâmetros com ordens diferentes levam a um mesmo local um deles será considerado como visitado pois a "impressão digital" já foi visitada. A "impressão digital" de uma URL é criada extraindo a informação dos parâmetros e reordenando a URL, assim mesmo que URL possuem ordens diferentes a impressão digital possuirá uma única ordem. 
+
+\subsubsection{Projeto Scrapy}
+
+Scrapy é uma biblioteca com todos os recursos disponíveis para extrair informações de um website, utilizando Requests e Parse para download de websites e parseamento das informações. Os Requests e Parses são realizados por meio de classes conhecidas como Spider.
+
+Um novo projeto Scrapy pode ser iniciado pela linha de comando e ao ser iniciado será criado uma estrutura pronta de pastas e arquivos padrões com algumas configurações pré-determinadas.
+ 
+"Estrutura de Pastas aqui"
+
+Para a visitação de URLs e extração de dados dos websites Scrapy utiliza as classes spiders armazenadas na pasta "spiders", essas classes devem ser herdar de pelo menos um tipo de spider disponível no Scrapy, cada um com sua implementação única.
+
+A classe que escolhemos herdar para criar nossos spiders é a CrawlSpider que implementa o método parse, método esse que utiliza as regras definidas para ou seguir uma URL ou efetuar parse da URL. Quando definimos as regras, em um objeto iterável com nome "rules" na classe, indicamos por meio de expressão regular as páginas que podem ser seguidas e as páginas que devem ter seu conteúdo extraído, parseado e enviado para um método callback. Pode apenas haver um método callback para extração de dados.
+
+Nossa classe spider para ser corretamente executada pela biblioteca Scrapy deve informar a propriedade nome do "spider", dominios permitidos para extração de informação sem o schema "http", as URLs iniciais e as regras de visitação e extração de URL.
+
+Ao criarmos o método callback podemos usá-lo de pelo menos dois modos: Usá-lo para armazenar as informações extraídas em objetos conhecidos como "items" para serem depois interpretados por diversos métodos "Pipeline" que verificarão se os "items" estão dentro de uma qualificação lógica adequada para serem salvos em Banco de Dados ou arquivos Json (Esse é o método recomendado pelo Scrapy). Ou usá-lo diretamente para salvar as informações sem a necessidade de criação de objetos items.
+
+Adotamos esse último método na qual as URLs extraídas e parseadas possuem seus dados normalizados para serem salvos no Banco de Dados no próprio método callback.
+ 
+ 
+ 
+ 
+
+\subsubsection{Implementando acesso ao Banco de Dados}
+
+Para acesso ao Banco de Dados PostgreSQL foi utilizado a biblioteca Psycopg2 e criado 
 
 
-\subsubsection{Cortando Atalhos - Uso de Transaction}
+\subsubsection{Efetuando Login antes de Crawlear}
+
+
+\subsubsection{Tratamento de Erros e Transactions}
+
+
+
+
 
 
 \subsection{Normalização dos Dados Salvos}
@@ -264,13 +299,6 @@ Como exemplo temos o item que iniciou uma coleção, só pode ser estipulado a p
 
 Com a escolha da biblioteca para o crawler foram analisados os links das páginas escolhidas e definidos quais links seriam seguidos em busca de outros links para conteúdo assim como quais links seriam de conteúdo para parseamento. 
 
-
-
-\subsubsection{Links Duplicados}
-
-Quando se desenvolve um crawler, ou seja, um algoritmo para visitação de links presentes em páginas da web se deve evitar a visita de links já visitados, característica causadora de loops inesperados. 
-
-Há muitas formas de se fazer um crawler com a biblioteca Scrapy e utilizamos a classe CrawlSpider que permiti uma implementação rápida que lida com links duplicados, recurso já implementado na classe.
 
 
 \subsubsection {Abordagens de Spiders}

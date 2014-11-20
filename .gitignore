@@ -4,3 +4,5 @@ bin/images/*
 *.~vsdx
 cache/*
 cache2/*
+src/crawler/cache*
+*.pdf
