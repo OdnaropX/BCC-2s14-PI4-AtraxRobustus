@@ -1084,7 +1084,7 @@ CREATE TABLE IF NOT EXISTS soundtrack_has_image (
   soundtrack_id INTEGER  NOT NULL,
   image_id BIGINT NOT NULL,
   image_soundtrack_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(soundtrack_id, image_id),
+  PRIMARY KEY(soundtrack_id, image_id, image_soundtrack_type_id),
   FOREIGN KEY(soundtrack_id)
     REFERENCES soundtrack(id)
       ON DELETE CASCADE
@@ -2075,7 +2075,7 @@ CREATE TABLE IF NOT EXISTS entity_edition_has_image (
   image_id BIGINT  NOT NULL,
   entity_edition_id INTEGER  NOT NULL,
   image_entity_edition_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(image_id, entity_edition_id),
+  PRIMARY KEY(image_id, entity_edition_id, image_entity_edition_type_id),
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
@@ -2489,7 +2489,7 @@ CREATE TABLE IF NOT EXISTS company_has_image (
   image_id BIGINT  NOT NULL,
   company_id INTEGER  NOT NULL,
   image_company_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(image_id, company_id),
+  PRIMARY KEY(image_id, company_id, image_company_type_id),
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE
@@ -2542,7 +2542,7 @@ CREATE TABLE IF NOT EXISTS audio_has_image (
   audio_id INTEGER  NOT NULL,
   image_id BIGINT  NOT NULL,
   image_audio_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(audio_id, image_id),
+  PRIMARY KEY(audio_id, image_id, image_audio_type_id),
   FOREIGN KEY(audio_id)
     REFERENCES audio(id)
       ON DELETE CASCADE
@@ -2562,7 +2562,7 @@ CREATE TABLE IF NOT EXISTS collaborator_has_image (
   collaborator_id INTEGER  NOT NULL,
   image_id BIGINT  NOT NULL,
   image_collaborator_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(collaborator_id, image_id),
+  PRIMARY KEY(collaborator_id, image_id, image_collaborator_type_id),
   FOREIGN KEY(collaborator_id)
     REFERENCES collaborator(id)
       ON DELETE CASCADE
@@ -2582,7 +2582,7 @@ CREATE TABLE IF NOT EXISTS user_has_image (
   user_id INTEGER  NOT NULL,
   image_id BIGINT  NOT NULL,
   image_user_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(user_id, image_id),
+  PRIMARY KEY(user_id, image_id, image_user_type_id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
       ON DELETE CASCADE
@@ -2776,7 +2776,7 @@ CREATE TABLE IF NOT EXISTS goods_has_image (
   image_id BIGINT  NOT NULL,
   goods_id BIGINT  NOT NULL,
   image_goods_type_id INTEGER  NOT NULL,
-  PRIMARY KEY(image_id, goods_id),
+  PRIMARY KEY(image_id, goods_id, image_goods_type_id),
   FOREIGN KEY(image_id)
     REFERENCES image(id)
       ON DELETE CASCADE

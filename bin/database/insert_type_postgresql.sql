@@ -261,6 +261,7 @@ INSERT INTO image_goods_type ( id, name) VALUES(17,'Expositions');
 INSERT INTO image_goods_type ( id, name) VALUES(18,'Various');
 INSERT INTO image_goods_type ( id, name) VALUES(19,'Chan');
 INSERT INTO image_goods_type ( id, name) VALUES(20,'Main');
+INSERT INTO image_goods_type ( id, name) VALUES(21,'Banner');
 
 INSERT INTO image_audio_type ( id, name ) VALUES (1,'Thumbnail');
 INSERT INTO image_audio_type ( id, name ) VALUES (2, 'Scene');
