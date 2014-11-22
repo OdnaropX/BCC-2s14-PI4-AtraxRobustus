@@ -133,16 +133,20 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_items(self, response):
 			print "response url: ", response.url
 			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
 			
-			#print "Initialized database and parse"
-			if(re.search(self.pattern_series, response.url) != None):
-				#Parse Series.
-				return self.parse_series(response)
-		
-			elif(re.search(self.pattern_series_releases, response.url) != None):
-				#Parse Groups.
-				return self.parse_series_releases(response)
-					
+			if not self.dbase.check_spider_item_crawled(response.url):
+				#print "Initialized database and parse"
+				if(re.search(self.pattern_series, response.url) != None):
+					#Parse Series.
+					return self.parse_series(response)
+			
+				elif(re.search(self.pattern_series_releases, response.url) != None):
+					#Parse Groups.
+					return self.parse_series_releases(response)
+			else:
+				print "Ignored"	
 
 		"""
 			Method used 
@@ -151,7 +155,9 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_series(self, response):
 			print "Series"
 			self.instancialize_database()			
-			
+			if not self.check_logged(response):
+				return self.log_in(response)
+				
 			update_id = None
 			try:
 				#Check if there is a dummy, if there is update only. If there inst the id will be none
@@ -717,7 +723,11 @@ class MangaUpdatesSpider(CrawlSpider):
 							collection_id = self.dbase.create_collection(original_name)
 						elif(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 							#return the element most appear on list
-							collection_id = util.most_common_oneliner(collection_id)
+							collections = []
+							for new_id in collection_id:
+								collections.append(new_id[0])
+							
+							collection_id = util.most_common_oneliner(collections)
 				
 				#	Change this to use a relation on database.
 				
@@ -729,7 +739,7 @@ class MangaUpdatesSpider(CrawlSpider):
 
 				#format classification_type_id
 				if(categories):
-					if "Adult" in categories or "Hentai" in categories or "Doujin" in categories or "Seinen" in categories:
+					if re.search(ur'[Mm]ature', categories) != None or re.search(ur'[Aa]dults?', categories) != None or re.search(ur'[Hh]entais?', categories) != None or re.search(ur'[Dd]oujin([ -]?shi)?s?', categories) != None or re.search(ur'[Ss]einens?', categories) != None:
 						category_adult = True
 								
 				if(not category_adult):
@@ -811,7 +821,9 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_series_releases(self, response):
 			print "Releases"
 			self.instancialize_database()
-			
+			if not self.check_logged(response):
+				return self.log_in(response)
+				
 			#Get release rows.
 			release_row = response.css('#main_content table table tr:nth-child(1) > td table:nth-child(1) tr')
 			releases = []

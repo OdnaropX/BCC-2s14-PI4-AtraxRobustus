@@ -62,13 +62,13 @@ class MyFigureCollectionSpider(CrawlSpider):
 		'search\.php\?mode=search&root=[01](.*)?&p=[0-9]{1,}'),
 		#'search\.php\?mode=search&root=[01]&goto=0&categoryid=[0-9]{1,}&runid=-1&rating=0&scale=0&year=0&month=0&day=0&nodate=0&date_strict=0&tagid=0&nocode=0&display=grid&sort=newest&order=desc(&acc=[0-9]{1,})?&separator=0&castoff=0&bootleg=0&draft=0&region_free=0&origin_id=0&origin_p=-1&origin_strict=0&character_id=0&character_p=-1&character_strict=0&manufacturer_id=0&manufacturer_p=-1&manufacturer_strict=0&artist_id=0&artist_p=-1&artist_strict=0&type_id=0&type_p=-1&type_strict=0&material_id=0&material_p=-1&material_strict=0&pp=1&p=[0-9]{1,}'),
 		deny=('kr\.myfigure','it\.myfigure','fi\.myfigure','nl\.myfigure','cn\.myfigure','af\.myfigure','sp\.myfigure','qe\.myfigure','fr\.myfigure','jp\.myfigure','ge\.myfigure', 'de\.myfigure', 'no\.myfigure','sv\.myfigure',
-		'pt\.myfigure','pl\.myfigure','es\.myfigure','ja\.myfigure','zh\.myfigure','ru\.myfigure')
+		'pt\.myfigure','pl\.myfigure','es\.myfigure','ja\.myfigure','zh\.myfigure','ru\.myfigure', 'database\.php\?','\.cgi')
 		)
 		),
 		#Parse id and series release. Series release page will be add from request on series parse. 
 		Rule(LinkExtractor(allow=('item/[0-9]{1,}'),
 		deny=('edit','link','history','kr\.myfigure','it\.myfigure','fi\.myfigure','nl\.myfigure','cn\.myfigure','af\.myfigure','sp\.myfigure','qe\.myfigure','fr\.myfigure','jp\.myfigure','ge\.myfigure', 'de\.myfigure', 'no\.myfigure','sv\.myfigure',
-		'pt\.myfigure','pl\.myfigure','es\.myfigure','ja\.myfigure','zh\.myfigure','ru\.myfigure')), callback='parse_items', follow=False)
+		'pt\.myfigure','pl\.myfigure','es\.myfigure','ja\.myfigure','zh\.myfigure','ru\.myfigure', 'database\.php\?', '\.cgi')), callback='parse_items', follow=False)
 		)
 		
 		pattern_items = re.compile(ur'item/[0-9]{1,}')
@@ -665,10 +665,10 @@ class MyFigureCollectionSpider(CrawlSpider):
 								for return_item in return_items:
 									new_comment = {}
 									new_comment['title'] = 'Cralwer Not Associated Entity'
-									new_comment['content'] = return_item
+									new_comment['content'] = return_item[0]
 									comments.append(new_comment)
 							else:
-								entities_origin_id.append(return_items[0])
+								entities_origin_id.append(return_items[0][0])
 						else:
 							#Create dummy.
 							entity_dummy_id = self.dbase.create_entity(entity['alias'][0], self.dbase.entity_type_anime, self.dbase.classification_type_12, self.dbase.language_ja, self.dbase.country_jp)
@@ -697,10 +697,10 @@ class MyFigureCollectionSpider(CrawlSpider):
 								for return_item in return_items:
 									new_comment = {}
 									new_comment['title'] = 'Cralwer Not Associated Persona'
-									new_comment['content'] = return_item
+									new_comment['content'] = return_item[0]
 									comments.append(new_comment)
 							else:
-								persona_origin_id.append(return_items[0])
+								persona_origin_id.append(return_items[0][0])
 						else:
 							persona_name = util.get_formatted_name(persona['alias'])
 							#Create dummy.
@@ -840,7 +840,11 @@ class MyFigureCollectionSpider(CrawlSpider):
 					
 					if(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 						#return the element most appear on list
-						collection_id = util.most_common_oneliner(collection_id)
+						collections = []
+						for new_id in collection_id:
+							collections.append(new_id[0])
+							
+						collection_id = util.most_common_oneliner(collections)
 				
 				#Else create collection from origin name. If there is no origin name get collection from classification.
 				if not collection_id:

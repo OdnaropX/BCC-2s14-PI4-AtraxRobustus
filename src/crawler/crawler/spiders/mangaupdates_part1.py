@@ -23,13 +23,14 @@ class MangaUpdatesSpider(CrawlSpider):
 			Domain list that are allowed to be followed and parsed.
 		"""
 		allowed_domains = ["www.mangaupdates.com"]
-		start_urls = [#"http://www.mangaupdates.com/groups.html?page=1&",
+		start_urls = ["http://www.mangaupdates.com/groups.html?page=1&",
 		"http://www.mangaupdates.com/authors.html?page=1&",
-		#"http://www.mangaupdates.com/publishers.html?page=1&",
+		"http://www.mangaupdates.com/publishers.html?page=1&",
 		]
+		
 		dbase = None
 		groups = None
-		websites = None
+		
 		login_page = 'http://www.mangaupdates.com/login.html'
 		
 		"""
@@ -168,19 +169,23 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_items(self, response):
 			print "Response url: ", response.url
 			self.instancialize_database()
-			
-			if(re.search(self.pattern_groups, response.url) != None):
-				#Parse Groups.
-				self.parse_groups(response)
+			if not self.check_logged(response):
+				return self.log_in(response)
 				
-			elif(re.search(self.pattern_authors, response.url) != None):
-				#Parse Authors.
-				self.parse_authors(response)
-				
-			elif(re.search(self.pattern_publishers, response.url) != None):
-				#Parse Publisher.
-				self.parse_publishers(response)
+			if not self.dbase.check_spider_item_crawled(response.url):
+				if(re.search(self.pattern_groups, response.url) != None):
+					#Parse Groups.
+					self.parse_groups(response)
 					
+				elif(re.search(self.pattern_authors, response.url) != None):
+					#Parse Authors.
+					self.parse_authors(response)
+					
+				elif(re.search(self.pattern_publishers, response.url) != None):
+					#Parse Publisher.
+					self.parse_publishers(response)
+			else:
+				print "Ignored"
 			
 					
 		"""
@@ -189,7 +194,9 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_groups(self, response):
 			print "Groups"
 			self.instancialize_database()
-			
+			if not self.check_logged(response):
+				return self.log_in(response)
+				
 			update_id = None
 			try:
 				#Check if there is a dummy, if there is update only. If there inst the id will be none
@@ -305,6 +312,9 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_authors(self, response):
 			print "Authors"
 			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
+				
 			#Parse author content html and extract texts from TR. Why Table?!! Why!!!! 
 			
 			update_id = None
@@ -362,7 +372,9 @@ class MangaUpdatesSpider(CrawlSpider):
 					new_image = {}
 					new_image['url'] = image
 					new_image['extension'] = image_array.pop()
-					new_image['name'] = image_array.pop()
+					new_image_name = image_array.pop()
+					new_image_name = new_image_name.split('/')
+					new_image['name'] = new_image_name.pop()
 					formatted_image.append(new_image)
 				
 				#Format associated names
@@ -384,9 +396,6 @@ class MangaUpdatesSpider(CrawlSpider):
 			
 				#Format birthdate
 				birth_date = util.sanitize_content(birth_date)
-				if(birth_date == 'N/A'):
-					birth_date = None
-					
 				
 				#Format country
 				country_id = None
@@ -413,17 +422,23 @@ class MangaUpdatesSpider(CrawlSpider):
 				
 				#Format blood type
 				blood_type = util.sanitize_title(blood_type[0])
+				
 				if blood_type:
 					new_blood = re.sub(self.pattern_blood, '', blood_type)
+					new_blood = new_blood.strip()
 					blood_name = []
 					blood_name.append(new_blood)
 					blood_type_id = self.dbase.get_var('blood_type', ['id'], 'name = %s', blood_name)
 					
 					#get rh from blood_type
 					new_rh = re.sub(self.pattern_blood_rh,'', blood_type)
-					rh_name = []
-					rh_name.append(new_rh)
-					blood_rh_type_id = self.dbase.get_var('blood_rh_type', ['id'], 'name = %s', rh_name)
+					new_rh = new_rh.strip()
+					if new_rh:
+						rh_name = []
+						rh_name.append(new_rh)
+						blood_rh_type_id = self.dbase.get_var('blood_rh_type', ['id'], 'name = %s', rh_name)
+					else:
+						blood_rh_type_id = None
 				else:
 					blood_type_id = None
 					blood_rh_type_id = None
@@ -490,6 +505,8 @@ class MangaUpdatesSpider(CrawlSpider):
 		def parse_publishers(self, response):
 			print "Publisher"
 			self.instancialize_database()
+			if not self.check_logged(response):
+				return self.log_in(response)
 			#Parse publisher content html and extract texts from TR. Why Table?!! Why!!!! 
 			
 			update_id = None

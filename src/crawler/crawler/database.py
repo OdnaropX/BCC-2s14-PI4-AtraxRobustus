@@ -571,15 +571,15 @@ class Database:
 			return result[0]
 				
 	"""
-		Method used to get only one column from database.
-		All rows within the column will be returned.
+		Method used to get any column from the table database.
+		This method return the rows on database, each with a tuple for the columns. Row = tuple[] and column = tuple[][]
 	"""
 	def get_col(self, table, column, where = None, where_values = None, joins = None, join_columns = None, join_type = None):
 		columns = []
 		columns.append(column)
 		column = self.select(table, columns, where, where_values, joins, join_columns, join_type)
 		if column:
-			return column[0]
+			return column
 		return None
 	
 	"""
@@ -4286,9 +4286,10 @@ class Database:
 		new_url = []
 		#print url
 		#Get name from domain
-		domain = re.sub(r'^ww[w0-9]{1,}.', '', url.netloc) 
+		domain = re.sub(r'^(.*://)?ww[w0-9]{1,}.', '', url.netloc) 
 		domain = domain.split('.')
-		name = domain[0].capitalize()
+		name = domain[0].title()
+		name = name.strip()
 		#Get url from social link
 		new_url.append(url[0])
 		new_url.append(url[1])
@@ -5055,7 +5056,7 @@ class Database:
 			if(length_country > 1 or length_country < 1):
 				country_id = default_country
 			else:
-				country_id = countries[0]
+				country_id = countries[0][0]
 			return country_id
 		
 		return default_country
@@ -5074,7 +5075,7 @@ class Database:
 			if(length_country > 1 or length_country < 1):
 				country_id = default_country
 			else:
-				country_id = countries[0]
+				country_id = countries[0][0]
 			return country_id
 		
 		return default_country
@@ -5093,7 +5094,7 @@ class Database:
 		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
 		countries = self.get_col('country_has_language', 'language_id', "country_id = %s", code)
 		if(countries != None):
-			return countries[0]
+			return countries[0][0]
 					
 		return default_language
 
@@ -5146,7 +5147,7 @@ class Database:
 		#this method will not return the correct country on cases there is more than one country with the same language. So country_id will set to None.
 		countries = self.get_col('country_has_language', 'country_id', "language_id = %s", code)
 		if(countries != None):
-			return countries[0]
+			return countries[0][0]
 					
 		return default_country
 		

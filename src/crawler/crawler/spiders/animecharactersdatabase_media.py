@@ -650,7 +650,10 @@ class AnimeCharactersSpider(CrawlSpider):
 									add_spider_item('collection', collection_id, new_url_collection)
 							elif(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 								#return the element most appear on list
-								collection_id = util.most_common_oneliner(collection_id)
+								collections = []
+								for new_id in collection_id:
+									collections.append(new_id[0])
+								collection_id = util.most_common_oneliner(collections)
 								
 					if not collection_id:
 						#Check if name is similar to another collection already registered. Only check if name is larger then 3 characters.
@@ -670,7 +673,10 @@ class AnimeCharactersSpider(CrawlSpider):
 								collection_id = self.dbase.create_collection(original_name)
 							elif(isinstance(collection_id, collections.Iterable) and not isinstance(collection_id, types.StringTypes)):
 								#return the element most appear on list
-								collection_id = util.most_common_oneliner(collection_id)
+								collections = []
+								for new_id in collection_id:
+									collections.append(new_id[0])
+								collection_id = util.most_common_oneliner(collections)
 								
 					#Format language and country
 					if type_id == self.dbase.entity_type_manhaw:
