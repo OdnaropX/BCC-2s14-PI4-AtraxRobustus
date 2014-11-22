@@ -36,12 +36,56 @@ class Visualization:
 					
 			return locations
 	
-	def cloud_words(self, words = [], canvas_width = 1920, canvas_height = 1080):
-		new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)
-		
+	"""
+		Format words.
+		random must be a instance of Random()
+	
+	"""
+	def format_words(self, words, random = None):
 		if words:
-			black_scene = grey_scale = Image.new("L", (canvas_width, canvas_height))
+			black_scene = Image.new("L", (canvas_width, canvas_height))
 			draw = ImageDraw.Draw(grey_scale)
+			
+			formatted_words = []
+			for word in self.words:
+				new_word = {}
+				i += 1
+				#Find avaliable position
+				new_word['font_size'] = self.get_font_size(word[1], word[0])
+				font = ImageFont.truetype(self.font_used, new_word['font_size'])
+				draw.setfont(font)
+				# get size of resulting text
+				box_size = draw.textsize(word[1])
+				position = self.find_avaliable_space(box_size[1], box_size[0])
+			
+				if position:
+					new_word['text'] = word[1]
+					if random:
+						new_word['x'], new_word['y'] = position[random.randint(0, len(position) - 1)]
+					else:
+						new_word['x'], new_word['y'] = position[0]
+						
+					new_word['color'] = 'black'
+					
+					#Draw word in temporary location
+					draw.text((new_word['x'], new_word['y']), word[1], fill="white")
+
+					black_array = np.array(black_scene)
+					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
+					#new = Image.fromarray(black_scene)
+					#new.save('teste{0}.png'.format(i))
+					
+					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
+					self.integral_image = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
+					formatted_words.append(new_word)
+			return formatted_words
+		else:
+			return []
+	
+	def cloud_words(self, words = [], canvas_width = 1920, canvas_height = 1080):
+		new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
+		
+		
 		
 		
 		pass
