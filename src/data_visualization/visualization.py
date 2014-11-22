@@ -7,6 +7,12 @@ from random import Random
 
 class Visualization:
 
+	def __init__(self):
+		self.fonts = []
+		self.fonts.append('verdana.ttf')
+		self.fonts.append('arial.ttf')
+	
+	
 	"""
 		Method used to find all or first avaliable space in a scene. 
 		The scene must be a numpy array with zeros. Location already occupied will not be equal to zero.
@@ -36,23 +42,41 @@ class Visualization:
 					
 			return locations
 	
+	def get_font_size(self, word, count):
+		pass
+		
+	def get_font_size_on_circle(self, circle_x, circle_y, radius):
+		pass
+		
+	
+	def get_font_used(self, location):
+		if not location:
+		
+		font_amount = len(self.fonts)
+		
+		return self.fonts[location % font_amount]
+		
 	"""
 		Format words.
 		random must be a instance of Random()
 	
 	"""
-	def format_words(self, words, random = None):
+	def format_words(self, words, random_font = False, random = None):
 		if words:
 			black_scene = Image.new("L", (canvas_width, canvas_height))
 			draw = ImageDraw.Draw(grey_scale)
 			
 			formatted_words = []
+			i = 0
 			for word in self.words:
 				new_word = {}
-				i += 1
+				if random_font: 
+					i += 1
+				
 				#Find avaliable position
 				new_word['font_size'] = self.get_font_size(word[1], word[0])
-				font = ImageFont.truetype(self.font_used, new_word['font_size'])
+				new_word['font_used'] = self.get_font_used(i)
+				font = ImageFont.truetype(self.get_font_used(), new_word['font_size'])
 				draw.setfont(font)
 				# get size of resulting text
 				box_size = draw.textsize(word[1])
@@ -82,14 +106,28 @@ class Visualization:
 		else:
 			return []
 	
-	def cloud_words(self, words = [], canvas_width = 1920, canvas_height = 1080):
+	"""
+		Method used to drawn a word cloud.
+	"""
+	def cloud_words(self, filename, words = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
 		new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
+		image = Image.new("RGB", (self.canvas_width, self.canvas_height), background_color)
+		canvas  = ImageDraw.Draw(image)
 		
+		#each words must be a tuple with the text and count.
+		formatted_words = self.format_words(words)
 		
+		for word in formatted_words:
+			font = ImageFont.truetype(word['font_used'], word['font_size'])
+			canvas.setfont(font)
+			canvas.text((word['x'],word['y']), word['text'], fill = word['color'])
 		
-		pass
+		image.save(filename)
 	
+	def bubble(self, collections = []):
+		pass
+		
 	def spiral(self, collections = []):
 		pass
 	
