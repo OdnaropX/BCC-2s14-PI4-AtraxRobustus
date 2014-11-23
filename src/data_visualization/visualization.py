@@ -48,11 +48,15 @@ class Visualization:
 	def get_font_size(self, word, count, min_size):
 		if count:
 			#Sum with 10 to log(1) return at least 1 and avoid 0.
-			new_size = np.log(count + 10)
+			#Multiple by 2 to create a greater number.
+			new_size = (2 * count / np.log(count + 10)) / min_size
 		else:
 			new_size = 1
 			
-		return int(min_size * new_size)
+		if new_size < min_size:
+			return min_size
+		else:
+			return int(new_size)
 		
 	def get_font_size_on_circle(self, circle_x, circle_y, radius):
 		pass
@@ -92,6 +96,7 @@ class Visualization:
 				
 				position = None
 				font_size = self.get_font_size(word[1], word[0], 10)
+				print font_size
 				#Loop while not find position. Get a small size if 
 				while font_size > 1 and not position:
 					#Find available position
