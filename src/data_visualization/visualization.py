@@ -90,7 +90,7 @@ class Visualization:
 				
 				position = None
 				font_size = self.get_font_size(word[1], word[0])
-				#Loop while not find position.
+				#Loop while not find position. Get a small size if 
 				while font_size > 1 and not position:
 					#Find available position
 					font = ImageFont.truetype(new_word['font_used'], font_size)
@@ -98,8 +98,11 @@ class Visualization:
 					#Get size of resulting text
 					box_size = draw.textsize(word[1])
 					position = self.find_avaliable_space(black_array, box_size[1], box_size[0])
-					font_size -= 1
-			
+					if use_all_words:
+						font_size -= 1
+					else:
+						break
+						
 				if position:
 					new_word['text'] = word[1]
 					if random:
