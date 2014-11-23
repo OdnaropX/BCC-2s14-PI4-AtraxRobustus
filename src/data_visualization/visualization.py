@@ -4,6 +4,7 @@ from PIL import ImageFont
 import numpy as np
 import math
 from random import Random
+import util
 
 class Visualization:
 
@@ -26,11 +27,12 @@ class Visualization:
 		find = False
 		locations = []
 		#Check the available locations to insert the rectangular. 
-		#For this use the summed table area. Areas already filled will not result in 0.
+		#For this use the summed table area. Areas already filled will not result in 0. Dont need to check last size_x and last size_y.
 		for i in xrange(x - size_x):
 			for j in xrange(y - size_y):
 				#print i, j
 				#Used not because scene can be 0.0 instead of 0. Not really sure if == x (x = 0) will have the same result when x = 0.0
+				#Image (0,0) start on left top. 
 				if not scene[i, j] + scene[i + size_x, j + size_y] - (scene[i + size_x, j] + scene[i, j + size_y]):
 					locations.append((j, i))
 					if first_only:
@@ -57,14 +59,36 @@ class Visualization:
 		else:
 			return int(new_size)
 		
-	def get_font_size_on_circle(self, circle_x, circle_y, radius):
-		pass
+	def get_font_size_on_circle(self, character_length, diameter):
+		diameter = diameter * 1.5
+		return int(diameter/character_length)
+
+
 		
+	"""
+		Method used to get the diameter from the bubble.
+	"""
 	def get_bubble_size(self, word, count, min_size):
+
+		if count:
+			if count > 2000:
+				#new_size = (5 * count / np.log(count + 100)) / 10
+				new_size = (12 * count / np.log(count + 10)) / 10
+			else:
+				new_size = (13 * count / np.log(count + 10)) / 10
+				
+			#new_size = 50 * np.log(count + 100) / 10
+		else:
+			new_size = 1
+			
+			
+		if new_size < min_size:
+			return min_size
+		else:
+			return min(700, int(new_size))
 	
 	
-	
-	def get_font_used(self, location):
+	def get_font_used(self, location = None):
 		if not location:
 			return self.fonts[0]
 			
@@ -90,9 +114,15 @@ class Visualization:
 			bubbles = []
 			for word in words:
 				print "Formatting: ", word 
+				font = ImageFont.truetype('verdana.ttf', 37)
+				draw.setfont(font)
+				#Get size of resulting text
+				box_size = draw.textsize(word[1])
+				print box_size
+				
 				position = None
-				diameter = self.get_bubble_size(word[1], word[0], 10)
-				print radius
+				diameter = self.get_bubble_size(word[1], word[0], 60)
+				print diameter
 				
 				#Loop while not find position. Get a small size if 
 				while diameter > 1 and not position:
@@ -112,7 +142,13 @@ class Visualization:
 					else:
 						#first position
 						new_circle['x'], new_circle['y'] = position[0]
-						
+					
+					new_circle['fill'] = "white"
+					new_circle['outline'] = self.get_color(True)
+					new_circle['char_length'] = word[2]
+					new_circle['text'] = word[1]
+					new_circle['items'] = util.convert_to_number(word[0])
+					
 					#Draw circle.
 					draw.ellipse((new_circle['x'], new_circle['y'], new_circle['x'] + diameter, new_circle['y'] + diameter), fill="white", outline="white")
 					#Get new array from scene
@@ -129,6 +165,20 @@ class Visualization:
 			return bubbles
 		else:
 			return []
+		
+	def get_color(self, random = False):
+		if not random:
+			return (0,0,0)
+		random = Random()
+		colors = []
+		colors.append((59,22,216))#Blue
+		colors.append((186,196,72))#Yellow
+		colors.append((0,0,0))#Black
+		colors.append((133,96,168))#Purple
+		colors.append((236,147,41))#Oranje
+		
+		return colors[random.randint(0, len(colors) - 1)]
+		
 		
 		
 	"""
@@ -161,19 +211,19 @@ class Visualization:
 				new_word['font_used'] = self.get_font_used(i)
 				
 				position = None
-				font_size = self.get_font_size(word[1], word[0], 10)
+				font_size = self.get_font_size(word[1], word[0], 10) + 1
 				print font_size
 				#Loop while not find position. Get a small size if 
 				while font_size > 1 and not position:
+					font_size -= 1
 					#Find available position
 					font = ImageFont.truetype(new_word['font_used'], font_size)
 					draw.setfont(font)
 					#Get size of resulting text
 					box_size = draw.textsize(word[1])
 					position = self.find_avaliable_space(black_array, box_size[1], box_size[0], first_only)
-					if use_all_words:
-						font_size -= 1
-					else:
+					
+					if not use_all_words:
 						break
 						
 				if position:
@@ -185,8 +235,8 @@ class Visualization:
 						#first position
 						new_word['x'], new_word['y'] = position[0]
 						
-					new_word['color'] = 'black'
-					
+					new_word['color'] = self.get_color(True)
+					new_word['font_size'] = font_size
 					#Draw word in temporary location
 					draw.text((new_word['x'], new_word['y']), word[1], fill="white")
 					#Get new array from scene
@@ -194,7 +244,7 @@ class Visualization:
 					
 					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
 					#new = Image.fromarray(scene)
-					scene.save('teste{0}.png'.format(i))
+					#scene.save('teste{0}.png'.format(i))
 					
 					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
 					black_array = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
@@ -207,12 +257,12 @@ class Visualization:
 		Method used to drawn a word cloud.
 	"""
 	def cloud_words(self, filename, words = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
-		new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
+		#new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
 		#each words must be a tuple with the text and count.
-		formatted_words = self.format_words(None, canvas_width, canvas_height, words)
+		formatted_words = self.format_words(None, canvas_width, canvas_height, words, True, False, Random())
 		if formatted_words:
-			image = Image.new("RGB", (self.canvas_width, self.canvas_height), background_color)
+			image = Image.new("RGB", (canvas_width, canvas_height), background_color)
 			canvas  = ImageDraw.Draw(image)
 			
 			for word in formatted_words:
@@ -224,8 +274,58 @@ class Visualization:
 		else:
 			print "No words to print"
 			
-	def bubble(self, collections = []):
-		pass
+	def bubbles(self, filename, collections = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
+		#new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
+		
+		formatted_bubbles = self.format_bubbles(None, canvas_width, canvas_height, collections, True, Random())
+		
+		if formatted_bubbles:
+			image = Image.new("RGB", (canvas_width, canvas_height), background_color)
+			canvas  = ImageDraw.Draw(image)
+			
+			for word in formatted_bubbles:
+				canvas.ellipse((word['x'], word['y'], word['x'] + word['diameter'], word['y'] + word['diameter']), word['fill'], word['outline'])
+				#Draw text inside ellipse.
+				font_used = self.get_font_used()
+				font_size = self.get_font_size_on_circle(word['char_length'], word['diameter'])
+				font = ImageFont.truetype(font_used, font_size)
+				canvas.setfont(font)
+				box_size = canvas.textsize(word['text'])
+				
+				while box_size[0] >= word['diameter'] - 10:
+					font_size -= 1
+					font = ImageFont.truetype(font_used, font_size)
+					canvas.setfont(font)
+					box_size = canvas.textsize(word['text'])
+				
+				
+				#canvas.text((word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2)), word['text'], fill=word['outline'])
+				if word['items'] > 1:
+					item = '{0} itens'.format(word['items'])
+				else:
+					item = '{0} item'.format(word['items'])
+					
+				x = word['x'] + (word['diameter'] / 2)
+				y = word['y'] + (word['diameter'] / 2) - (box_size[1] / 2) - (word['diameter']  * 0.1)
+				canvas.text((x - (box_size[0] / 2), y), word['text'], fill=word['outline'])
+					
+				font_size = self.get_font_size_on_circle(len(item), word['diameter'])
+				font = ImageFont.truetype(font_used, font_size)
+				canvas.setfont(font)
+				text_size = canvas.textsize(item)
+				
+				while text_size[0] >= word['diameter'] - 10:
+					font_size -= 1
+					font = ImageFont.truetype(font_used, font_size)
+					canvas.setfont(font)
+					text_size = canvas.textsize(item)
+					
+				print text_size
+				canvas.text((x - (text_size[0] / 2), y + box_size[1] + 5), item, fill=word['outline'])
+
+			image.save(filename)
+		else:
+			print "No words to print"
 		
 	def spiral(self, collections = []):
 		pass
