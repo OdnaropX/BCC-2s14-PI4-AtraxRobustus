@@ -48,8 +48,7 @@ class Visualization:
 	def get_font_size(self, word, count, min_size):
 		if count:
 			#Sum with 10 to log(1) return at least 1 and avoid 0.
-			#Multiple by 2 to create a greater number.
-			new_size = (2 * count / np.log(count + 10)) / min_size
+			new_size = (4 * count / np.log(count + 10)) / min_size
 		else:
 			new_size = 1
 			
@@ -61,6 +60,9 @@ class Visualization:
 	def get_font_size_on_circle(self, circle_x, circle_y, radius):
 		pass
 		
+	def get_bubble_size(self, word, count, min_size):
+	
+	
 	
 	def get_font_used(self, location):
 		if not location:
@@ -69,6 +71,65 @@ class Visualization:
 		font_amount = len(self.fonts)
 		
 		return self.fonts[location % font_amount]
+		
+	def format_bubbles(self, scene, canvas_width, canvas_height, words, use_all_words = True, random = None):
+		if words:
+			if scene == None:
+				#Create new black scene
+				scene = Image.new("L", (canvas_width, canvas_height))
+
+			draw = ImageDraw.Draw(scene)
+			black_array = np.array(scene)
+			
+			
+			if random:
+				first_only = False
+			else:
+				first_only = True
+				
+			bubbles = []
+			for word in words:
+				print "Formatting: ", word 
+				position = None
+				diameter = self.get_bubble_size(word[1], word[0], 10)
+				print radius
+				
+				#Loop while not find position. Get a small size if 
+				while diameter > 1 and not position:
+					#Find available position					
+					position = self.find_avaliable_space(black_array, diameter, diameter, first_only)
+					if use_all_words:
+						diameter -= 1
+					else:
+						break
+				
+				if position:
+					new_circle = {}
+					new_circle['diameter'] = diameter
+					if random:
+						#random position
+						new_circle['x'], new_circle['y'] = position[random.randint(0, len(position) - 1)]
+					else:
+						#first position
+						new_circle['x'], new_circle['y'] = position[0]
+						
+					#Draw circle.
+					draw.ellipse((new_circle['x'], new_circle['y'], new_circle['x'] + diameter, new_circle['y'] + diameter), fill="white", outline="white")
+					#Get new array from scene
+					black_array = np.array(scene)
+					
+					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
+					#new = Image.fromarray(scene)
+					scene.save('teste-bubble.png')
+					
+					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
+					black_array = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
+					bubbles.append(new_circle)
+					
+			return bubbles
+		else:
+			return []
+		
 		
 	"""
 		Format words.
@@ -84,6 +145,11 @@ class Visualization:
 			draw = ImageDraw.Draw(scene)
 			black_array = np.array(scene)
 			
+			if random:
+				first_only = False
+			else:
+				first_only = True
+				
 			formatted_words = []
 			i = 0
 			for word in words:
@@ -104,7 +170,7 @@ class Visualization:
 					draw.setfont(font)
 					#Get size of resulting text
 					box_size = draw.textsize(word[1])
-					position = self.find_avaliable_space(black_array, box_size[1], box_size[0])
+					position = self.find_avaliable_space(black_array, box_size[1], box_size[0], first_only)
 					if use_all_words:
 						font_size -= 1
 					else:
