@@ -20,27 +20,26 @@ class Visualization:
 		TODO: Find a avaliable space using polygon and not rectangular items. 
 	"""
 	def find_avaliable_space(self, scene, size_x, size_y, first_only = False):
-		if scene:
-			x = scene.shape[0]
-			y = scene.shape[1]
+		x = scene.shape[0]
+		y = scene.shape[1]
 			
-			find = False
-			locations = []
-			#Check the available locations to insert the rectangular. 
-			#For this use the summed table area. Areas already filled will not result in 0.
-			for i in xrange(x - size_x):
-				for j in xrange(y - size_y):
-					#print i, j
-					#Used not because scene can be 0.0 instead of 0. Not really sure if == x (x = 0) will have the same result when x = 0.0
-					if not scene[i, j] + scene[i + size_x, j + size_y] - (scene[i + size_x, j] + scene[i, j + size_y]):
-						locations.append((j, i))
-						if first_only:
-							find = True
-							break
-				if find and first_only:
-					break
-					
-			return locations
+		find = False
+		locations = []
+		#Check the available locations to insert the rectangular. 
+		#For this use the summed table area. Areas already filled will not result in 0.
+		for i in xrange(x - size_x):
+			for j in xrange(y - size_y):
+				#print i, j
+				#Used not because scene can be 0.0 instead of 0. Not really sure if == x (x = 0) will have the same result when x = 0.0
+				if not scene[i, j] + scene[i + size_x, j + size_y] - (scene[i + size_x, j] + scene[i, j + size_y]):
+					locations.append((j, i))
+					if first_only:
+						find = True
+						break
+			if find and first_only:
+				break
+				
+		return locations
 	
 	"""
 		Get size from count. 
@@ -53,7 +52,7 @@ class Visualization:
 		else:
 			new_size = 1
 			
-		return min_size * new_size
+		return int(min_size * new_size)
 		
 	def get_font_size_on_circle(self, circle_x, circle_y, radius):
 		pass
@@ -61,7 +60,8 @@ class Visualization:
 	
 	def get_font_used(self, location):
 		if not location:
-		
+			return self.fonts[0]
+			
 		font_amount = len(self.fonts)
 		
 		return self.fonts[location % font_amount]
@@ -73,7 +73,8 @@ class Visualization:
 	"""
 	def format_words(self, scene, canvas_width, canvas_height, words, use_all_words = True, random_font = False, random = None):
 		if words:
-			if not scene:
+			if scene == None:
+				#Create new black scene
 				scene = Image.new("L", (canvas_width, canvas_height))
 
 			draw = ImageDraw.Draw(scene)
@@ -81,7 +82,8 @@ class Visualization:
 			
 			formatted_words = []
 			i = 0
-			for word in self.words:
+			for word in words:
+				print "Formatting: ", word 
 				if random_font: 
 					i += 1
 				
@@ -89,7 +91,7 @@ class Visualization:
 				new_word['font_used'] = self.get_font_used(i)
 				
 				position = None
-				font_size = self.get_font_size(word[1], word[0])
+				font_size = self.get_font_size(word[1], word[0], 10)
 				#Loop while not find position. Get a small size if 
 				while font_size > 1 and not position:
 					#Find available position
@@ -116,11 +118,12 @@ class Visualization:
 					
 					#Draw word in temporary location
 					draw.text((new_word['x'], new_word['y']), word[1], fill="white")
-
+					#Get new array from scene
+					black_array = np.array(scene)
 					
 					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
-					#new = Image.fromarray(black_scene)
-					#new.save('teste{0}.png'.format(i))
+					#new = Image.fromarray(scene)
+					scene.save('teste{0}.png'.format(i))
 					
 					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
 					black_array = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
