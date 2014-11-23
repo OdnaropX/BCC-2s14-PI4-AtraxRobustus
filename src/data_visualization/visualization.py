@@ -42,8 +42,18 @@ class Visualization:
 					
 			return locations
 	
-	def get_font_size(self, word, count):
-		pass
+	"""
+		Get size from count. 
+		Use natural log to multiply by a value not to great. Some count are greater than 3000.
+	"""
+	def get_font_size(self, word, count, min_size):
+		if count:
+			#Sum with 10 to log(1) return at least 1 and avoid 0.
+			new_size = np.log(count + 10)
+		else:
+			new_size = 1
+			
+		return min_size * new_size
 		
 	def get_font_size_on_circle(self, circle_x, circle_y, radius):
 		pass
