@@ -71,32 +71,42 @@ class Visualization:
 		random must be a instance of Random()
 	
 	"""
-	def format_words(self, words, random_font = False, random = None):
+	def format_words(self, scene, canvas_width, canvas_height, words, use_all_words = True, random_font = False, random = None):
 		if words:
-			black_scene = Image.new("L", (canvas_width, canvas_height))
-			draw = ImageDraw.Draw(grey_scale)
+			if not scene:
+				scene = Image.new("L", (canvas_width, canvas_height))
+
+			draw = ImageDraw.Draw(scene)
+			black_array = np.array(scene)
 			
 			formatted_words = []
 			i = 0
 			for word in self.words:
-				new_word = {}
 				if random_font: 
 					i += 1
 				
-				#Find avaliable position
-				new_word['font_size'] = self.get_font_size(word[1], word[0])
+				new_word = {}
 				new_word['font_used'] = self.get_font_used(i)
-				font = ImageFont.truetype(self.get_font_used(), new_word['font_size'])
-				draw.setfont(font)
-				# get size of resulting text
-				box_size = draw.textsize(word[1])
-				position = self.find_avaliable_space(box_size[1], box_size[0])
+				
+				position = None
+				font_size = self.get_font_size(word[1], word[0])
+				#Loop while not find position.
+				while font_size > 1 and not position:
+					#Find available position
+					font = ImageFont.truetype(new_word['font_used'], font_size)
+					draw.setfont(font)
+					#Get size of resulting text
+					box_size = draw.textsize(word[1])
+					position = self.find_avaliable_space(black_array, box_size[1], box_size[0])
+					font_size -= 1
 			
 				if position:
 					new_word['text'] = word[1]
 					if random:
+						#random position
 						new_word['x'], new_word['y'] = position[random.randint(0, len(position) - 1)]
 					else:
+						#first position
 						new_word['x'], new_word['y'] = position[0]
 						
 					new_word['color'] = 'black'
@@ -104,13 +114,13 @@ class Visualization:
 					#Draw word in temporary location
 					draw.text((new_word['x'], new_word['y']), word[1], fill="white")
 
-					black_array = np.array(black_scene)
+					
 					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
 					#new = Image.fromarray(black_scene)
 					#new.save('teste{0}.png'.format(i))
 					
 					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
-					self.integral_image = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
+					black_array = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
 					formatted_words.append(new_word)
 			return formatted_words
 		else:
@@ -122,19 +132,21 @@ class Visualization:
 	def cloud_words(self, filename, words = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
 		new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
-		image = Image.new("RGB", (self.canvas_width, self.canvas_height), background_color)
-		canvas  = ImageDraw.Draw(image)
-		
 		#each words must be a tuple with the text and count.
-		formatted_words = self.format_words(words)
-		
-		for word in formatted_words:
-			font = ImageFont.truetype(word['font_used'], word['font_size'])
-			canvas.setfont(font)
-			canvas.text((word['x'],word['y']), word['text'], fill = word['color'])
-		
-		image.save(filename)
-	
+		formatted_words = self.format_words(None, canvas_width, canvas_height, words)
+		if formatted_words:
+			image = Image.new("RGB", (self.canvas_width, self.canvas_height), background_color)
+			canvas  = ImageDraw.Draw(image)
+			
+			for word in formatted_words:
+				font = ImageFont.truetype(word['font_used'], word['font_size'])
+				canvas.setfont(font)
+				canvas.text((word['x'],word['y']), word['text'], fill = word['color'])
+			
+			image.save(filename)
+		else:
+			print "No words to print"
+			
 	def bubble(self, collections = []):
 		pass
 		
