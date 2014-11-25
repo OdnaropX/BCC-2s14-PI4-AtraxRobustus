@@ -22,7 +22,7 @@
 }
 
 
-\title{Visualização da Dados de Informações Extraídas da Web - Um estudo sobre Conteúdo Popular Japonês}
+\title{Visualização da Dados de Informações Extraídas da Web - Um Estudo sobre Conteúdo Popular Japonês}
 \author{Gabriel Fontenelle\inst{1}}
 \address 
 {Centro Universitário Senac - Campus Santo Amaro
@@ -268,56 +268,209 @@ Ao criarmos o método callback podemos usá-lo de pelo menos dois modos: Usá-lo
 Adotamos esse último método na qual as URLs extraídas e parseadas possuem seus dados normalizados para serem salvos no Banco de Dados no próprio método callback.
  
  
- 
- 
-
 \subsubsection{Implementando acesso ao Banco de Dados}
 
-Para acesso ao Banco de Dados PostgreSQL foi utilizado a biblioteca Psycopg2 e criado 
+Para acesso ao Banco de Dados PostgreSQL foi utilizado a biblioteca Psycopg2. A biblioteca oferece métodos para conexão com o Banco de Dados, para execução de código SQL e para controle de transações.
+
+A partir desses métodos básicos criamos uma classe de conexão ao Banco de Dados com métodos para inserção e para atualização de dados nas diversas tabelas do Banco de Dados que manipulem as informações mantendo a integridade dos dados.
+
+\subsubsection{Tratamento de Erros e Transactions}{Melhorar}
+
+Muitas das entidades do nosso Modelo Conceitual na migração para o Modelo Relacional resultou em diversas tabelas relacionadas. Algumas dessas tabelas dependem de chaves-estrangeiras para manter sua integridade.  
+
+Para evitar situações em que erros na formatação dos dados a serem salvos, extraídos das páginas da web pelo crawler, possam produzir falha na integridade dos dados ou possam resultar em excesso de dados salvos não utilizados como no exemplo de uma especialização quando um dado requer a criação de uma chave-estrangeira para sua identificação mas falha ao inserir conteúdo na tabela da especialização, foi utilizado o controle de transações Commit e Rollback.
+
+Assim usando o conceito de Try Catch, no Python Try Exception, quando ocorre uma falha na inserção de algum conteúdo da página processada pelo parse todas as operações executadas com os dados da página são descartadas usando Rollback e a URL da página inserido em um arquivo de Log para analise posterior. Permitindo assim que apenas dados formatados e relacionados sejam salvos no Banco de Dados.
+Após realização com sucesso de todas as operações com dados da página é efetuado Commit na transação.
+
+\subsubsection{Definindo Coleções}
+
+Para alcançarmos o objetivo de fazer uma visualização de dados com extração de informações relacionadas a coleções, precisávamos identificar e criar as coleções a partir do conteúdo salvo no Banco de Dados.
+
+Durante a extração de dados pelo Crawler algumas páginas forneciam também o nome e URLs para itens relacionados. Com os itens relacionados foi possível verificar se já existe uma coleção associada a algum dos itens ou criar uma nova coleção se inexistente.
+
+Para identificar se existe uma coleção já salva no Banco de Dados foi executado uma busca recursiva a fim de retornar todos os itens relacionados entre si, utilizando o recurso WITH RECURSIVE do PostgreSQL.
+
+Se existe alguma coleção associada a um item essa coleção é utilizada para associar a itens ainda sem coleção. Se não existir alguma coleção salva no Banco de Dados, casos em nenhuma coleção foi criada ainda na execução do Crawler a coleção é criada.
+
+(Separação de títulos)
+Para a criação da coleção é utilizado a parte dos títulos anteriores a caracteres usados para divisão de subtítulos como hifen " - " e parenteses "()", o texto após extraido é formatado e utilizado para criação da coleção. 
+Em casos com itens relacionados com títulos diferentes o título mais comum será usado.  
 
 
-\subsubsection{Efetuando Login antes de Crawlear}
+Exemplo:
+		Fairy Tail
+		Fairy Tail Freezing
 
+		
+		
+Após a execução 
+que a execução 
 
-\subsubsection{Tratamento de Erros e Transactions}
-
-
-
-
-
-
-\subsection{Normalização dos Dados Salvos}
-
-Após extrair os dados, esses foram analisados e salvos normalizados. Porém algumas informações só podem ser estipuladas após a obtenção de todos os dados.
-
-Como exemplo temos o item que iniciou uma coleção, só pode ser estipulado a partir da data de lançamento dos itens integrantes da coleçao e só após todos os dados serem salvos podemos descobrir qual item é o mais antigo da coleção.
+\subsubsection{Itens Relacionados}
 
 
 
+Algumas páginas a terem seu conteúdo extraído possuem lista de itens relacionados, com o nome e URL do item relacionado.
 
-\subsubsection{1º Passo no Desenvolvimento}
-
-Com a escolha da biblioteca para o crawler foram analisados os links das páginas escolhidas e definidos quais links seriam seguidos em busca de outros links para conteúdo assim como quais links seriam de conteúdo para parseamento. 
-
+Itens relacionados em que a URL ainda não teve seu conteúdo extraído é salvo com conteúdo em sua maior parte nulo no Banco de Dados, quando a URL desses itens forem extraídas esses itens serão atualizados, mantendo assim o relacionamento entre o conteúdo.
 
 
-\subsubsection {Abordagens de Spiders}
-
-Abordagem assincrona.
-
-Sobreescrita de métodos para efetuar login, de métodos
-Implementação de Requests na própria classe requer um tratamento diferenciado ao código, só pode existir uma chamada a Request no CrawlSpider, mais que isso e o CrawlSpider não consegue lidar com request e interrompe a busca =.
+salvos esses itens temporário
 
 
+Falar que os itens relacionados são salvos no Banco de Dados antes do projeto.
+ 
 
-\subsection{Processamento e relacionamento de Dados}
+
+e existe, itens sem coleções são al
+
+m é 
+
+código SQL para busca com recursão dos itens relacionados.
+
+
+identificar a existência 
+
+se já existe uma coleção a 
+
+uma coleção 
+
+
+, a partir desse conjunto de 
+
+ partir do nome desses itens foi possível criar 
+
+informação  itens possuem 
+
+Ao inserirmos um item ao Banco de Dados que possui conteúdo relacionado 
+
+Ao inserirmos um item ao Banco de Dados, como Mangás, Light Novels verificamos se algum item relacionado
+
+As coleções foram criadas durante a execução do Crawler, 
+
+ no próprio código, outras só poderiam ser analisadas após o termino 
+
+ a que cada item pera partir dos Websites.
+
+
+Para tal precisávamos criar as coleções e relacionar os diversos tipos de itens (como mangás, light novels, etc) a uma coleção.
+
+
+
+em uma coleçção
+
+
+e englobar diversos itens
+
+
+
+\begin{comments}
+
+\subsection{Normalização dos Dados Salvos}\subsection{Processamento e relacionamento de Dados}
 
 Após a extração dos dados e inserção no Banco de dados, os dados precisariam ser ....
 
 
+Após extrair os dados, esses foram analisados e salvos normalizados. Porém algumas informações só podem ser estipuladas após a obtenção de todos os dados.
+
+Como exemplo temos o item que iniciou uma coleção, só pode ser estipulado a partir da data de lançamento dos itens integrantes da coleçao e só após todos os dados serem salvos podemos descobrir qual item é o mais antigo da coleção.
+\end{comments}
+
+
 \subsection{Visualização de Dados}
 
+Para visualização de dados extraímos do Banco de Dados textos e representamos a variação na quantidade entre os textos, exibindo-as como uma nuvem de bolhas ou uma nuvem de palavras. 
+Usamos a estrutura de dados Tabela de Área Somada[] para identificação de espaços ocupados e realizamos uma distribuição aleatória na imagem de nossos objetos: as bolhas ou as palavras.
+Para esse fim utilizamos a biblioteca Numpy para manipulação de vetores multidimensionais, gerando assim a Tabela de Área Somada, e a biblioteca PIL para desenhar palavras, desenhar formas e salvar a imagem resultante.
+
+A Figura número-aqui ilustra a seqüência adotada para identificação do espaço e o tamanho da bolha ou da palavra a ser utilizada. Essas etapas serão melhor explicadas nos próximos tópicos.   
+
+\subsection{Preparando a Cena}
+
+Utilizando a biblioteca de processamento de imagem preparamos um fundo com tamanho determinado que usaremos para posicionar nossos objetos. 
+Qualquer seguimento da Tabela de Área Somada com valor diferente de zero é considerado ocupado, assim podemos criar uma imagem com fundo totalmente preto, utilizando toda a área disponível, ou podemos criar uma área limitada com ilustrações ou textos resultando em uma máscara para nossa visualização.
+A cor preta é representada pelo valor 0 e ao converter a imagem preparada em um vetor multidimensional com Numpy obtemos a Tabela de Área Somada inicial.
+
+
+Imagem exemplo de Máscara. => Representação Vetorial
+
+
+\subsection{Definindo o Tamanho dos Objetos}
+
+Ao obtermos nossos objetos, palavras e círculos, do Banco de Dados também selecionamos informação numérica que representam um ranking entre os objetos, como quantidade de itens da Coleção, valor em reais para adquirir cada item da coleção, volume que a coleção ocupa entre outras informações numéricas.
+
+Alguns dos valores usados para Rankeamento:
+
+
+Para definir o tamanho dos objetos usamos a razão do valor do Rankeamento pelo logaritmo natural desse valor nas formulas:
+
+Dividimos por 10 para que ranking acima de 1000 não gerem tamanhos demasiadamente grandes. 
+
+{Calculo aqui}
+
+Para evitar divisão por zero é somado o valor 10 ao número do rankeamento antes do cálculo do Logaritmo Natural.
+
+ 
+
+
+Nossos objetos, palavras e círculos, são representam informações extraídas do Banco de Dados com duas informaçõesCada objeto possui 
+
+
+Para cada objeto h
+Cada objeto possui
+
+
+
+\subsection{Determinando a posição dos Objetos}
+
+Na cena os objetos não podem sobrepor uns aos outros, para verificarmos os espaços disponíveis para inserção do objeto na cena sem sobrepor outros objetos na cena 
+
+
+Tabela de área somada
+
+$I(x,y) = \sum_{\begin{smallmatrix} x' \le x \\ y' \le y\end{smallmatrix}} i(x',y')$
+
+Cálculo área somada
+
+
+$\sum_{\begin{smallmatrix} x0 < x \le x1 \\ y0 < y \le y1 \end{smallmatrix}} i(x,y) = I(D) + I(A) - I(B) - I(C).$
+
+
+
+
+Cada objeto 
+Para encontrar
+
+
+
+
+\subsubsection{Exportando para HTML}
+
+Com a determinação do posicionamento dos objetos na cena, tamanhos e fontes de texto utilizadas além de gerar uma imagem final também podemos exportar nossa nuvem para HTML utilizando CSS para desenhar e posicionar nossos objetos dentro de uma tag <div>.
+
+A posição dos objetos é relativa a tag <div>, as mesmas coordenadas [x, y] utilizadas no posicionamento em nossa imagem podem ser aplicadas na tag.
+
+Geramos um documento HTML com nosso CSS adicionado na tag <head>, para melhor manipulação de nossos objetos. dentro da tag <div> principal, os colocamos em tags <div> separadas possuindo classes para representarmos os tamanhos, formas e posições.
+
+A conversão para HTML foi simples, para as formas e textos, ao invés de utilizar os métodos fornecidos pela biblioteca de processamento de imagem criamos métodos que retornem a representação em CSS das formas utilizadas (círculos) e a representação dos textos com posicionamento definido usando os mesmos parâmetros disponíveis. 
+Formatamos portanto o documento HTML com o CSS e as tags <div> de nossos objetos.
+
+
+
+
+
+
+
 \section{Resultados}
+
+Com 
+
+
+
+
+
+podemos criar uma imagem
 
 Resultados.
 Quais foram os dados considerados? Qual é o volume desses dados? Quanto tempo foi
