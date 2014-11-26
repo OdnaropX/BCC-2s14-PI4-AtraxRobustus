@@ -56,47 +56,56 @@ Visualização de dados é uma forma de comunicar visualmente informações que 
 
 Para a criação da visualização de dados foi escolhido o tema: cultura popular japonesa. A cultura popular japonesa é conhecida pelo desenvolvimento de animações, revistas em quadrinhos e gêneros literários influenciados por um estilo de desenho único focado nas expressões de suas personagens. O tema é abrangente e poderíamos obter e utilizar informações sobre os seus diversos produtos comercializados: mangás, animes, Light Novels, Visual Novels e outros bens de consumo derivados como braceletes e figuras de ação que são adquiridos por colecionadores em grande parte do mundo ocidental.
 
+
 Os seguintes itens da cultura popular serviram como base para a modelagem do banco de dados e ajudaram na escolha dos websites para o crawler:
+
 
 \begin{description}
 \item[Anime] significa animação em japonês, porém no ocidente é usado para referenciar animações provenientes do Japão.
-\item[Manga] significa história em quadrinhos em japonês, porém no ocidente é usado para se referir as histórias em quadrinhos provenientes do Japão ou que possuem o mesmo estilo estético.
+\item[Mangá] significa história em quadrinhos em japonês, porém no ocidente é usado para se referir as histórias em quadrinhos provenientes do Japão ou que possuem o mesmo estilo estético.
 \item[Light Novel] é um gênero literário caracterizado pelo menor número de páginas e escrita mais clara, possui histórias fluídas com desenvolvimento rápido muitas vezes utilizando-se de efeitos sonoros para ilustrar situações em vez de uma descrição completa da situação, como exemplo a saída de uma personagem de um quarto com uma batida grosseira da porta pode ser demonstrada apenas mencionando que a personagem saiu e o efeito sonoro realizado na porta.
 \item[Visual Novel] assim como Light Novel é um gênero literário originado no Japão, também é formado por ilustrações e textos mais claros de serem entendidos que livros tradicionais, mas diferente de Light Novel se assemelham mais a um jogo de computador em que decisões dos jogadores podem alterar o rumo da história.
 \item[Figuras de ação] são esculturas de personagens de animes, de jogos eletrônicos ou até mesmo Light Novels, produzidas geralmente em PVC podendo ser ou não pintadas a mão. Ocasionalmente são produzidas em quantidade limitada, e algumas edição são inclusive enumeradas tendo um valor maior para colecionadores.
 \end{description}
 
 
-Muito desses itens fazem parte de franquias, ou coleções, que é um conjunto que engloba histórias e personagens existentes em um mesmo universo fictício, podendo ser composta por livros com histórias seqüenciais ou por livros com histórias que complemente o compreendimento do universo fictício. O universo fictício nem sempre é limitado pela produção de conteúdo em uma única mídia como livros, uma continuação pode ser disponibilizado em jogos de computadores, jogos eletrônicos, mangás, animes e até mesmo em histórias em aúdio. Uma franquia conhecida por sua propagação em diversas mídias é a .Hack, que teve inicio com o anime .hack//Sign, mas continuações da história foram lançadas em jogos para Playstation e mangás. Muitas franquias possuem venda de produtos como cartazes promocionais, adesivos, chaveiros, braceletes e outros acessórios baseados em seus personagens.
+Muito desses itens fazem parte de franquias, ou coleções, que é um conjunto que engloba histórias e personagens existentes em um mesmo universo fictício, podendo ser composta por livros com histórias seqüenciais ou por livros com histórias que complemente o compreendimento do universo fictício. 
+
+O universo fictício nem sempre é limitado pela produção de conteúdo em uma única mídia como livros, uma continuação pode ser disponibilizada em jogos de computadores, jogos eletrônicos, mangás, animes e até mesmo em história em aúdio. Uma franquia conhecida por sua propagação em diversas mídias é a .Hack, que teve inicio com o anime .hack//Sign, mas continuações da história foram lançadas em jogos para Playstation e mangás. 
+
+Muitas franquias possuem venda de produtos como cartazes promocionais, adesivos, chaveiros, braceletes e outros acessórios baseados em seus personagens.
 
 \section{Desenvolvimento}
 
 \subsection{Websites para extração de dados}
 
-O tema escolhido é abrangente e possui diversos websites que poderíamos utilizar para a extração de informações. Focamo-nos na visualização de dados ilustrando informações sobre Coleções e seus produtos derivados como artigos decorativos e figuras de ação baseados em personagens presentes nas Coleções. 
+Com a escolha do tema e a definição dos principais itens a serem extraídos, descobrimos que poderíamos utilizar diversos websites como fonte para a extração de informações. 
+Escolhemos websites que possuiam grande quantidade de dados, para que pudessemos extrair informações sobre franquias. Alguns desses websites eram similares e possuiam conteúdo redundante. A escolha de websites com informações reduntantes foi proposital uma vez que não poderíamos garantir a conectividade com os sites durante o desenvolvimento deste trabalho.
 
-Os websites escolhidos se encontram abaixo. A escolha de websites com informações reduntantes é proposital uma vez que não poderíamos garantir a conectividade com os sites durante o desenvolvimento deste trabalho. 
+A lista de websites escolhidos pode ser conferida abaixo. Entre esses websites durante o desenvolvimento do sistema de crawling o website Manga-Updates ficou fora do ar durante alguns dias logo após o termino do algoritmo para extração de seu conteúdo. Não só o website Manga-Updates como também o website AnimeBlade ficou indisponível, porém esse último teve sua hospedagem cancelada e não retornou.
 
-\begin{itemize}
-\item http://mangaupdates.com/ (Para extração de informação de Mangás e Light Novels)
-\item http://myfigurecollection.net/ (Para extração de informações de Mangás, "Figuras de Ação" e Outros Produtos)
-\item http://www.animecharactersdatabase.com/ (Para extração de informações de Jogos para computador, animes e personagens)
-\end{itemize}
+\begin{description}
+\item[http://mangaupdates.com/] utilizado para extração de informações de mangás e Light Novels. Outras informações relacionadas como editoras, ilustradores e autores também foram extraídas do website.
+\item[http://myfigurecollection.net/] utilizado para extração de informações de mangás, figuras de ação e outros produtos baseados em personagens.
+\item[http://www.animecharactersdatabase.com] utilizado para extração de informações de jogos de computador, animes e personagens. Também foi possível extrair informações sobre dubladores de personagens de animes e de jogos de computadores. 
+\item[http://old.animeblade.com.br/] seria utilizado para extração de informação de mangás e Light Novels com conteúdo em português.
+\end{description}
 
-Os sites escolhidos possuem informações principalmente no idioma inglês mas também fornecem algumas informações em outros idiomas, como os títulos de mangás e animes em japonês ou até mesmo português. Para aproveitarmos essas informações o banco de dados foi modelado a permitir múltiplos idiomas. 
 
-Os websites foram testados e apenas o http://www.animecharactersdatabase.com/ demonstrou limitação quanto a quantidade de requisições por hora.
+Esses websites foram testados e apenas o http://www.animecharactersdatabase.com/ demonstrou limitação quanto a quantidade de requisições por hora.
+
+Dentre os websites escolhidos, alguns possuem informações em outros idiomas além do idioma principal do website, como os títulos de mangás e animes. Para aproveitarmos essas informações o banco de dados foi modelado a permitir múltiplos idiomas. 
+
+%Nossa visualização de dados foca-se na ilustração quantitativa de franquias e seus produtos derivados 
 
 \subsection{Modelagem do Banco de Dados}
 
-Antes do desenvolvimento do sistema de extração de informações dos websites optamos por criar um Banco de Dados normalizado para que quando fossemos extrair e salvar as informações desses websites, os dados já seriam salvos em uma estrutura normalizada.
+Para desenvolvimento do sistema de crawling dos websites optamos por criar um Banco de Dados normalizado para que quando extraíssemos e salvassemos as informações desses websites, os dados já seriam salvos em uma estrutura normalizada. 
+Portanto foi desenvolvido o Modelo Conceitual, Modelo Relacional e Modelo Lógico do Banco de Dados. 
 
-Foi portanto desenvolvido o Modelo Conceitual, Modelo Relacional e Modelo Lógico do Banco de Dados.
+Para o Sistema de Banco de Dados Relacional foi escolhido o PostgreSQL, sob licença BSD, disponível para diversos sistemas operacionais, por possibilitar o uso de recursos para controle de transação, que segue o modelo ACID, e por possibilitar orientação a objeto com o uso de herança entre tabelas. A orientação a objeto poderia ser utilizada para tabelas com relacionamento de generalização/especialização. 
 
-Para o Sistema de Banco de Dados foi escolhido o PostgreSQL, sob licença BSD, disponível para diversos sistemas operacionais, possuindo Transações que seguem o modelo ACID com recursos como Commit e Rollback e opção para criação de atributos com tipos de dados personalizados. 
-
-Este trabalho faz uso extenso de Commit e Rollback no tratamento de erros, assim transações com falhas parciais são descartadas evitando o salvamento de conteúdo incompleto.
-
+%Este trabalho faz uso extenso de Commit e Rollback no tratamento de erros, assim transações com falhas parciais são descartadas evitando o salvamento de conteúdo incompleto.
 %Como para extração dos dados dos websites escolhidos é necessário 
 %Com a mentalidade que é melhor pegar todas as informações disponibilizadas pois é melhor ter que precisar e não ter, foi modelado um Banco de Dados que expandiu o conceito original e possibilita a inserção de dados relacionais para armazenamento de músicas, vídeos, livros e diversas informações associadas. 
 
