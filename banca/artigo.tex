@@ -23,7 +23,7 @@
 
 
 \title{Visualização da Dados de Informações Extraídas da Web - Um Estudo sobre Conteúdo Popular Japonês}
-\author{Gabriel Fontenelle\inst{1}}
+\author{Gabriel Fontenelle Senno Silva\inst{1}}
 \address 
 {Centro Universitário Senac - Campus Santo Amaro
   (SENAC-SP)\\
@@ -52,14 +52,14 @@ Este trabalho apresenta um estudo sobre coleções de itens da cultura popular j
 
 \section{Introdução}
 
-O foco deste trabalho é a criação de Visualização de dados a partir de informações extraídas de websites que disponibilizam quantidade de dados maciça.
+O foco deste trabalho é a visualização de dados a partir de informações extraídas de websites que disponibilizam quantidade de dados maciça.
 
-Para a criação da Visualização de Dados foi escolhido o tema: Cultura Popular Japonesa. O tema é abrangente e poderíamos obter e utilizar informações sobre os seus diversos produtos comercializados: mangás, animes, Light Novels, Visual Novels e outros bens de consumo derivados como braceletes e "Figuras de Ação" que são colecionados por colecionadores em grande parte do mundo ocidental.
+Para a criação da visualização de dados foi escolhido o tema: cultura popular japonesa. O tema é abrangente e poderíamos obter e utilizar informações sobre os seus diversos produtos comercializados: mangás, animes, Light Novels, Visual Novels e outros bens de consumo derivados como braceletes e figuras de ação que são adquiridos por colecionadores em grande parte do mundo ocidental.
 
-A Cultura Popular Japonesa é conhecida pelo desenvolvimento de animações, revistas em quadrinhos e gêneros literários influenciados por um estilo de desenho único focado nas expressões de suas personagens. Nos países ocidentais as animações, histórias em quadrinhos originadas no Japão são nomeadas respectivamente como anime e manga.
+A cultura popular japonesa é conhecida pelo desenvolvimento de animações, revistas em quadrinhos e gêneros literários influenciados por um estilo de desenho único focado nas expressões de suas personagens. Nos países ocidentais as animações e histórias em quadrinhos originadas no Japão são nomeadas respectivamente como anime e manga.
 Com a popularização de jogos eletrônicos surgiram dois gêneros literários no Japão: Light Novel e Visual Novel. Light Novel é um gênero literário caracterizado pelo menor número de páginas e escrita mais clara utilizando-se em maior parte de Furiganas, possui histórias fluídas com desenvolvimento rápido muitas vezes utilizando-se de efeitos sonoros para ilustrar situações em vez de uma descrição completa da situação, como exemplo a saída de uma personagem de um quarto com uma batida grosseira da porta pode demonstrada apenas mencionando que a personagem saiu o efeito sonoro realizado na porta. Light Novel também é caracterizado pelas ilustrações de algumas cenas e por isso pode ser comparado a Graphic Novels (Histórias em inglês que possuem algumas páginas ilustradas). Visual Novel também é formado por ilustrações e textos mais claros de serem entendidos que livros tradicionais, mas diferente de Light Novel se assemelham mais a um jogo de computador em que decisões dos jogadores podem alterar o rumo da história.
 
-Neste trabalho as informações foram extraídas de diversos websites com o uso de biblioteca de Crawler e salvas em um banco de dados previamente modelado para geração posterior de diversas visualizações de dados. 
+Neste trabalho as informações foram extraídas de diversos websites com o uso de uma biblioteca de crawling e salvas em um banco de dados previamente modelado para geração posterior de diversas visualizações de dados. 
 
 Visualização de dados é uma forma de comunicar visualmente informações que de outro modo não seriam facilmente identificáveis.
 
@@ -68,9 +68,9 @@ Visualização de dados é uma forma de comunicar visualmente informações que 
 
 \subsection{Websites para extração de dados}
 
-O tema escolhido é abrangente assim como possui diversos websites que poderíamos utilizar para a extração de informações. Focamo-nos na visualização de dados ilustrando informações sobre Coleções e seus produtos derivados como artigos decorativos e "Figuras de Ação" baseados em personagens presentes nas Coleções. 
+O tema escolhido é abrangente e possui diversos websites que poderíamos utilizar para a extração de informações. Focamo-nos na visualização de dados ilustrando informações sobre Coleções e seus produtos derivados como artigos decorativos e figuras de ação baseados em personagens presentes nas Coleções. 
 
-Os websites escolhidos se encontram abaixo, a escolha de websites com informações reduntantes é proposital uma vez que não poderíamos garantir a conectividade com os sites durante o desenvolvimento deste trabalho. 
+Os websites escolhidos se encontram abaixo. A escolha de websites com informações reduntantes é proposital uma vez que não poderíamos garantir a conectividade com os sites durante o desenvolvimento deste trabalho. 
 
 \begin{itemize}
 \item http://mangaupdates.com/ (Para extração de informação de Mangás e Light Novels)
@@ -78,11 +78,13 @@ Os websites escolhidos se encontram abaixo, a escolha de websites com informaç�
 \item http://www.animecharactersdatabase.com/ (Para extração de informações de Jogos para computador, animes e personagens)
 \end{itemize}
 
-Os sites escolhidos possuem informações principalmente no idioma inglês mas também fornecem algumas informações em outros idiomas, como os títulos de mangás e animes em Japonês ou até mesmo Português. Para aproveitarmos essas informações o Banco de Dados foi modelado a permitir múltiplos idiomas. 
+Os sites escolhidos possuem informações principalmente no idioma inglês mas também fornecem algumas informações em outros idiomas, como os títulos de mangás e animes em japonês ou até mesmo português. Para aproveitarmos essas informações o banco de dados foi modelado a permitir múltiplos idiomas. 
+
+Os websites foram testados e apenas o http://www.animecharactersdatabase.com/ demonstrou limitação quanto a quantidade de requisições por hora.
 
 \subsection{Modelagem do Banco de Dados}
 
-Antes sequer de prosseguirmos com o desenvolvimento do sistema de extração de informações dos websites optamos por criar um Banco de Dados normalizado para quando fossemos extrair e salvar as informações desses websites, os dados já seriam salvos em uma estrutura relacionado e normalizado.
+Antes do desenvolvimento do sistema de extração de informações dos websites optamos por criar um Banco de Dados normalizado para que quando fossemos extrair e salvar as informações desses websites, os dados já seriam salvos em uma estrutura normalizada.
 
 Foi portanto desenvolvido o Modelo Conceitual, Modelo Relacional e Modelo Lógico do Banco de Dados.
 
@@ -97,7 +99,7 @@ Este trabalho faz uso extenso de Commit e Rollback no tratamento de erros, assim
 
 O conceito inicial de armazenar informações relacionais sobre itens da Cultura Popular Japonesa resultou em um Modelo Conceitual em que se poderia armazenar informações de mangás, animes e "Figuras de Ação". Esse conceito original foi expandido para possibilitar a inserção de dados relacionais sobre músicas, jogos de computador, vídeos, livros e diversas informações associadas a Coleções. 
 
-Com a expansão do tipo de informação a ser salva no Banco de Dados a criação do Modelo Conceitual se tornou complexa, além do tradicional uso de atributos e relacionamentos foram utilizados conceito de especialização/generalização e associação. 
+Com a expansão do tipo de informação a ser salva no banco de dados, a criação do modelo conceitual se tornou complexa: além do tradicional uso de atributos e relacionamentos foram utilizados conceito de especialização/generalização e associação. 
 
 Como a estrutura do Modelo Conceitual é complexa e grande dividimos sua ilustração em partes e para melhor compreensão antes de apresentarmos cada parte mostraremos um diagrama mais simples abrangendo as principais entidades do Modelo Conceitual:
 
@@ -108,7 +110,7 @@ Como a estrutura do Modelo Conceitual é complexa e grande dividimos sua ilustra
 \end{figure}
 
 
-A seguir pode ser observado as entidades e seus relacionamentos de forma mais detalhada. As entidades na cor laranja serão detalhadas mais a frente.
+A seguir podem ser observados as entidades e seus relacionamentos de forma mais detalhada. As entidades na cor laranja serão detalhadas mais a frente.
 
 \begin{figure}[H]
 \centering
@@ -147,7 +149,8 @@ A seguir pode ser observado as entidades e seus relacionamentos de forma mais de
 \caption{Entidades responsáveis pelo armazenamento de informações de Países, seus idiomas e suas moedas.} \label{hash}
 \end{figure}
 
-Como exemplo de especialização/generalização temos no Modelo Conceitual a entitidade Goods onde bens de consumo como braceletes, posters, chaveiros são armazenados. Essa entidade se especializa na entidade Figure que armazena informações de bens conhecidos como figures ou action figures, são artigos colecionáveis em Três Dimensões de Personagens de animes, mangás, video games e light novels,
+{Arrumar}
+Como exemplo de especialização/generalização temos no Modelo Conceitual a entitidade onde bens de consumo como braceletes, posters, chaveiros são armazenados. Essa entidade se especializa na entidade figuras de ação que armazena informações de bens conhecidos como figures ou action figures, são artigos colecionáveis em Três Dimensões de Personagens de animes, mangás, video games e light novels,
  que possuem informações extras além das contidas em Goods como escala e versão de lançamento.
 
 \begin{figure}[H]
@@ -203,11 +206,13 @@ Para as entidades que possuem mais de um tipo de título ou descrição como "En
 
 Modelagem Conceitual
 
-Para a modelagem do Banco de Dados e criação do Modelo Conceitual foi escolhido o Microsoft Visio que permite a geração de diversos tipos de diagramas, possibilitando a criação de novos itens se necessários para uso nos diagramas. Alguns dos itens como Associação, Atributos Compostos não estão presentes por padrão na modelagem de dados que vem com o Microsoft Visio e tiveram que serem criadas.
+Para a modelagem do Banco de Dados e criação do Modelo Conceitual foi escolhido o Microsoft Visio que permite a geração de diversos tipos de diagramas, possibilitando a criação de novos itens se necessários para uso nos diagramas. Alguns dos itens como Associação, Atributos Compostos não estão presentes por padrão na modelagem de dados que vem com o Microsoft Visio e tiveram que ser criadas.
 
 Modelo Relacional
 
-Para o Modelo Relacional foi utilizado o DBDesign na sua 4ª versão, que permite a migração do Modelo Relacional para código SQL do MySQL, porém o DBDesign se mostrou limitado ao não permitir o aumento na área útil em que as entidades poderiam ser adicionadas, para uma modelagem extensa como a do Banco de Dados desse projeto essa limitação dificultou a organização pela falta de espaço fazendo com que as entidades ficassem muito próximas umas das outras. Além dessa limitação a própria implementação em JAVA do DB Design apresenta problemas com a hibernação no Sistema Operacional Windows, ao se hibernar e retornar quando se tenta salvar ou exportar um arquivo no DBDesign o programa trava sendo necessário reniciar o computador para voltar a utilizar essas opções. Portanto não é recomendo o uso do DB Design para um modelo relacional extenso. 
+Para o Modelo Relacional foi utilizado o DBDesign na sua 4ª versão, que permite a migração do Modelo Relacional para código SQL do MySQL. Porém o DBDesign se mostrou limitado ao não permitir o aumento na área útil em que as entidades poderiam ser adicionadas, para uma modelagem extensa como a do Banco de Dados desse projeto essa limitação dificultou a organização pela falta de espaço fazendo com que as entidades ficassem muito próximas umas das outras. 
+
+Além dessa limitação a própria implementação em JAVA do DB Design apresenta problemas com a hibernação no Sistema Operacional Windows, ao se hibernar e retornar quando se tenta salvar ou exportar um arquivo no DBDesign o programa trava sendo necessário reniciar o computador para voltar a utilizar essas opções. Portanto não é recomendo o uso do DB Design para um modelo relacional extenso. 
 
 Modelo Lógico
 
@@ -230,10 +235,10 @@ Nas tabelas que armazenam informações de tipos, como "entity\_type" que armaze
 
 \subsection{Crawler}
 
-Um crawler é um programa que visita websites, segue seus links e extrai informações das páginas. Um crawler deve a partir de uma URL inicial seguir todas as URL presentes na página a fim de vasculhar o website, 
-pode ser utilizados critérios para seguir essas URL, como por exemplo seguir URL apenas do domínio atual do site, excluindo websites externos de publicidade e redes sociais.
+Um crawler é um programa que visita websites, segue seus links e extrai informações das páginas. Um crawler deve a partir de uma URL inicial seguir todas as URLs presentes na página a fim de vasculhar o website, 
+pode ser utilizados critérios para seguir essas URLs, como por exemplo seguir URL apenas do domínio atual do site, excluindo websites externos de publicidade e redes sociais.
 
-O Crawler na URL inicial faz o download do código HTML da página e extrai a informação "href" do atributo <a> e os coloca numa lista de processamento que será utilizada para analisar se o link deve ser seguido ou removido da lista. 
+O Crawler na URL inicial faz o download do código HTML da página e extrai a informação "href" da tag <a> e os coloca numa lista de processamento que será utilizada para analisar se o link deve ser seguido ou removido da lista. 
 Para evitar o problema de loops infinitos quando uma página A possui um link para uma página B e a página B possui link para a página A, deve-se criar uma pilha de links já visitados para verificação.   
  
 Neste projeto foi optado pelo uso de uma biblioteca de Crawler que permite o seguimento de URL de páginas e extração de informações sem ter que se preocupar em programar Request e Download de páginas da Web.
@@ -242,7 +247,7 @@ O Biblioteca escolhida foi o Scrapy, na versão 0.24.4, desenvolvida em Python, 
  
 Como os websites a serem utilizados possuem conteúdo estático sem uso de Ajax o Scrapy atende as necessidades básicas de download e parseamento de websites. Se for necessário extrair informações dinamicamente geradas por AJAX pode ser utilizado o Scrapy com extensão para Firefox ou outra biblioteca de Crawler que permite o download do código-fonte da página como visualizado pelos browser, como a biblioteca Selenium.
 
-Scrapy assim como Python está disponível para Windows e Linux.
+Scrapy assim como Python está disponível para Windows e Linux. Nesse projeto foi utilizado a versão para Windows.
 
 \subsubsection{Links Duplicados}
 
@@ -272,40 +277,17 @@ Adotamos esse último método na qual as URLs extraídas e parseadas possuem seu
 
 Para acesso ao Banco de Dados PostgreSQL foi utilizado a biblioteca Psycopg2. A biblioteca oferece métodos para conexão com o Banco de Dados, para execução de código SQL e para controle de transações.
 
-A partir desses métodos básicos criamos uma classe de conexão ao Banco de Dados com métodos para inserção e para atualização de dados nas diversas tabelas do Banco de Dados que manipulem as informações mantendo a integridade dos dados.
+A partir desses métodos básicos criamos uma classe de conexão ao Banco de Dados, com métodos para inserção e para atualização de dados que manipulem as informações nas tabelas mantendo a integridade lógica dos dados.
 
-\subsubsection{Tratamento de Erros e Transactions}{Melhorar}
+\subsubsection{Tratamento de Erros e Transactions}
 
-Muitas das entidades do nosso Modelo Conceitual na migração para o Modelo Relacional resultou em diversas tabelas relacionadas. Algumas dessas tabelas dependem de chaves-estrangeiras para manter sua integridade.  
-
-Para evitar situações em que erros na formatação dos dados a serem salvos, extraídos das páginas da web pelo crawler, possam produzir falha na integridade dos dados ou possam resultar em excesso de dados salvos não utilizados como no exemplo de uma especialização quando um dado requer a criação de uma chave-estrangeira para sua identificação mas falha ao inserir conteúdo na tabela da especialização, foi utilizado o controle de transações Commit e Rollback.
-
-Assim usando o conceito de Try Catch, no Python Try Exception, quando ocorre uma falha na inserção de algum conteúdo da página processada pelo parse todas as operações executadas com os dados da página são descartadas usando Rollback e a URL da página inserido em um arquivo de Log para analise posterior. Permitindo assim que apenas dados formatados e relacionados sejam salvos no Banco de Dados.
-Após realização com sucesso de todas as operações com dados da página é efetuado Commit na transação.
-
-\subsubsection{Definindo Coleções}
-
-Para alcançarmos o objetivo de fazer uma visualização de dados com extração de informações relacionadas a coleções, precisávamos identificar e criar as coleções a partir do conteúdo salvo no Banco de Dados.
-
-Durante a extração de dados pelo Crawler algumas páginas forneciam também o nome e URLs para itens relacionados. Com os itens relacionados foi possível verificar se já existe uma coleção associada a algum dos itens ou criar uma nova coleção se inexistente.
-
-Para identificar se existe uma coleção já salva no Banco de Dados foi executado uma busca recursiva a fim de retornar todos os itens relacionados entre si, utilizando o recurso WITH RECURSIVE do PostgreSQL.
-
-Se existe alguma coleção associada a um item essa coleção é utilizada para associar a itens ainda sem coleção. Se não existir alguma coleção salva no Banco de Dados, casos em nenhuma coleção foi criada ainda na execução do Crawler a coleção é criada.
-
-(Separação de títulos)
-Para a criação da coleção é utilizado a parte dos títulos anteriores a caracteres usados para divisão de subtítulos como hifen " - " e parenteses "()", o texto após extraido é formatado e utilizado para criação da coleção. 
-Em casos com itens relacionados com títulos diferentes o título mais comum será usado.  
+Muitas das entidades do nosso Modelo Conceitual, na migração para o Modelo Relacional, resultou em diversas tabelas relacionadas. Embora o Banco de Dados seja responsável por manter a integridade quanto aos tipos de dados e existência de chaves-primárias e estrangeiras, ele não se responsabiliza pela integridade lógica dos dados salvos. Por exemplo: {exemplo aqui.}
 
 
-Exemplo:
-		Fairy Tail
-		Fairy Tail Freezing
+Algumas das páginas processadas pelo parse podem ter variações na formatação HTML, que podem originar erros na integridade lógica do Banco de Dados. Assim usando o conceito de Try Catch (no Python Try Exception), quando ocorre uma falha na inserção de algum conteúdo da página processada pelo parse todas as operações executadas com os dados da página são descartadas, usando Rollback quando uma Exception ocorre, e a URL da página e informações sobre o erro são inseridas em um arquivo de Log para analise posterior.
 
-		
-		
-Após a execução 
-que a execução 
+Somente após realização com sucesso, de todas as operações, é finalmente efetuado Commit na transação. Permitindo assim que apenas dados formatados e relacionados sejam salvos no Banco de Dados.
+
 
 \subsubsection{Itens Relacionados}
 
@@ -365,17 +347,32 @@ e englobar diversos itens
 
 
 
-\begin{comments}
-
-\subsection{Normalização dos Dados Salvos}\subsection{Processamento e relacionamento de Dados}
-
-Após a extração dos dados e inserção no Banco de dados, os dados precisariam ser ....
 
 
-Após extrair os dados, esses foram analisados e salvos normalizados. Porém algumas informações só podem ser estipuladas após a obtenção de todos os dados.
 
-Como exemplo temos o item que iniciou uma coleção, só pode ser estipulado a partir da data de lançamento dos itens integrantes da coleçao e só após todos os dados serem salvos podemos descobrir qual item é o mais antigo da coleção.
-\end{comments}
+\subsubsection{Definindo Coleções}
+
+Para alcançarmos o objetivo de fazer uma visualização de dados com extração de informações relacionadas a coleções, precisávamos identificar e criar as coleções a partir do conteúdo salvo no Banco de Dados.
+
+Durante a extração de dados pelo Crawler algumas páginas forneciam também o nome e URLs para itens relacionados. Com os itens relacionados foi possível verificar se já existe uma coleção associada a algum dos itens ou criar uma nova coleção se inexistente.
+
+Para identificar se existe uma coleção já salva no Banco de Dados foi executado uma busca recursiva a fim de retornar todos os itens relacionados entre si, utilizando o recurso WITH RECURSIVE do PostgreSQL.
+
+Se existe alguma coleção associada a um item essa coleção é utilizada para associar a itens ainda sem coleção. Se não existir alguma coleção salva no Banco de Dados, casos em nenhuma coleção foi criada ainda na execução do Crawler a coleção é criada.
+
+(Separação de títulos)
+Para a criação da coleção é utilizado a parte dos títulos anteriores a caracteres usados para divisão de subtítulos como hifen " - " e parenteses "()", o texto após extraido é formatado e utilizado para criação da coleção. 
+Em casos com itens relacionados com títulos diferentes o título mais comum será usado.  
+
+
+Exemplo:
+		Fairy Tail
+		Fairy Tail Freezing
+
+		
+
+Com esse método há possibilidade de associar em coleções itens com nomes semelhantes que pertencem a coleções distintas. Para corrigir casos assim é necessário uma verificação manual da associação de Coleções.
+
 
 
 \subsection{Visualização de Dados}
@@ -424,25 +421,22 @@ Cada objeto possui
 
 \subsection{Determinando a posição dos Objetos}
 
-Na cena os objetos não podem sobrepor uns aos outros, para verificarmos os espaços disponíveis para inserção do objeto na cena sem sobrepor outros objetos na cena 
+Na cena os objetos não podem sobrepor uns aos outros, para verificarmos os espaços disponíveis para inserção do objeto na cena sem sobrepor outros objetos na cena foi utilizado a Tabela de Área Somada, também conhecida em Estatística como Tabela de Distribuição Acumulada e como Imagem Integral em Visão Computacional.
 
+Para uso da Tabela de Área Somada é utilizado imagens na escala cinza, assim podemos trabalhar apenas um um valor variante para cada pixel da imagem. 
 
 Tabela de área somada
 
+
 $I(x,y) = \sum_{\begin{smallmatrix} x' \le x \\ y' \le y\end{smallmatrix}} i(x',y')$
 
-Cálculo área somada
+Para verificar se um espaço está disponível na cena para nossos objetos precisávamos verificar se já não existe outro objeto já posicionado no local. 
 
+Conseguimos verificar se o espaço está ocupado calculando a área com os valores da Tabela de Área Somada a tempo constante utilizando a fórmula de Área da Imagem Integral. Como utilizamos uma cena em escala cinza, qualquer espaço ocupado resultará em uma soma com valor acima de zero.  
 
 $\sum_{\begin{smallmatrix} x0 < x \le x1 \\ y0 < y \le y1 \end{smallmatrix}} i(x,y) = I(D) + I(A) - I(B) - I(C).$
 
-
-
-
-Cada objeto 
-Para encontrar
-
-
+Para obtermos uma melhor distribuição dos objetos na cena verificamos todos os espaços disponíveis, obtendo a Área da Imagem Integral em todos os pixels da cena. Os valores de x e y livres são portanto armazenados em um vetor e uma única posição é escolhida aleatoriamente como local do nosso objeto. 
 
 
 \subsubsection{Exportando para HTML}
@@ -457,28 +451,52 @@ A conversão para HTML foi simples, para as formas e textos, ao invés de utiliz
 Formatamos portanto o documento HTML com o CSS e as tags <div> de nossos objetos.
 
 
-
-
-
-
-
 \section{Resultados}
 
-Com 
+Com o uso de crawling foi possível obter uma quantidade considerável de dados. Um resultado mais detalhado pode ser visto a seguir: 
+
+Manga-Updates - Com o crawling do site http://mangaupdates.com foi possível obter 103774 itens, classificados como Mangás, Light Novels e livros; 34721 pessoas, que atuam como ilustradores ou escritores; e 1181 editoras.
+
+My Figure Collection - Com o crawling do site http://myfigurecollection.net foi possível obter 205041 produtos, incluindo Figuras e 3440 empresas envolvidas na produção desses produtos.
+
+Anime Characters Database - Com o crawling do site http://animecharactersdatabase.com/ foi possível obter informações de 70304 personagens e 4840 dubladores.
+
+Com os resultados obtidos com o crawling foi possível criar 109274 coleções e associá-las aos itens e aos produtos. Também foi possível relacionar produtos com personagens.
+
+Para obter esses resultados foi necessário a execução do crawler por três dias consecutivos, levando um dia para download e extração das informações de cada site.  
+
+Com as informações armazenadas no Banco de Dados foi possível criar várias visualizações seguindo os dois modelos de visualizações desenvolvidos nesse projeto.
 
 
 
 
+Figura
 
-podemos criar uma imagem
+
+Figura
+
+
+Figura
+
+
+Figura
+
+
+Figura
+
+
+
+Para ambos os modelos o tempo de processamento é similar, e dependendo da quantidade de objetos (palavras ou círculos), a serem utilizados, podem ser processados em alguns minutos, em casos com 10 objetos, ou em 12 horas, em casos com 10.000 objetos. A maior parte do tempo é consumida pela busca por espaço disponível. 
+
+Quando um espaço não for encontrado o objeto sofre redução no seu tamanho e novamente é procurado por um espaço disponível. A redução é realizada a cada 1 pixel. 
+
+
+
 
 Resultados.
 Quais foram os dados considerados? Qual é o volume desses dados? Quanto tempo foi
 necessário para obtê-los e armazená-los? Quais visualizações foram consideradas interessantes e quais não
 foram? Quanto tempo foi necessário para gerar essas visualizações? Alguma delas foi surpreendente?
-
-
-\section{Conclusão}
 
 
 \bibliographystyle{plain}
