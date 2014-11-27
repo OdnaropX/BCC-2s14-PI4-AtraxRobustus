@@ -111,99 +111,92 @@ Para o Sistema de Banco de Dados Relacional foi escolhido o PostgreSQL, sob lice
 
 \subsubsection{Modelo Conceitual}
 
-O conceito inicial de armazenar informações relacionais sobre itens da Cultura Popular Japonesa resultou em um Modelo Conceitual em que se poderia armazenar informações de mangás, animes e "Figuras de Ação". Esse conceito original foi expandido para possibilitar a inserção de dados relacionais sobre músicas, jogos de computador, vídeos, livros e diversas informações associadas a Coleções. 
+Com o estudo do conteúdo dos websites escolhidos, o conceito inicial de armazenar informações sobre mangás, animes e Light Novels resultou em um Modelo Conceitual expandido na qual possibilita a inserção de diversas informações relacionadas a franquias como músicas, softwares, vídeos e livros, além de permitir o cadastro de qualquer pessoa e empresa envolvida na produção de algum produto.
 
 Com a expansão do tipo de informação a ser salva no banco de dados, a criação do modelo conceitual se tornou complexa: além do tradicional uso de atributos e relacionamentos foram utilizados conceito de especialização/generalização e associação. 
 
-Como a estrutura do Modelo Conceitual é complexa e grande dividimos sua ilustração em partes e para melhor compreensão antes de apresentarmos cada parte mostraremos um diagrama mais simples abrangendo as principais entidades do Modelo Conceitual:
+Como a estrutura do Modelo Conceitual é complexa dividimos sua ilustração em partes, para melhor compreensão antes de apresentarmos cada parte mostraremos um diagrama mais simples abrangendo as principais entidades do Modelo Conceitual:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_General.pdf}
-\caption{Modelo Conceitual resumido com os nomes das principais entidades em português. Na implementação do Modelo Lógico foram utilizados nomes em inglês.} \label{hash}
+\includegraphics[width=1\textwidth]{MER_-_General.pdf}
+\caption{Modelo Conceitual resumido com os nomes das principais entidades em português. No Modelo Conceitual detalhado e na implementação do Modelo Lógico foram utilizados textos em inglês.} \label{collection}
 \end{figure}
 
-
-A seguir podem ser observados as entidades e seus relacionamentos de forma mais detalhada. As entidades na cor laranja serão detalhadas mais a frente.
-
+A seguir podem ser observados as entidades e seus relacionamentos de forma mais detalhada. As entidades na cor laranja representam entidades que serão detalhadas mais a frente.
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Collection.pdf}
+\includegraphics[height=0.85\textheight, width=0.85\textwidth]{MER_-_Collection.pdf}
 \caption{Entidade responsável por armazenar informações de coleções.} \label{collection}
 \end{figure}
 
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Entity.pdf}
+\includegraphics[width=1\textwidth]{MER_-_Entity.pdf}
 \caption{Entidade "Entity" é responsável por armazenar conteúdo como Vídeos, Livros e Jogos.} \label{entity}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Edition.pdf}
+\includegraphics[height=0.9\textheight,width=0.9\textwidth]{MER_-_Edition.pdf}
 \caption{Entidade "Edition" é responsável por armazenar informações de itens de "Entity" que possuem publicação física. "Edition" se especializa em "Software Edition" para armazenamento de informações especificas a softwares e "Read Edition" para armazenamento de informações de livros e revistas} \label{edition}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Collaborator_Social.pdf}
+\includegraphics[width=1\textwidth]{MER_-_Collaborator_Social.pdf}
 \caption{Entidades com informações sobre Colaboradores que traduzem conteúdo Popular Japonês e suas redes sociais.} \label{collaborator}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Company.pdf}
+\includegraphics[width=1\textwidth]{MER_-_Company.pdf}
 \caption{Entitidade "Company" é responsável por arzenar informações de empresas. A atividade que a empresa exerce é definida no relacionamento.} \label{company}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Country-Language-Currency.pdf}
+\includegraphics[height=0.92\textheight,width=0.72\textwidth]{MER_-_Country-Language-Currency.pdf}
 \caption{Entidades responsáveis pelo armazenamento de informações de Países, seus idiomas e suas moedas.} \label{hash}
 \end{figure}
 
-{Arrumar}
-Como exemplo de especialização/generalização temos no Modelo Conceitual a entitidade onde bens de consumo como braceletes, posters, chaveiros são armazenados. Essa entidade se especializa na entidade figuras de ação que armazena informações de bens conhecidos como figures ou action figures, são artigos colecionáveis em Três Dimensões de Personagens de animes, mangás, video games e light novels,
- que possuem informações extras além das contidas em Goods como escala e versão de lançamento.
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Goods.pdf}
+\includegraphics[height=0.98\textheight,width=1\textwidth]{MER_-_Goods.pdf}
 \caption{Entidade "Goods" se especializa em "Figure".} \label{hash}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_People.pdf}
-\caption{Entidades responsáveis pelo armazenamento de informações de pessoas. A atividade exercida por uma pessoa em um determinado trabalho é definida no relacionamento.} \label{hash}
+\includegraphics[height=0.92\textheight,width=1\textwidth]{MER_-_People.pdf}
+\caption{Entidades responsáveis pelo armazenamento de informações de pessoas. A atividade exercida por uma pessoa em um determinado trabalho é definida no relacionamento. Como exemplo de Associação temos o relacionamento entre pessoas que dublam animações, animações dubladas e edições dubladas que são associadas ao número da edição, para situações onde o dublador oficial não pode dublar um episodio ou uma lista de episodios por motivos fora de seu controle. } \label{hash}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Persona.pdf}
+\includegraphics[width=1\textwidth]{MER_-_Persona.pdf}
 \caption{} \label{Persona}
 \end{figure}
 
 
-Como exemplo de Associação temos o relacionamento entre pessoas que dublam animações, animações dubladas e edições dubladas que são associadas ao número da edição, para situações onde o dublador oficial não pode dublar um episodio ou uma lista de episodios por motivos fora de seu controle. 
+
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Release.pdf}
+\includegraphics[height=0.85\textheight,width=1\textwidth]{MER_-_Release.pdf}
 \caption{Entidades responsáveis pelo armazenamento de conteúdo disponibilizado na web como modificações de jogos, conhecidos pela abreviação Mod, e traduções não oficiais de conteúdo ainda não licenciado fora do Japão.} \label{Release}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Version.pdf}
+\includegraphics[height=0.95\textheight,width=1\textwidth]{MER_-_Version.pdf}
 \caption{Entidades responsáveis pelo armazenamento de informações de versões existentes de softwares, animações e livros e seus respectivos arquivos disponibilizados na web.} \label{hash}
 \end{figure}
 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=.80\textwidth]{MER_-_Spider_item.pdf}
+\includegraphics[width=1\textwidth]{MER_-_Spider_item.pdf}
 \caption{Entidade utilizada para se ter um controle das URL visitadas com as tabelas em que foram salvas as informações da URL e o ID correspondente nessas tabelas. Essa entidade não é utilizada para verificar se uma URL já foi visitada durante uma execução do Crawler e sim para verificar o ID relacionado e a última vez que as informações referentes ao ID foram atualizadas.} \label{hash}
 \end{figure}
 
@@ -517,4 +510,4 @@ foram? Quanto tempo foi necessário para gerar essas visualizações? Alguma del
 \begin{thebibliography}{2}
 
 \end{thebibliography}
-\end{document}
+\end{document}s
