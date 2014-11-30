@@ -5,6 +5,7 @@ import numpy as np
 import math
 from random import Random
 import util
+import collections
 
 class Visualization:
 
@@ -20,7 +21,7 @@ class Visualization:
 		This method use integral image to find a avaliable space.
 		TODO: Find a avaliable space using polygon and not rectangular items. 
 	"""
-	def find_avaliable_space(self, scene, size_x, size_y, first_only = False):
+	def find_avaliable_space(self, scene, size_x, size_y, first_only = False, use_first = False):
 		x = scene.shape[0]
 		y = scene.shape[1]
 			
@@ -33,7 +34,13 @@ class Visualization:
 				#print i, j
 				#Used not because scene can be 0.0 instead of 0. Not really sure if == x (x = 0) will have the same result when x = 0.0
 				#Image (0,0) start on left top. 
-				if not scene[i, j] + scene[i + size_x, j + size_y] - (scene[i + size_x, j] + scene[i, j + size_y]):
+			
+				if use_first:
+					area = scene[i, j][0] + scene[i + size_x, j + size_y][0] - (scene[i + size_x, j][0] + scene[i, j + size_y][0])
+				else:
+					area = scene[i, j] + scene[i + size_x, j + size_y] - (scene[i + size_x, j] + scene[i, j + size_y])
+					
+				if not area:
 					locations.append((j, i))
 					if first_only:
 						find = True
@@ -50,7 +57,7 @@ class Visualization:
 	def get_font_size(self, word, count, min_size):
 		if count:
 			#Sum with 10 to log(1) return at least 1 and avoid 0.
-			new_size = (4 * count / np.log(count + 10)) / min_size
+			new_size = (4 * count / np.log(count + 10)) / 10
 		else:
 			new_size = 1
 			
@@ -96,15 +103,21 @@ class Visualization:
 		
 		return self.fonts[location % font_amount]
 		
-	def format_bubbles(self, scene, canvas_width, canvas_height, words, use_all_words = True, random = None):
+	def format_bubbles(self, scene, canvas_width, canvas_height, words, use_all_words = True, random = None, use_first = True, mask_array = None):
 		if words:
-			if scene == None:
-				#Create new black scene
-				scene = Image.new("L", (canvas_width, canvas_height))
+			if not mask_array == None:
+				black_array = mask_array
+				scene = Image.fromarray(black_array)
+				scene.convert('L')
+			else:
+				if scene == None:
+					#Create new black scene
+					scene = Image.new("L", (canvas_width, canvas_height))
+					use_first = False
 
+				black_array = np.array(scene)
 			draw = ImageDraw.Draw(scene)
-			black_array = np.array(scene)
-			
+
 			
 			if random:
 				first_only = False
@@ -127,7 +140,7 @@ class Visualization:
 				#Loop while not find position. Get a small size if 
 				while diameter > 1 and not position:
 					#Find available position					
-					position = self.find_avaliable_space(black_array, diameter, diameter, first_only)
+					position = self.find_avaliable_space(black_array, diameter, diameter, first_only, use_first)
 					if use_all_words:
 						diameter -= 1
 					else:
@@ -186,14 +199,20 @@ class Visualization:
 		random must be a instance of Random()
 	
 	"""
-	def format_words(self, scene, canvas_width, canvas_height, words, use_all_words = True, random_font = False, random = None):
+	def format_words(self, scene, canvas_width, canvas_height, words, use_all_words = True, random_font = False, random = None, use_first = True, mask_array = None):
 		if words:
-			if scene == None:
-				#Create new black scene
-				scene = Image.new("L", (canvas_width, canvas_height))
+			if not mask_array == None:
+				black_array = mask_array
+				scene = Image.fromarray(black_array)
+				scene.convert('L')
+			else:
+				if scene == None:
+					#Create new black scene
+					scene = Image.new("L", (canvas_width, canvas_height))
+					use_first = False
 
+				black_array = np.array(scene)
 			draw = ImageDraw.Draw(scene)
-			black_array = np.array(scene)
 			
 			if random:
 				first_only = False
@@ -215,13 +234,13 @@ class Visualization:
 				print font_size
 				#Loop while not find position. Get a small size if 
 				while font_size > 1 and not position:
-					font_size -= 1
+					font_size -= 2
 					#Find available position
 					font = ImageFont.truetype(new_word['font_used'], font_size)
 					draw.setfont(font)
 					#Get size of resulting text
 					box_size = draw.textsize(word[1])
-					position = self.find_avaliable_space(black_array, box_size[1], box_size[0], first_only)
+					position = self.find_avaliable_space(black_array, box_size[1], box_size[0], first_only, use_first)
 					
 					if not use_all_words:
 						break
@@ -244,7 +263,7 @@ class Visualization:
 					
 					#Save test to know if it is really saving the item on array. Cannot print the array, is too length.
 					#new = Image.fromarray(scene)
-					#scene.save('teste{0}.png'.format(i))
+					scene.save('teste--{0}.png'.format(i))
 					
 					#This is the good part, the cumsum will generate the new integral image. Will sum on axis y and x.  
 					black_array = np.cumsum(np.cumsum(black_array, axis=1),axis=0)
@@ -254,13 +273,14 @@ class Visualization:
 			return []
 	
 	"""
-		Method used to drawn a word cloud.
+		Method used to draw a word cloud.
+		Initial idea was create a bubble cloud, after know about integral image think of using on word cloud. 
 	"""
-	def cloud_words(self, filename, words = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
+	def cloud_words(self, filename, words = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255), mask = None, mask_array = None, use_first = True):
 		#new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
 		#each words must be a tuple with the text and count.
-		formatted_words = self.format_words(None, canvas_width, canvas_height, words, True, False, Random())
+		formatted_words = self.format_words(mask, canvas_width, canvas_height, words, True, False, Random(), use_first, mask_array)
 		if formatted_words:
 			image = Image.new("RGB", (canvas_width, canvas_height), background_color)
 			canvas  = ImageDraw.Draw(image)
@@ -273,11 +293,14 @@ class Visualization:
 			image.save(filename)
 		else:
 			print "No words to print"
-			
-	def bubbles(self, filename, collections = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255)):
+	
+	"""
+		Method used to draw bubbles cloud.
+	"""
+	def bubbles(self, filename, collections = [], canvas_width = 1920, canvas_height = 1080, background_color = (255, 255, 255), mask = None, mask_array = None, use_first = True):
 		#new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
-		formatted_bubbles = self.format_bubbles(None, canvas_width, canvas_height, collections, True, Random())
+		formatted_bubbles = self.format_bubbles(mask, canvas_width, canvas_height, collections, False, Random(), use_first, mask_array)
 		
 		if formatted_bubbles:
 			image = Image.new("RGB", (canvas_width, canvas_height), background_color)
