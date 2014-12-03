@@ -7,6 +7,7 @@ from random import Random
 import util
 import collections
 import os
+import re
 
 class Visualization:
 
@@ -157,7 +158,47 @@ class Visualization:
 		
 		return (new_x, new_y)
 		
+	def sanitize_title(self, title):
+		title = title.lower()
+		title = re.sub(ur'[ _]', '-', title)
 		
+		return title
+		
+	def get_hex_color(self, color = (255, 255, 255)):
+		string = ""
+		for cor in color:
+			print cor
+			s = str(hex(cor)).replace('0x','')
+			if len(s) == 1:
+				s = "0" + s
+			string += s
+		return string
+		
+		
+	def get_html_circle(self, word, x, y, diameter, background_color, color):
+
+		background_color = self.get_hex_color(background_color)
+		color = self.get_hex_color(color)
+			
+		title = "b" + self.sanitize_title(word)
+		css = "." + title + "{top:" + str(y) + "px; left: "+str(x) +"px; width:" + str(diameter) + "px;height:" + str(diameter) + "px;background-color: #" +background_color + ";border: 1px solid #"+color+"; } "
+		
+		html = "<div class='{0} circulo'></div>".format(title)
+		
+		return (css, html)
+
+	def get_html_word(self, word, x, y, font_size, font_style, color, extra_class = "", size_type = 'px'):
+		color = self.get_hex_color(color)
+		title = "b" + self.sanitize_title(word) + "-inside"
+		font_style = re.sub(ur'\..*', '', font_style)
+		
+		css = "." + title + "{top:" + str(y) + "px; left: "+str(x) +"px; font-size: "+str(font_size) + size_type + ";font-family:"+font_style+";color:#"+color+"}"
+		
+		html = "<div class='{0} word {1}'>{2}</div>".format(title, extra_class, word)
+		
+		return (css, html)
+		
+	
 	############################# Begin of specified methods for data visualization ##############################
 	##############################################################################################################
 
@@ -335,7 +376,7 @@ class Visualization:
 	"""
 		Method used to draw bubbles cloud.
 	"""
-	def cloud_bubbles(self, filename, collections = [], canvas_size = (1920, 1080), background_color = (255, 255, 255), text = ('{0} items', '{0} item') xy_initial = (None, None), xy_final = (None, None), use_first = False, random = True, mask_array = None):
+	def cloud_bubbles(self, filename, collections = [], canvas_size = (1920, 1080), background_color = (255, 255, 255), text = ('{0} items', '{0} item'), xy_initial = (None, None), xy_final = (None, None), use_first = False, random = True, mask_array = None):
 		#new_scene = np.zeros((canvas_height, canvas_width), dtype=np.uint32)#need to be integer.
 		
 		formatted_bubbles = self.find_bubble_position(mask_array, canvas_size, collections, random, xy_initial, xy_final)
@@ -364,7 +405,7 @@ class Visualization:
 					box_size = canvas.textsize(word['text'])
 				
 				plural, singular = text
-				#canvas.text((word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2)), word['text'], fill=word['outline'])
+				canvas.text((word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2)), word['text'], fill=word['outline'])
 				if word['items'] > 1:
 					item = plural.format(word['items'])
 				else:
@@ -390,9 +431,105 @@ class Visualization:
 			image.save(filename)
 		else:
 			print "No words to print"
+	
+	def cloud_bubbles_html(self, filename, collections = [], canvas_size = (1920, 1080), background_color = (255, 255, 255), text = ('{0} items', '{0} item'), xy_initial = (None, None), xy_final = (None, None), use_first = False, random = True, mask_array = None):
 		
-	def cloud_per_year(self, filename, collections = [], size_per_year = 200, amount_years = 35):
-		canvas_size = (amount_years*size_per_year+60, 1080)
+		formatted_bubbles = self.find_bubble_position(mask_array, canvas_size, collections, random, xy_initial, xy_final)
+		
+		if formatted_bubbles:
+			css = "#main {width:" +str(canvas_size[0])+" px;height:" +str(canvas_size[0])+ "px;} .circulo{border-radius: 100%; position: absolute; margin: 0;overflow: hidden;} .word {position:absolute;overflow: hidden}"
+			
+			image = Image.new("RGB", canvas_size, background_color)
+			canvas  = ImageDraw.Draw(image)
+			html = ""
+			
+			for word in formatted_bubbles:
+				bubble_css, bubble_html = self.get_html_circle(word['text'], word['x'], word['y'], word['diameter'], (255,255,255), word['outline'])
+				css = css + bubble_css
+				html += bubble_html
+				
+				#Draw text inside ellipse.
+				font_used = self.get_font_used()
+				font_size = self.get_font_size_on_circle(word['char_length'], word['diameter'])
+				font = ImageFont.truetype(font_used, font_size)
+				canvas.setfont(font)
+				box_size = canvas.textsize(word['text'])
+				
+				while box_size[0] >= word['diameter'] - 10:
+					font_size -= 1
+					font = ImageFont.truetype(font_used, font_size)
+					canvas.setfont(font)
+					box_size = canvas.textsize(word['text'])
+				
+				word_css, word_html = self.get_html_word(word['text'], word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2), font_size, font_used, word['outline'])
+				html += word_html
+				css += word_css
+				
+				plural, singular = text
+				if word['items'] > 1:
+					item = plural.format(word['items'])
+				else:
+					item = singular.format(word['items'])
+					
+				x = word['x'] + (word['diameter'] / 2)
+				y = word['y'] + (word['diameter'] / 2) - (box_size[1] / 2) - (word['diameter']  * 0.1)
+				canvas.text((x - (box_size[0] / 2), y), word['text'], fill=word['outline'])
+					
+				font_size = self.get_font_size_on_circle(len(item), word['diameter'])
+				font = ImageFont.truetype(font_used, font_size)
+				canvas.setfont(font)
+				text_size = canvas.textsize(item)
+				
+				while text_size[0] >= word['diameter'] - 10:
+					font_size -= 1
+					font = ImageFont.truetype(font_used, font_size)
+					canvas.setfont(font)
+					text_size = canvas.textsize(item)
+
+				word_css, word_html = self.get_html_word(item, x - (text_size[0] / 2), y + box_size[1] + 5, font_size, font_used, word['outline'])
+				html += word_html
+				css += word_css
+
+			html = "<!doctype html><html lang='pt-BR'><head><style>{0}</style></head><body><div id='main'>{1}</div></body></html>".format(css, html) 
+				
+			document = open(filename, 'w')
+			document.write(html)
+			document.close()
+			print "Success"
+		else:
+			print "No words to print"		
+	
+	def cloud_words_html(self, filename, words = [], canvas_size = (1920, 1080), background_color = (255, 255, 255), xy_initial = (None, None), xy_final = (None, None), use_first = True, random = True, mask_array = None):
+		
+		#each words must be a tuple with the text and count.
+		formatted_words = self.find_word_position(mask_array, canvas_size, words, random, xy_initial, xy_final)
+		
+		if formatted_words:
+			image = Image.new("RGB", canvas_size, background_color)
+			canvas  = ImageDraw.Draw(image)
+			
+			html = ""
+			css = "#main {width:" +str(canvas_size[0])+" px;height:" +str(canvas_size[0])+ "px;} .word {position:absolute;} "
+			
+			for word in formatted_words:
+				font = ImageFont.truetype(word['font_used'], word['font_size'])
+				canvas.setfont(font)
+				word_css, word_html = self.get_html_word(word['text'], word['x'],word['y'], word['font_size'], word['font_used'], word['color'])
+				html += word_html
+				css += word_css
+
+			html = "<!doctype html><html lang='pt-BR'><head><style>{0}</style></head><body><div id='main'>{1}</div></body></html>".format(css, html) 
+				
+			document = open(filename, 'w')
+			document.write(html)
+			document.close()
+			print "Success"
+		else:
+			print "No words to print"
+			
+	def cloud_per_year(self, filename = "cloud_per_year.png", collections = [], size_per_year = 200):
+		amount_years = len(collections)
+		canvas_size = (amount_years*size_per_year + 60, 1080)
 
 		for index, collection in enumerate(collections):
 			len(collection)
@@ -401,8 +538,9 @@ class Visualization:
 			initial += 20
 			final = size_per_year * (index + 1)
 			final += 20
-			self.cloud_bubbles(filename + ".png", collection, canvas_size, (255, 255, 255), text, (initial, 150), (final, 980))
-	
+			self.cloud_bubbles(filename, collection, canvas_size, (255, 255, 255), text, (initial, 150), (final, 980))
+		print "Success"
+		
 	def spiral(self, collections = []):
 		pass
 	
