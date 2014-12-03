@@ -484,7 +484,7 @@ CREATE TABLE IF NOT EXISTS collaborator (
   irc VARCHAR NULL,
   description TEXT NULL,
   foundation_date DATE NOT NULL DEFAULT now(),
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   UNIQUE(country_id, name),
   PRIMARY KEY(id),
   FOREIGN KEY(country_id)
@@ -511,7 +511,7 @@ CREATE TABLE IF NOT EXISTS users (
   gender gender NOT NULL,
   location VARCHAR NULL,
   birthday DATE NOT NULL,
-  signup_date timestamp without time zone NOT NULL DEFAULT now(),
+  signup_date timestamp with time zone NOT NULL DEFAULT now(),
   activated BOOLEAN NOT NULL DEFAULT TRUE,
   PRIMARY KEY(id)
 )
@@ -522,7 +522,7 @@ CREATE TABLE IF NOT EXISTS spider_item (
   table_name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
   complete_crawled BOOLEAN NOT NULL DEFAULT False,
-  date timestamp without time zone NOT NULL DEFAULT now(),
+  date timestamp with time zone NOT NULL DEFAULT now(),
 );
 
 CREATE TABLE IF NOT EXISTS tag (
@@ -558,7 +558,7 @@ CREATE TABLE IF NOT EXISTS lists_goods (
   id SERIAL,
   user_id INTEGER  NOT NULL,
   name VARCHAR NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -587,7 +587,7 @@ CREATE TABLE IF NOT EXISTS company (
   foundation_date DATE NULL,
   website VARCHAR NULL,
   description TEXT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(country_id)
     REFERENCES country(id)
@@ -730,8 +730,8 @@ FOREIGN KEY(blood_rh_type_id)
 CREATE TABLE IF NOT EXISTS users_has_social (
   user_id INTEGER  NOT NULL,
   social_id INTEGER  NOT NULL,
-  last_checked timestamp without time zone NOT NULL DEFAULT now(),
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  last_checked timestamp with time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(user_id, social_id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -762,8 +762,8 @@ CREATE TABLE IF NOT EXISTS tag_has_filter_type (
 CREATE TABLE IF NOT EXISTS people_has_social (
   social_id INTEGER  NOT NULL,
   people_id BIGINT  NOT NULL,
-  last_checked timestamp without time zone NOT NULL DEFAULT now(),
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  last_checked timestamp with time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, people_id),
   FOREIGN KEY(social_id)
     REFERENCES social(id)
@@ -779,8 +779,8 @@ CREATE TABLE IF NOT EXISTS people_has_social (
 CREATE TABLE IF NOT EXISTS collaborator_has_social (
   social_id INTEGER  NOT NULL,
   collaborator_id INTEGER  NOT NULL,
-  last_checked timestamp without time zone NOT NULL DEFAULT now(),
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  last_checked timestamp with time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, collaborator_id),
   FOREIGN KEY(social_id)
     REFERENCES social(id)
@@ -1000,8 +1000,8 @@ CREATE TABLE IF NOT EXISTS company_has_country (
 CREATE TABLE IF NOT EXISTS company_has_social (
   social_id INTEGER  NOT NULL,
   company_id INTEGER  NOT NULL,
-  last_checked timestamp without time zone NOT NULL DEFAULT now(),
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  last_checked timestamp with time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(social_id, company_id),
   FOREIGN KEY(social_id)
     REFERENCES social(id)
@@ -1034,7 +1034,7 @@ CREATE TABLE IF NOT EXISTS lists_edition (
   entity_type_id INTEGER  NOT NULL,
   user_id INTEGER  NOT NULL,
   name VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -1052,7 +1052,7 @@ CREATE TABLE IF NOT EXISTS lists_release (
   entity_type_id INTEGER  NOT NULL,
   user_id INTEGER  NOT NULL,
   name VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -1468,7 +1468,7 @@ CREATE TABLE IF NOT EXISTS hash (
   hash_type_id INTEGER  NOT NULL,
   archive_id BIGINT  NOT NULL,
   code TEXT NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(archive_id)
     REFERENCES archive(id)
@@ -1583,7 +1583,7 @@ CREATE TABLE IF NOT EXISTS entity_release (
   country_id INTEGER  NOT NULL,
   entity_edition_id INTEGER NULL,
   description TEXT NULL,
-  release_date timestamp without time zone NOT NULL DEFAULT now(),
+  release_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(entity_edition_id)
     REFERENCES entity_edition(id)
@@ -2177,8 +2177,8 @@ CREATE TABLE IF NOT EXISTS soundtrack_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2200,8 +2200,8 @@ CREATE TABLE IF NOT EXISTS audio_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2220,8 +2220,8 @@ CREATE TABLE IF NOT EXISTS company_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2240,8 +2240,8 @@ CREATE TABLE IF NOT EXISTS people_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2260,8 +2260,8 @@ CREATE TABLE IF NOT EXISTS goods_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2280,8 +2280,8 @@ CREATE TABLE IF NOT EXISTS collaborator_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2300,8 +2300,8 @@ CREATE TABLE IF NOT EXISTS entity_edition_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2320,8 +2320,8 @@ CREATE TABLE IF NOT EXISTS collection_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2340,8 +2340,8 @@ CREATE TABLE IF NOT EXISTS entity_release_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2360,8 +2360,8 @@ CREATE TABLE IF NOT EXISTS entity_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
@@ -2826,7 +2826,7 @@ CREATE TABLE IF NOT EXISTS goods_has_shops (
   goods_id BIGINT  NOT NULL,
   shops_id INTEGER  NOT NULL,
   product_url VARCHAR NOT NULL,
-  checked_last timestamp without time zone NOT NULL DEFAULT now(),
+  checked_last timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(goods_id, shops_id),
   FOREIGN KEY(goods_id)
     REFERENCES goods(id)
@@ -2988,8 +2988,8 @@ CREATE TABLE IF NOT EXISTS persona_comments (
   user_id INTEGER  NOT NULL,
   content TEXT NOT NULL,
   title VARCHAR NOT NULL,
-  create_date timestamp without time zone NOT NULL DEFAULT now(),
-  update_date timestamp without time zone NOT NULL DEFAULT now(),
+  create_date timestamp with time zone NOT NULL DEFAULT now(),
+  update_date timestamp with time zone NOT NULL DEFAULT now(),
   PRIMARY KEY(id),
   FOREIGN KEY(user_id)
     REFERENCES users(id)
