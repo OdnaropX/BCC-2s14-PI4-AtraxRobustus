@@ -405,7 +405,7 @@ class Visualization:
 					box_size = canvas.textsize(word['text'])
 				
 				plural, singular = text
-				canvas.text((word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2)), word['text'], fill=word['outline'])
+				#canvas.text((word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2)), word['text'], fill=word['outline'])
 				if word['items'] > 1:
 					item = plural.format(word['items'])
 				else:
@@ -461,9 +461,6 @@ class Visualization:
 					canvas.setfont(font)
 					box_size = canvas.textsize(word['text'])
 				
-				word_css, word_html = self.get_html_word(word['text'], word['x'] + (word['diameter'] / 2) - (box_size[0] / 2), word['y'] + (word['diameter'] / 2) - (box_size[1] / 2), font_size, font_used, word['outline'])
-				html += word_html
-				css += word_css
 				
 				plural, singular = text
 				if word['items'] > 1:
@@ -474,6 +471,10 @@ class Visualization:
 				x = word['x'] + (word['diameter'] / 2)
 				y = word['y'] + (word['diameter'] / 2) - (box_size[1] / 2) - (word['diameter']  * 0.1)
 				canvas.text((x - (box_size[0] / 2), y), word['text'], fill=word['outline'])
+				
+				word_css, word_html = self.get_html_word(word['text'], x - (box_size[0] / 2), y, font_size, font_used, word['outline'])
+				html += word_html
+				css += word_css
 					
 				font_size = self.get_font_size_on_circle(len(item), word['diameter'])
 				font = ImageFont.truetype(font_used, font_size)

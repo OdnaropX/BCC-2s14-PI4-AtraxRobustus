@@ -139,7 +139,7 @@ for index, result in enumerate(results):
 		
 	#new_view.cloud_words('item_words_{0}.png'.format(index), result, (1920, 1080), (255, 255, 255), (0,200), (None, None), False, True, mask_array)
 	#new_view.cloud_bubbles('item_bubbles_{0}.png'.format(index), result, (1920, 1080), (255, 255, 255), text, (0,200), (None, None), False, True, mask_array)
-	new_view.cloud_words_html('item_words_{0}.html'.format(index), result, (1920, 1080), (255, 255, 255), (0,200), (None, None), False, True, mask_array)
+	#new_view.cloud_words_html('item_words_{0}.html'.format(index), result, (1920, 1080), (255, 255, 255), (0,200), (None, None), False, True, mask_array)
 	new_view.cloud_bubbles_html('item_bubbles_{0}.html'.format(index), result, (1920, 1080), (255, 255, 255), text, (0,200), (None, None), False, True, mask_array)
 
 		
