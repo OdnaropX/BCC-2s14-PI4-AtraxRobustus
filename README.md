@@ -23,7 +23,40 @@ O Projeto Integrador IV, tem como objetivo o desenvolvimento de visualizações 
 ### Requisitos de instalação
 ----------------------
 
-Git (opcional recomendado), Python 2.7.
+Git (opcional recomendado), Python 2.7, PostgreSQL 9.3.
+
+Bibliotecas Python:
+
+Scrapy, Langid
+
+### Utilização
+----------------------
+
+Crawler:
+
+Instale o Banco de Dados PostgreSQL e execute os Scripts .sql na pasta requeriments.
+
+Pela linha de comando acesse a pasta crawler e para iniciar o crawling execute o seguinte comando:
+
+scrapy crawl NOME_DO_SPIDER  -s JOBDIR=cache/NOME_DO_SPIDER --logfile=log.log
+
+Onde NOME_DO_SPIDER é um dos spiders disponíveis: myfigure_items, mangaupdates_part1, mangaupdates_part2, mangaupdates_part3, animecharacter_relation, animecharacter_media, animecharacter_character.
+
+Ordem de execução dos spiders:
+
+1 - mangaupdates_part1
+2 - mangaupdates_part2
+3 - mangaupdates_part3
+4 - animecharacter_character
+5 - animecharacter_relation
+6 - animecharacter_media
+7 - myfigure_items
+
+No arquivo "src/crawler/crawler/setting.py" estão as configurações do Banco de Dados e usuário de teste criado para salvar informações dos websites enquanto logado.
+
+Visualização de dados:
+
+O arquivo generator.py possui alguns exemplos de visualização, para gerar visualizações executer o arquivo generator.py. É necessário ter dados no Banco de dados para as visualizações serem geradas. 
 
 ####Licença e Créditos
 ----------------------
