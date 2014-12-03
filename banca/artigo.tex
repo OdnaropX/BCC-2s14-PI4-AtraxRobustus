@@ -22,7 +22,7 @@
 }
 
 
-\title{Visualização da Dados de Informações Extraídas da Web - Um Estudo sobre Conteúdo Popular Japonês}
+\title{Visualização de Dados de Informações Extraídas da Web - Um Estudo sobre Conteúdo Popular Japonês}
 \author{Gabriel Fontenelle Senno Silva\inst{1}}
 \address 
 {Centro Universitário Senac - Campus Santo Amaro
@@ -78,7 +78,21 @@ Muitas franquias possuem venda de produtos como cartazes promocionais, adesivos,
 
 \subsection{Informações a serem extraídas}
 
-Volumes de dados
+Decidimos extrair a maior quantidade possível de informações disponíveis nos websites escolhidos para que pudessemos criar visualizações com diversos tipos de informação.
+
+Como não podemos garantir o funcionamento dos websites escolhidos no momento de leitura desse documentos a seguir pode ser conferido \textit{screenshots} das páginas utilizadas na extração de conteúdo.
+
+Figura
+
+
+Figura
+
+
+Figura
+
+
+Figura
+
 
 \section{Desenvolvimento}
 
@@ -263,9 +277,11 @@ No PostgreSQL há dois tipos de timestamp: para armazenar com informação de fu
 
 Código MySQL:
 
+data\_cadastro DATETIME NOT NULL DEFAULT now()
 
 Alternativa em PostgreSQL:
 
+data\_cadastro timestamp without time zone NOT NULL DEFAULT now()
 
 
 Um recurso presente em PostgreSQL é a herança entre tabelas, que permitem que tabelas herdem atributos não-chave de outras tabelas. Usamos esse recurso em entidades que possuem especialização, como as entidades \textit{goods} e \textit{edition}. Como herança não é um recurso presente no MySQL durante a criação do Modelo Relacional no DB Design foi utilizado relacionamento de cardinalidade 1:1 entre as tabelas que sofrem especialização/generalização.
@@ -279,8 +295,7 @@ Uma pesquisa no banco de dados PostgreSQL efetuada em uma tabela pai automaticam
 
 Código de consulta em PostgreSQL com ONLY:
 
-
-
+SELECT * FROM ONLY goods 
 
 
 \subsection{Crawler}
@@ -362,176 +377,128 @@ Somente após realização com sucesso, de todas as operações, é finalmente e
 
 \subsubsection{Itens Relacionados}
 
-Algumas páginas a terem seu conteúdo extraído possuem lista de itens relacionados, com o nome e URL do item relacionado.
+Alguns dos websites escolhidos a terem seu conteúdo extraído nas páginas de detalhes de seus itens também fornecem informação de itens relacionados, listando esses itens em tags <a>. Esses itens podem ser livros, mangás ou figuras de ação, cada página fornece informações que ajudam a determinar o tipo de item e em qual tabela será salvo.
 
-Itens relacionados em que a URL ainda não teve seu conteúdo extraído é salvo com conteúdo em sua maior parte nulo no Banco de Dados, quando a URL desses itens forem extraídas esses itens serão atualizados, mantendo assim o relacionamento entre o conteúdo.
+Esses relacionamentos entre itens também são salvos no banco de dados desse projeto. Atráves das tags <a> podemos extrair a URL do item e consultando a tabela spider\_item do banco de dados podemos identificar se o item já foi salvo, precisando portanto apenas inserir o relacionamento nas tabelas adequadas. Se um item ainda não foi criado, um item com valores nulos é inserido no banco de dados, na tabela apropriada, a fim de se obter um id e seu id e sua URL são adicionados na tabela spider\_item.
 
+A tabela spider\_item é consultada sempre que uma página é processada para ter suas informações extraídas e salvas no banco de dados. Se a página que estiver sendo processada foi localizada na tabela spider\_item o item é atualizado utilizando o id registrado ao invés de ser criado um novo item. Assim é mantido o relacionamento mesmo entre itens que ainda não tiveram suas URLs processadas pelo crawler.
 
-salvos esses itens temporário
+\subsubsection{Definindo Franquias}
 
+Para alcançarmos o objetivo de fazer uma visualização de dados com extração de informações relacionadas a franquias, precisávamos identificá-las e criá-las a partir do conteúdo salvo no Banco de Dados. 
 
-Falar que os itens relacionados são salvos no Banco de Dados antes do projeto.
+Escolhemos criar as franquias na execução do próprio Crawler, utilizando o nome dos itens e quando disponível os nomes dos itens relacionados.
+
+Para a criação do nome das franquias é identificado o nome principal nos títulos dos itens, para isso removemos subtítulos, que podem ser identificados como parte posterior de um hífen " - " ou parte dentro de parenteses, dos títulos. Com o nome principal podemos pesquisar por franquias na tabela collection que possuem o mesmo nome, ou criar uma nova se nenhuma franquia for localizada.
+
+No título de um item abaixo temos um exemplo de título a esquerda e subtítulo a direita:
+
+Kidou Senshi Gundam Unicorn - Char second comming
+
+Se um item possui algum item relacionado salvo no banco de dados, antes de criamos uma nova franquia caso nossa busca não retorne resultados é executado uma busca recursiva, utilizando o recurso WITH RECURSIVE do PostgreSQL, a fim de retornar o nome e franquia de todos os itens relacionados ao atual. Se uma franquia associada a um item é encontrada os demais itens ainda não associados a franquia são atualizados.
+
+Se nenhuma franquia associada é encontrada será necessário criá-la. Se existem itens relacionados, o nome da franquia será criado usando os nomes em sequência mais comuns entre os nomes principais dos itens. Se não existem itens relacionados será utilizado apenas o nome principal do item atual na criação da franquia.
+
+Nos títulos abaixo podemos identificar o nome mais comum entre os nomes principais, neste caso Fairy Tail:
  
+Fairy Tail - Season 1
+
+Fairy Tail Freezing - Season 1 
 
 
-e existe, itens sem coleções são al
-
-m é 
-
-código SQL para busca com recursão dos itens relacionados.
-
-
-identificar a existência 
-
-se já existe uma coleção a 
-
-uma coleção 
-
-
-, a partir desse conjunto de 
-
- partir do nome desses itens foi possível criar 
-
-informação  itens possuem 
-
-Ao inserirmos um item ao Banco de Dados que possui conteúdo relacionado 
-
-Ao inserirmos um item ao Banco de Dados, como Mangás, Light Novels verificamos se algum item relacionado
-
-As coleções foram criadas durante a execução do Crawler, 
-
- no próprio código, outras só poderiam ser analisadas após o termino 
-
- a que cada item pera partir dos Websites.
-
-
-Para tal precisávamos criar as coleções e relacionar os diversos tipos de itens (como mangás, light novels, etc) a uma coleção.
-
-
-
-em uma coleçção
-
-
-e englobar diversos itens
-
-
-
-
-
-
-\subsubsection{Definindo Coleções}
-
-Para alcançarmos o objetivo de fazer uma visualização de dados com extração de informações relacionadas a coleções, precisávamos identificar e criar as coleções a partir do conteúdo salvo no Banco de Dados.
-
-Durante a extração de dados pelo Crawler algumas páginas forneciam também o nome e URLs para itens relacionados. Com os itens relacionados foi possível verificar se já existe uma coleção associada a algum dos itens ou criar uma nova coleção se inexistente.
-
-Para identificar se existe uma coleção já salva no Banco de Dados foi executado uma busca recursiva a fim de retornar todos os itens relacionados entre si, utilizando o recurso WITH RECURSIVE do PostgreSQL.
-
-Se existe alguma coleção associada a um item essa coleção é utilizada para associar a itens ainda sem coleção. Se não existir alguma coleção salva no Banco de Dados, casos em nenhuma coleção foi criada ainda na execução do Crawler a coleção é criada.
-
-(Separação de títulos)
-Para a criação da coleção é utilizado a parte dos títulos anteriores a caracteres usados para divisão de subtítulos como hifen " - " e parenteses "()", o texto após extraido é formatado e utilizado para criação da coleção. 
-Em casos com itens relacionados com títulos diferentes o título mais comum será usado.  
-
-
-Exemplo:
-		Fairy Tail
-		Fairy Tail Freezing
-
-		
-
-Com esse método há possibilidade de associar em coleções itens com nomes semelhantes que pertencem a coleções distintas. Para corrigir casos assim é necessário uma verificação manual da associação de Coleções.
-
-
+Com esse método há possibilidade de associar a franquias itens com nomes semelhantes ou iguais que pertencem a franquias distintas. Como exemplo, existe o mangá Magician criado por Sarae Kim e existe também o mangá homônimo criado por Yuriko Matsukawa que possuem histórias diferentes e que não se passam no mesmo universo fictício. Para corrigir casos assim é necessário uma verificação manual da associação de franquias posterior a execução do crawler.
 
 \subsection{Visualização de Dados}
 
 Para visualização de dados extraímos do Banco de Dados textos e representamos a variação na quantidade entre os textos, exibindo-as como uma nuvem de bolhas ou uma nuvem de palavras. 
-Usamos a estrutura de dados Tabela de Área Somada[] para identificação de espaços ocupados e realizamos uma distribuição aleatória na imagem de nossos objetos: as bolhas ou as palavras.
+Usamos a estrutura de dados Tabela de Área Somada, também conhecida em Visão Computacional como Imagem Integrada, para identificação de espaços ocupados e realizamos uma distribuição aleatória na imagem de nossos objetos: as bolhas ou as palavras.
 Para esse fim utilizamos a biblioteca Numpy para manipulação de vetores multidimensionais, gerando assim a Tabela de Área Somada, e a biblioteca PIL para desenhar palavras, desenhar formas e salvar a imagem resultante.
 
-A Figura número-aqui ilustra a seqüência adotada para identificação do espaço e o tamanho da bolha ou da palavra a ser utilizada. Essas etapas serão melhor explicadas nos próximos tópicos.   
+Figura aqui
+Ilustra a seqüência adotada para identificação do espaço e o tamanho da bolha ou da palavra a ser utilizada. Essas etapas serão melhor explicadas nos próximos tópicos.   
 
 \subsection{Preparando a Cena}
 
 Utilizando a biblioteca de processamento de imagem preparamos um fundo com tamanho determinado que usaremos para posicionar nossos objetos. 
 Qualquer seguimento da Tabela de Área Somada com valor diferente de zero é considerado ocupado, assim podemos criar uma imagem com fundo totalmente preto, utilizando toda a área disponível, ou podemos criar uma área limitada com ilustrações ou textos resultando em uma máscara para nossa visualização.
-A cor preta é representada pelo valor 0 e ao converter a imagem preparada em um vetor multidimensional com Numpy obtemos a Tabela de Área Somada inicial.
+A cor preta é representada pelo valor 0 e ao converter a imagem preparada em um vetor multidimensional com Numpy podemos obter a matriz inicial que será utilizada para gerar a Tabela de Área Somada inicial.
 
 
 Imagem exemplo de Máscara. => Representação Vetorial
 
 
+Para uso da Tabela de Área Somada é utilizado imagens na escala cinza, assim podemos trabalhar apenas um valor variante para cada pixel da imagem.
+
+
+\subsection{Obtendo a Tabela de Área Somada}
+
+Utilizando uma matriz inicial criamos a Tabela de Área Somada usando cumsum do Numpy. As dimensões da matriz inicial e a Tabela de Área Somada são as mesmo, os que as diferenciam são os valores de cada linha e coluna da matriz. 
+
+Cada valor na Tabela de Área Somada representa o produto resultante da soma de todos os valores anteriores na mesma linha com a soma de todos os valores anteriores na mesma coluna.
+
+Imagem representando as duas tabelas.
+
+
 \subsection{Definindo o Tamanho dos Objetos}
 
-Ao obtermos nossos objetos, palavras e círculos, do Banco de Dados também selecionamos informação numérica que representam um ranking entre os objetos, como quantidade de itens da Coleção, valor em reais para adquirir cada item da coleção, volume que a coleção ocupa entre outras informações numéricas.
+Ao obtermos nossos objetos, palavras e círculos, do Banco de Dados também selecionamos informação numérica que representam um ranking entre os objetos. Alguns dos valores numéricos utilizados como ranking são: quantidade de itens da franquia, valor em reais para adquirir todos os item da franquia, volume mínimo em $m^3$ necessário para armazenar todos os itens da franquia.
 
-Alguns dos valores usados para Rankeamento:
+Para definir o tamanho dos objetos e manter uma proporção ao alor do ranking, usamos a razão do valor do ranking pelo logaritmo natural desse valor.
 
+Como nossos resultados possuiam um ranking na casa dos milhares, dividimos por 10 o resultado obtido para que não sejam gerados tamanhos demasiadamente grandes. 
 
-Para definir o tamanho dos objetos usamos a razão do valor do Rankeamento pelo logaritmo natural desse valor nas formulas:
+{Fórmula usada no tamanho dos objetos}
 
-Dividimos por 10 para que ranking acima de 1000 não gerem tamanhos demasiadamente grandes. 
 
 {Calculo aqui}
 
 Para evitar divisão por zero é somado o valor 10 ao número do rankeamento antes do cálculo do Logaritmo Natural.
 
- 
-
-
-Nossos objetos, palavras e círculos, são representam informações extraídas do Banco de Dados com duas informaçõesCada objeto possui 
-
-
-Para cada objeto h
-Cada objeto possui
-
-
 
 \subsection{Determinando a posição dos Objetos}
 
-Na cena os objetos não podem sobrepor uns aos outros, para verificarmos os espaços disponíveis para inserção do objeto na cena sem sobrepor outros objetos na cena foi utilizado a Tabela de Área Somada, também conhecida em Estatística como Tabela de Distribuição Acumulada e como Imagem Integral em Visão Computacional.
+Para verificarmos se um espaço está disponível na cena para nossos objetos precisávamos verificar se já não existe outro objeto já posicionado no local. 
 
-Para uso da Tabela de Área Somada é utilizado imagens na escala cinza, assim podemos trabalhar apenas um um valor variante para cada pixel da imagem. 
+Conseguimos verificar se o espaço está ocupado ou não calculando o valor na área que nosso objeto ocupa. Se o local em que pretendemos colocar nosso objeto estiver ocupado o resultado do cálculo da área será acima de zero.
 
-Tabela de área somada
-
-
-$I(x,y) = \sum_{\begin{smallmatrix} x' \le x \\ y' \le y\end{smallmatrix}} i(x',y')$
-
-Para verificar se um espaço está disponível na cena para nossos objetos precisávamos verificar se já não existe outro objeto já posicionado no local. 
-
-Conseguimos verificar se o espaço está ocupado calculando a área com os valores da Tabela de Área Somada a tempo constante utilizando a fórmula de Área da Imagem Integral. Como utilizamos uma cena em escala cinza, qualquer espaço ocupado resultará em uma soma com valor acima de zero.  
+Com o cálculo da área saberemos exatamente quanto espaço está sendo ocupado em determinada área e posição. E utilizando a Tabela de Área Somada conseguimos realizar o cálculo da área, em analise assintótica: em tempo constante O(1).
 
 $\sum_{\begin{smallmatrix} x0 < x \le x1 \\ y0 < y \le y1 \end{smallmatrix}} i(x,y) = I(D) + I(A) - I(B) - I(C).$
 
-Para obtermos uma melhor distribuição dos objetos na cena verificamos todos os espaços disponíveis, obtendo a Área da Imagem Integral em todos os pixels da cena. Os valores de x e y livres são portanto armazenados em um vetor e uma única posição é escolhida aleatoriamente como local do nosso objeto. 
+{Explicação dos elementos do cálculo aqui} 
 
+Ao calcular a área de todos pixels da imagem, que serve de máscara, e adicionar em um vetor os valores que representam a linha e coluna da posição livre, poderíamos escolher randomicamente uma posição livre para adicionarmos nosso objeto.
 
-\subsubsection{Gerando a Imagem Final}
+Com uma posição escolhida informações do objeto, como tamanho e posição, são adicionados a um vetor utilizado posteriormente para geração da imagem final ou exportação para HTML. 
 
+Depois da escolha da posição e inserção do objeto na imagem máscara, a imagem é salva e é gerada uma nova Tabela de Área Somada a partir dessa nova imagem, para uso da verificação de espaço disponível da próxima palavra. 
 
-\subsubsection{Exportando para HTML}
+Quando um espaço disponível não for encontrado o objeto sofre redução de 1 pixel no seu tamanho e novamente é procurado por um espaço disponível.
+
+\subsubsection{Gerando a Imagem Final ou Exportando para HTML}
 
 Com a determinação do posicionamento dos objetos na cena, tamanhos e fontes de texto utilizadas além de gerar uma imagem final também podemos exportar nossa nuvem para HTML utilizando CSS para desenhar e posicionar nossos objetos dentro de uma tag <div>.
 
-A posição dos objetos é relativa a tag <div>, as mesmas coordenadas [x, y] utilizadas no posicionamento em nossa imagem podem ser aplicadas na tag.
+Para gerar a imagem final com nossos objetos posicionados utilizamos os métodos disponíveis na biblioteca PIL para inserção de texto e de elipse e depois salvamos a imagem final em um local determinado. A biblioteca PIL não oferece método para criação de círculo, mas podemos criá-los inserindo uma elipse que terá um raio constante, ou seja uma elipse com dimensões de um quadrado.
 
-Geramos um documento HTML com nosso CSS adicionado na tag <head>, para melhor manipulação de nossos objetos. dentro da tag <div> principal, os colocamos em tags <div> separadas possuindo classes para representarmos os tamanhos, formas e posições.
+Para a crição do HTML consideramos que a posição dos objetos é relativa a uma tag <div> com elemento id definida como principal, as mesmas coordenadas [x, y] utilizadas no posicionamento em nossa imagem podem ser aplicadas no posicionamento na tag <div> \#principal.
 
-A conversão para HTML foi simples, para as formas e textos, ao invés de utilizar os métodos fornecidos pela biblioteca de processamento de imagem criamos métodos que retornem a representação em CSS das formas utilizadas (círculos) e a representação dos textos com posicionamento definido usando os mesmos parâmetros disponíveis. 
-Formatamos portanto o documento HTML com o CSS e as tags <div> de nossos objetos.
+Geramos um documento HTML com nosso CSS adicionado na tag <head>, que permite uma melhor manipulação posterior de nossos objetos quando o HTML for salvo.
+
+Cada objeto a ser posicionado deve estar dentro de uma tag <div> que contêm classes que representam os tamanhos, formas e posições. Essas classes e seus estilos CSS são criados após a determinação de posição de todos os objetos.
+
+Com o posicionamento dos objetos determinado, suas dimensões e outras características definidas, para gerarmos o documento HTML criamos métodos que armazenam em uma variável o texto com o estilo CSS utilizado, para nossos objetos, e em outra variável as tags <div> criadas. Ao finalizar o processamento de todas as palavras criamos um novo arquivo com extensão \textit{html} e inserimos o conteúdo das duas variáveis formatadas corretamente nesse novo arquivo. 
 
 
 \section{Resultados}
 
 Com o uso de crawling foi possível obter uma quantidade considerável de dados. Um resultado mais detalhado pode ser visto a seguir: 
 
-Manga-Updates - Com o crawling do site http://mangaupdates.com foi possível obter 103774 itens, classificados como Mangás, Light Novels e livros; 34721 pessoas, que atuam como ilustradores ou escritores; e 1181 editoras.
+Manga-Updates - Com o crawling do site http://mangaupdates.com foi possível obter 103.774 itens, classificados como Mangás, Light Novels e livros; 34.721 pessoas, que atuam como ilustradores ou escritores; e 1.181 editoras.
 
-My Figure Collection - Com o crawling do site http://myfigurecollection.net foi possível obter 205041 produtos, incluindo Figuras e 3440 empresas envolvidas na produção desses produtos.
+My Figure Collection - Com o crawling do site http://myfigurecollection.net foi possível obter 205.041 produtos, incluindo Figuras e 3.440 empresas envolvidas na produção desses produtos.
 
-Anime Characters Database - Com o crawling do site http://animecharactersdatabase.com/ foi possível obter informações de 70304 personagens e 4840 dubladores.
+Anime Characters Database - Com o crawling do site http://animecharactersdatabase.com/ foi possível obter informações de 70.304 personagens e 4.840 dubladores.
 
 Com os resultados obtidos com o crawling foi possível criar 109274 coleções e associá-las aos itens e aos produtos. Também foi possível relacionar produtos com personagens.
 
@@ -559,16 +526,6 @@ Figura
 
 
 Para ambos os modelos o tempo de processamento é similar, e dependendo da quantidade de objetos (palavras ou círculos), a serem utilizados, podem ser processados em alguns minutos, em casos com 10 objetos, ou em 12 horas, em casos com 10.000 objetos. A maior parte do tempo é consumida pela busca por espaço disponível. 
-
-Quando um espaço não for encontrado o objeto sofre redução no seu tamanho e novamente é procurado por um espaço disponível. A redução é realizada a cada 1 pixel. 
-
-
-
-
-Resultados.
-Quais foram os dados considerados? Qual é o volume desses dados? Quanto tempo foi
-necessário para obtê-los e armazená-los? Quais visualizações foram consideradas interessantes e quais não
-foram? Quanto tempo foi necessário para gerar essas visualizações? Alguma delas foi surpreendente?
 
 
 \bibliographystyle{plain}
